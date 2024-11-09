@@ -21,8 +21,7 @@
     font-size: 0.5rem;
   }
 
-  .search-section,
-  .categories-section{
+  .search-section{
     background-image: url('https://res.cloudinary.com/dr1jbzn9r/image/upload/v1730406007/bg_search_wfisto.png');
     background-size: cover;
     background-repeat: no-repeat;

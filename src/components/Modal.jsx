@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { AiOutlineArrowLeft, AiFillPicture } from "react-icons/ai";
+import { useContextGlobal } from '../utils/global.context.jsx';
 
 const Modal = ({ isOpen, onClose, producto }) => {
   const [mostrarMas, setMostrarMas] = useState(false);
+  const { state } = useContextGlobal();
 
   if (!isOpen) return null;
 
@@ -60,7 +62,10 @@ const Modal = ({ isOpen, onClose, producto }) => {
               </div>
 
               <div className="flex flex-col w-full items-end">
-                <button className="w-48 py-3 px-4 bg-amber-600 text-white text-xl rounded-lg font-medium hover:bg-amber-700 transition-colors">
+                <button 
+                  className={`w-48 py-3 px-4 bg-amber-600 text-white text-xl rounded-lg font-medium hover:bg-amber-700 transition-colors ${!state.user ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  disabled={!state.user}
+                >
                   Alquilar
                 </button>
               </div>

@@ -12,7 +12,7 @@ const Card = ({ producto }) => {
       >
         <div className="absolute inset-0 rounded-xl bg-gradient-to-b from-transparent via-black/20 to-black/80 opacity-0" />
         
-        <div className="relative overflow-hidden h-96 rounded-xl bg-white/10 backdrop-blur-sm">
+        <div className="relative overflow-hidden h-100 rounded-xl bg-white/10 backdrop-blur-sm">
           <div className="relative">
             <img 
               className="h-48 w-full object-cover" 

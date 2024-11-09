@@ -5,7 +5,7 @@ import data from "./data.json";
 
 export const ContextGlobal = createContext(undefined);
 
-export const initialState = { theme: "light", data: [] };
+export const initialState = { theme: "light", data: [], user: null };
 
 export const ContextProvider = ({ children }) => {
     
@@ -27,6 +27,25 @@ export const ContextProvider = ({ children }) => {
     }, []);
 
 
+    // cargar usuario desde localStorage al iniciar aplicación
+    useEffect(() => {
+        const savedUser = localStorage.getItem("user");
+        if (savedUser) {
+            dispatch({ type: "SET_USER", payload: JSON.parse(savedUser) });
+            }
+            }, []);
+
+    // guardar usuario en localStorage cada vez que el estado cambia
+    useEffect(() => {
+        if (state.user) {
+            localStorage.setItem("user", JSON.stringify(state.user));
+        } else {
+            localStorage.removeItem("user");
+        }
+    }, [state.user]);
+
+
+
     /* const url =
     "http://localhost:8080/obra/listartodos"; //url local para conectar con backend
     
@@ -45,8 +64,19 @@ export const ContextProvider = ({ children }) => {
         dispatch({ type: "GET_ART", payload: url });
     }, []);
 
+    // función para gestionar login de usuario
+    const loginUser = (user) => {
+        dispatch({ type: "SET_USER", payload: user });
+    }
+
+    // gestionar el cierre de sesión del usuario
+    const logoutUser = () => {
+        dispatch({ type: "SET_USER", payload: null });
+        localStorage.removeItem("user");
+    }
+
     return (
-        <ContextGlobal.Provider value={{ state, dispatch, isMobile }}>
+        <ContextGlobal.Provider value={{ state, dispatch, isMobile, loginUser, logoutUser }}>
             {children}
         </ContextGlobal.Provider>
     );
