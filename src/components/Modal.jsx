@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import { AiOutlineArrowLeft, AiFillPicture } from "react-icons/ai";
-import { useContextGlobal } from '../utils/global.context.jsx';
+import { useContextGlobal } from "../utils/global.context.jsx";
 
 const Modal = ({ isOpen, onClose, producto }) => {
   const [mostrarMas, setMostrarMas] = useState(false);
@@ -10,11 +10,11 @@ const Modal = ({ isOpen, onClose, producto }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div 
+      <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
       />
-      
+
       <div className="relative w-full max-w-6xl max-h-[96vh] overflow-y-auto bg-white rounded-xl mx-4 shadow-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] shadow-primary/20">
         <button
           onClick={onClose}
@@ -32,43 +32,65 @@ const Modal = ({ isOpen, onClose, producto }) => {
             <div className="flex flex-col p-6 rounded-xl bg-white w-full lg:flex-row gap-6">
               {/* Imagen Principal y Detalles */}
               <div className="flex-1">
-              <img
-                src={producto.img}
-                alt={producto.nombre}
-                className="w-full aspect-[5/3] object-cover rounded-lg mb-6"
-              />
+                <img
+                  src={producto.img}
+                  alt={producto.nombre}
+                  className="w-full aspect-[5/3] object-cover rounded-lg mb-6"
+                />
 
-              <div className="space-y-4 flex flex-col">
-                <div>
-                  <h3 className="text-lg font-semibold">Fecha de creación:</h3>
-                  <p className="text-md text-gray-600">{producto.fechaCreacion}</p>
+                <div className="space-y-4 flex flex-col">
+                  <div>
+                    <h3 className="text-lg font-semibold">
+                      Fecha de creación:
+                    </h3>
+                    <p className="text-md text-gray-600">
+                      {producto.fechaCreacion}
+                    </p>
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-semibold">Descripción:</h3>
+                    <p className="text-md text-gray-600">
+                      {producto.descripcion}
+                    </p>
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-semibold">
+                      Movimiento artístico / Técnica:
+                    </h3>
+                    <p className="text-md text-gray-600">
+                      {producto.movimientoArtistico.nombre} /{" "}
+                      {producto.tecnicaObra.nombre}
+                    </p>
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-semibold">Dimensiones:</h3>
+                    <p className="text-md text-gray-600">{producto.tamano}</p>
+                  </div>
                 </div>
 
-                <div>
-                  <h3 className="text-lg font-semibold">Descripción:</h3>
-                  <p className="text-md text-gray-600">{producto.descripcion}</p>
+                <div className="flex flex-col w-full items-end">
+                  {/* Verifica si hay un usuario logueado */}
+                  {state.users ? (
+                    <button className="w-48 py-3 px-4 bg-amber-600 text-white text-xl rounded-lg font-medium hover:bg-amber-700 transition-colors">
+                      Alquilar
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        className="w-48 py-3 px-4 bg-amber-600 text-white text-xl rounded-lg font-medium hover:bg-amber-700 transition-colors opacity-50 cursor-not-allowed"
+                        disabled
+                      >
+                        Alquilar
+                      </button>
+                      <p className="text-red-500 text-sm mt-2">
+                        Debe estar autenticado para alquilar una obra
+                      </p>
+                    </>
+                  )}
                 </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold">Movimiento artístico / Técnica:</h3>
-                  <p className="text-md text-gray-600">{producto.movimientoArtistico.nombre} / {producto.tecnicaObra.nombre}</p>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold">Dimensiones:</h3>
-                  <p className="text-md text-gray-600">{producto.tamano}</p>
-                </div>
-
-              </div>
-
-              <div className="flex flex-col w-full items-end">
-                <button 
-                  className={`w-48 py-3 px-4 bg-amber-600 text-white text-xl rounded-lg font-medium hover:bg-amber-700 transition-colors ${!state.user ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  disabled={!state.user}
-                >
-                  Alquilar
-                </button>
-              </div>
               </div>
 
               {/* Imágenes Adicionales y precio */}
@@ -76,7 +98,10 @@ const Modal = ({ isOpen, onClose, producto }) => {
                 <div className="sticky top-4">
                   <div className="grid grid-cols-2 gap-2 mb-6">
                     {producto.imagenesAdicionales?.length > 0 ? (
-                      (mostrarMas ? producto.imagenesAdicionales : producto.imagenesAdicionales.slice(0, 4)).map((imagen, index) => (
+                      (mostrarMas
+                        ? producto.imagenesAdicionales
+                        : producto.imagenesAdicionales.slice(0, 4)
+                      ).map((imagen, index) => (
                         <img
                           key={index}
                           src={imagen}
@@ -87,17 +112,21 @@ const Modal = ({ isOpen, onClose, producto }) => {
                     ) : (
                       <div className="flex p-2 items-center justify-center text-gray-600 mx-auto">
                         <AiFillPicture className="w-32 h-32" />
-                        <p className="text-xl pl-2">Sin imagenes disponibles 😔</p>
+                        <p className="text-xl pl-2">
+                          Sin imagenes disponibles 😔
+                        </p>
                       </div>
                     )}
                   </div>
-                  <button 
+                  <button
                     className="w-full py-3 px-4 bg-amber-600 text-white text-xl rounded-lg font-medium hover:bg-amber-700 transition-colors"
                     onClick={() => setMostrarMas(!mostrarMas)}
                   >
-                    {mostrarMas ? 'Ver menos' : 'Ver más'}
+                    {mostrarMas ? "Ver menos" : "Ver más"}
                   </button>
-                  <p className="text-xl font-bold text-secondary text-right py-4 px-2">Desde ${producto.precioRenta} / día*</p>
+                  <p className="text-xl font-bold text-secondary text-right py-4 px-2">
+                    Desde ${producto.precioRenta} / día*
+                  </p>
                 </div>
               </div>
             </div>

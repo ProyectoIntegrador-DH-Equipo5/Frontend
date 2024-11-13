@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useContextGlobal } from '../utils/global.context.jsx';
+import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
   const { dispatch } = useContextGlobal();
@@ -12,6 +13,7 @@ const Register = () => {
   });
 
   const [errors, setErrors] = useState({});
+  const navigate = useNavigate();
 
   const nameRegex = /^[a-zA-Z\s]*$/;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -84,9 +86,19 @@ const Register = () => {
       const newUser = {
         name: `${formData.firstName} ${formData.lastName}`,
         email: formData.email,
+        password: formData.password, // Guardamos la contraseña para el login
+        role: "USER",
       };
+      
+      // Guardamos en localStorage
+      localStorage.setItem("user", JSON.stringify(newUser));
+      
+      // Actualizamos el estado global
       dispatch({ type: 'SET_USER', payload: newUser });
+      
+      // Limpiamos errores y redireccionamos a la página principal
       setErrors({});
+      navigate('/');
     } else {
       setErrors(validationErrors);
     }
@@ -177,4 +189,4 @@ const Register = () => {
   );
 };
 
-export default Register
+export default Register;

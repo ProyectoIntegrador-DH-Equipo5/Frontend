@@ -18,9 +18,9 @@
 		],
 		"disponibilidad": true,
 		"tamano": "GRANDE",
-		"tecnicaObra": { "id": 11, "nombre": "Óleo sobre tabla" },
-		"movimientoArtistico": { "id": 11, "nombre": "Renacimiento" },
-		"artista": { "id": 11, "nombre": "El Bosco" }
+		"tecnicaObra": { "id": 1, "nombre": "Óleo sobre tabla" },
+		"movimientoArtistico": { "id": 1, "nombre": "Renacimiento" },
+		"artista": { "id": 1, "nombre": "El Bosco" }
 	},
 	{
 		"id": 2,
@@ -109,10 +109,7 @@
 		"disponibilidad": true,
 		"tamano": "MEDIANO",
 		"tecnicaObra": { "id": 6, "nombre": "Óleo sobre lienzo" },
-		"movimientoArtistico": {
-			"id": 6,
-			"nombre": "Postimpresionismo"
-		},
+		"movimientoArtistico": { "id": 6, "nombre": "Postimpresionismo" },
 		"artista": { "id": 6, "nombre": "Vincent Van Gogh" }
 	},
 	{
@@ -204,9 +201,9 @@
 		],
 		"disponibilidad": true,
 		"tamano": "GRANDE",
-		"tecnicaObra": { "id": 11, "nombre": "Xilografía" },
-		"movimientoArtistico": { "id": 11, "nombre": "Ukiyo-e" },
-		"artista": { "id": 11, "nombre": "Katsushika Hokusai" }
+		"tecnicaObra": { "id": 12, "nombre": "Xilografía" },
+		"movimientoArtistico": { "id": 12, "nombre": "Ukiyo-e" },
+		"artista": { "id": 12, "nombre": "Katsushika Hokusai" }
 	},
 	{
 		"id": 13,
@@ -224,9 +221,9 @@
 		],
 		"disponibilidad": true,
 		"tamano": "GRANDE",
-		"tecnicaObra": { "id": 12, "nombre": "Óleo sobre lienzo" },
-		"movimientoArtistico": { "id": 12, "nombre": "Romanticismo" },
-		"artista": { "id": 12, "nombre": "William Turner" }
+		"tecnicaObra": { "id": 13, "nombre": "Óleo sobre lienzo" },
+		"movimientoArtistico": { "id": 13, "nombre": "Romanticismo" },
+		"artista": { "id": 13, "nombre": "William Turner" }
 	},
 	{
 		"id": 14,
@@ -245,9 +242,9 @@
 		],
 		"disponibilidad": true,
 		"tamano": "MEDIANO",
-		"tecnicaObra": { "id": 13, "nombre": "Óleo sobre lienzo" },
-		"movimientoArtistico": { "id": 13, "nombre": "Romanticismo" },
-		"artista": { "id": 13, "nombre": "Caspar David Friedrich" }
+		"tecnicaObra": { "id": 14, "nombre": "Óleo sobre lienzo" },
+		"movimientoArtistico": { "id": 14, "nombre": "Romanticismo" },
+		"artista": { "id": 14, "nombre": "Caspar David Friedrich" }
 	},
 	{
 		"id": 15,
@@ -265,9 +262,9 @@
 		],
 		"disponibilidad": true,
 		"tamano": "MEDIANO",
-		"tecnicaObra": { "id": 14, "nombre": "Óleo sobre lienzo" },
-		"movimientoArtistico": { "id": 14, "nombre": "Arte abstracto" },
-		"artista": { "id": 14, "nombre": "Wassily Kandinsky" }
+		"tecnicaObra": { "id": 15, "nombre": "Óleo sobre lienzo" },
+		"movimientoArtistico": { "id": 15, "nombre": "Arte abstracto" },
+		"artista": { "id": 15, "nombre": "Wassily Kandinsky" }
 	},
 	{
 		"id": 16,
@@ -285,9 +282,9 @@
 		],
 		"disponibilidad": true,
 		"tamano": "GRANDE",
-		"tecnicaObra": { "id": 15, "nombre": "Tempera sobre lienzo" },
-		"movimientoArtistico": { "id": 15, "nombre": "Renacimiento" },
-		"artista": { "id": 15, "nombre": "Sandro Botticelli" }
+		"tecnicaObra": { "id": 16, "nombre": "Tempera sobre lienzo" },
+		"movimientoArtistico": { "id": 16, "nombre": "Renacimiento" },
+		"artista": { "id": 16, "nombre": "Sandro Botticelli" }
 	},
 	{
 		"id": 17,
@@ -305,9 +302,9 @@
 		],
 		"disponibilidad": true,
 		"tamano": "MEDIANO",
-		"tecnicaObra": { "id": 16, "nombre": "Óleo sobre lienzo" },
-		"movimientoArtistico": { "id": 16, "nombre": "Postimpresionismo" },
-		"artista": { "id": 16, "nombre": "Vincent van Gogh" }
+		"tecnicaObra": { "id": 17, "nombre": "Óleo sobre lienzo" },
+		"movimientoArtistico": { "id": 17, "nombre": "Postimpresionismo" },
+		"artista": { "id": 17, "nombre": "Vincent van Gogh" }
 	},
 	{
 		"id": 18,
@@ -325,9 +322,9 @@
 		],
 		"disponibilidad": true,
 		"tamano": "GRANDE",
-		"tecnicaObra": { "id": 17, "nombre": "Óleo sobre panel" },
-		"movimientoArtistico": { "id": 17, "nombre": "Barroco" },
-		"artista": { "id": 17, "nombre": "Willem van de Velde" }
+		"tecnicaObra": { "id": 18, "nombre": "Óleo sobre panel" },
+		"movimientoArtistico": { "id": 18, "nombre": "Barroco" },
+		"artista": { "id": 18, "nombre": "Willem van de Velde" }
 	},
 	{
 		"id": 19,
@@ -345,9 +342,9 @@
 		],
 		"disponibilidad": true,
 		"tamano": "GRANDE",
-		"tecnicaObra": { "id": 18, "nombre": "Óleo sobre lienzo" },
-		"movimientoArtistico": { "id": 18, "nombre": "Barroco" },
-		"artista": { "id": 18, "nombre": "Nicolas Poussin" }
+		"tecnicaObra": { "id": 19, "nombre": "Óleo sobre lienzo" },
+		"movimientoArtistico": { "id": 19, "nombre": "Barroco" },
+		"artista": { "id": 19, "nombre": "Nicolas Poussin" }
 	},
 	{
 		"id": 20,
@@ -365,6 +362,8 @@
 		],
 		"disponibilidad": true,
 		"tamano": "GRANDE",
-		"tecnicaObra": { "id": 19, "nombre": "Óleo sobre nogal" }
+		"tecnicaObra": { "id": 20, "nombre": "Óleo sobre nogal" },
+		"movimientoArtistico": { "id": 20, "nombre": "Barroco" },
+		"artista": { "id": 20, "nombre": "Nicolas Poussin" }
 	}
 ]
