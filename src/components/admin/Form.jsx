@@ -3,8 +3,9 @@ import { FaTimes } from "react-icons/fa";
 import { useContextGlobal } from "../../utils/global.context"; // Importa el contexto
 import FormField from "./FormField";
 import ImageUpload from "./ImageUpload";
+import Message from "./Message";
 
-const Form = ({ edit, obra = {}, onClose, setSuccessMessage, setErrorMessage }) => {
+const Form = ({ edit, obra = {}, onClose }) => {
     const { state, dispatch } = useContextGlobal(); // Obtiene las categorías del estado global
     const initialFormData = {
         nombre: "",
@@ -23,6 +24,8 @@ const Form = ({ edit, obra = {}, onClose, setSuccessMessage, setErrorMessage }) 
         descripcion: "",
         imagen: "",
     });
+    const [successMessage, setSuccessMessage] = useState("");
+	const [errorMessage, setErrorMessage] = useState("");
 
     useEffect(() => {
         if (edit) {
@@ -89,17 +92,19 @@ const Form = ({ edit, obra = {}, onClose, setSuccessMessage, setErrorMessage }) 
     
         // Verificar si se ha seleccionado o creado una categoría
         const isCategoryValid = formData.movimientoArtistico?.nombre || (isAddingCategory && newCategory.nombre);
-    
-        if (!isCategoryValid) {
-            setErrorMessage("Por favor, seleccione o cree una categoría.");
-            return;
-        }
-    
-        const existingProduct = false;  // Aquí deberías validar si la obra ya existe
+        const existingProduct = state.data.find((product) => product.nombre === formData.nombre);
         if (existingProduct) {
             setErrorMessage("El nombre del producto ya existe.");
+            console.log("El nombre del producto ya existe.");
             return;
         }
+        if (!isCategoryValid) {
+            setErrorMessage("Por favor, seleccione o cree una categoría.");
+            console.log("Por favor, seleccione o cree una categoría.");
+            return;
+        }
+    
+     
     
         console.log("Form data:", formData);
         if (edit) {
@@ -118,7 +123,17 @@ const Form = ({ edit, obra = {}, onClose, setSuccessMessage, setErrorMessage }) 
         console.log("Nueva categoría creada:", newCategory);
         setIsAddingCategory(false); // Oculta los campos de nueva categoría después de la creación
     };
+    // Efecto para ocultar los mensajes después de unos segundos
+	useEffect(() => {
+		if (successMessage || errorMessage) {
+			const timer = setTimeout(() => {
+				setSuccessMessage(""); // Ocultar el mensaje de éxito
+				setErrorMessage(""); // Ocultar el mensaje de error
+			}, 3000); // Duración del mensaje en milisegundos
 
+			return () => clearTimeout(timer); // Limpiar el temporizador al desmontar
+		}
+	}, [successMessage, errorMessage]);
     const handleCategorySelect = (e) => {
         const { value } = e.target;
     if (value === "agregar") {
@@ -272,6 +287,9 @@ const Form = ({ edit, obra = {}, onClose, setSuccessMessage, setErrorMessage }) 
         );
     };
 
+
+    
+
     return (
         <div className="w-[75vw] h-[65vh] overflow-y-scroll relative bg-white p-6 rounded-lg shadow-md">
             <button
@@ -302,6 +320,25 @@ const Form = ({ edit, obra = {}, onClose, setSuccessMessage, setErrorMessage }) 
                         {edit ? "Actualizar obra" : "Crear obra"}
                     </button>
                 </div>
+                {/* Mostrar mensajes */}
+			{successMessage && (
+				<div className="fixed bottom-16 right-4 z-50 mb-4">
+					<Message
+						type="success"
+						text={successMessage}
+						onClose={() => setSuccessMessage("")}
+					/>
+				</div>
+			)}
+			{errorMessage && (
+				<div className="fixed bottom-4 right-4 z-50 mb-4">
+					<Message
+						type="danger"
+						text={errorMessage}
+						onClose={() => setErrorMessage("")}
+					/>
+				</div>
+			)}
             </form>
         </div>
     );

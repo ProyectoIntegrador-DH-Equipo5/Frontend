@@ -16,6 +16,8 @@ const UserTable = () => {
   const [errorMessage, setErrorMessage] = useState("");
   
 
+
+
   const headers = ["ID", "Nombre", "Apellido", "Correo electrónico", "Rol"];
 
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -199,9 +201,9 @@ const UserTable = () => {
               </table>
             </div>
             <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
+             currentPage={currentPage}
+							setCurrentPage={setCurrentPage}
+							totalPages={totalPages}
             />
           </div>
         )}

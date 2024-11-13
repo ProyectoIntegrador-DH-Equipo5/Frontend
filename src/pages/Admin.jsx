@@ -3,13 +3,13 @@ import SubHeader from "../components/SubHeader";
 import ProductTable from "../components/admin/ProductTable";
 import UserTable from "../components/admin/UserTable";
 import CategoryTable from "../components/admin/CategoryTable";
-import Message from "../components/admin/Message";
 import IsMobile from "../components/admin/IsMobile";
-import { useState } from "react";
+import { useState, useEffect  } from "react";
 import Sidebar from "../components/admin/Sidebar";
 import Form from "../components/admin/Form";
 import { FaTimes } from "react-icons/fa";
 import { idCreator } from "../utils/formatFunctions";
+import Message from "../components/admin/Message";
 
 const Admin = () => {
 	const { isMobile, state, dispatch } = useContextGlobal();
@@ -94,7 +94,17 @@ const Admin = () => {
 			[name]: value,
 		});
 	};
+	// Efecto para ocultar los mensajes después de unos segundos
+	useEffect(() => {
+		if (successMessage || errorMessage) {
+			const timer = setTimeout(() => {
+				setSuccessMessage(""); // Ocultar el mensaje de éxito
+				setErrorMessage(""); // Ocultar el mensaje de error
+			}, 3000); // Duración del mensaje en milisegundos
 
+			return () => clearTimeout(timer); // Limpiar el temporizador al desmontar
+		}
+	}, [successMessage, errorMessage]);
 	const handleSubmitUser = (e) => {
 		e.preventDefault(); // Previene el comportamiento predeterminado de envío del formulario
 
@@ -149,6 +159,7 @@ const Admin = () => {
         
 		handleListItems();
 	}
+
 	return (
 		<>
 			{isMobile ? (
@@ -169,6 +180,7 @@ const Admin = () => {
 										onClose={handleListItems}
 										setSuccessMessage={setSuccessMessage}
 										setErrorMessage={setErrorMessage}
+										
 									/>
 								)}
 								{isCreatingItem === "usuario" && (
@@ -376,6 +388,25 @@ const Admin = () => {
 							)}
 						</section>
 					)}
+					{/* Mostrar mensajes */}
+			{successMessage && (
+				<div className="fixed bottom-16 right-4 z-50 mb-4">
+					<Message
+						type="success"
+						text={successMessage}
+						onClose={() => setSuccessMessage("")}
+					/>
+				</div>
+			)}
+			{errorMessage && (
+				<div className="fixed bottom-4 right-4 z-50 mb-4">
+					<Message
+						type="danger"
+						text={errorMessage}
+						onClose={() => setErrorMessage("")}
+					/>
+				</div>
+			)}
 				</div>
 			)}
 		</>

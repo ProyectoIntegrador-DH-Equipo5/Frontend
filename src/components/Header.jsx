@@ -1,4 +1,3 @@
-// Header.js
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Logo from "./Logo";
@@ -36,8 +35,8 @@ const Header = () => {
 
   useEffect(() => {
     // Actualiza el nombre del usuario cuando 'state.users' cambie
-    if (state.users && state.users.name) {
-      setUserName(state.users.name.substring(0, 2).toUpperCase());
+    if (state.loggedUser && state.loggedUser.nombre) {
+      setUserName(state.loggedUser.nombre.substring(0, 2).toUpperCase());
     } else {
       setUserName("");
     }
