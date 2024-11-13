@@ -85,7 +85,7 @@ const Admin = () => {
 		],
 	};
 
-	const buttonsToDisplay = buttons[activeSection] || [];
+	const buttonsToDisplay = { [activeSection]: buttons[activeSection] || [] };
 
 	const handleInputChange = (e) => {
 		const { name, value } = e.target;
@@ -103,9 +103,15 @@ const Admin = () => {
 			return;
 		}
 
+		// Asignar el ID
+		const newUserWithId = {
+			...newUser,
+			id: idCreator(state.users),
+		};
+
 		// Agregar el nuevo usuario
-        console.log("admin: ",newUser)
-		dispatch({ type: "ADD_USER", payload: newUser });
+        console.log("admin: ",newUserWithId)
+		dispatch({ type: "ADD_USER", payload: newUserWithId });
 		setSuccessMessage("Usuario creado con éxito");
 
 		// Limpiar los campos después de la creación
@@ -126,9 +132,16 @@ const Admin = () => {
 	const submitCategory = (e)=>{
 		e.preventDefault(); 
 
+
+		// Asignar el ID
+		const newCatWithId = {
+			...newCat,
+			id: idCreator(state.categories),
+		};
+
 		// Agregar el nuevo usuario
-        console.log("admin: ",newCat)
-		dispatch({ type: "ADD_CATEGORY", payload: newCat });
+        console.log("admin: ",newCatWithId)
+		dispatch({ type: "ADD_CATEGORY", payload: newCatWithId });
 		setSuccessMessage("Categoría creada con éxito");
 
 		// Limpiar los campos después de la creación

@@ -1,3 +1,4 @@
+
 const Button = ({ text, bgColor, textColor, textSize, widthSize, heightSize, action }) => {
   return (
     <button
@@ -10,4 +11,3 @@ const Button = ({ text, bgColor, textColor, textSize, widthSize, heightSize, act
 };
 
 export default Button;
-
