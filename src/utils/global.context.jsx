@@ -26,7 +26,7 @@ export const initialState = {
     images: loadFromLocalStorage("images") || [],  // Cargar imágenes desde localStorage
     activeSection: "obras",
     user: null,
-    loggedUser: 0,
+    loggedUser: loadFromLocalStorage("loggedUser") || null,
 };
 
 export const ContextProvider = ({ children }) => {
@@ -84,21 +84,10 @@ export const ContextProvider = ({ children }) => {
         }
     }, [state.images]);
 
-    // función para gestionar login de usuario
-    const loginUser = (user) => {
-        dispatch({ type: "LOGIN_USER", payload: user });
-        saveToLocalStorage("user", user);
-    };
-
-    // gestionar el cierre de sesión del usuario
-    const logoutUser = () => {
-        dispatch({ type: "LOGOUT_USER" });
-        // localStorage.removeItem("user");
-        removeFromLocalStorage("user");
-    };
+   
 
     return (
-        <ContextGlobal.Provider value={{ state, dispatch, isMobile, loginUser, logoutUser }}>
+        <ContextGlobal.Provider value={{ state, dispatch, isMobile }}>
             {children}
         </ContextGlobal.Provider>
     );

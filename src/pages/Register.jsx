@@ -5,11 +5,12 @@ import { useNavigate } from 'react-router-dom';
 const Register = () => {
   const { dispatch } = useContextGlobal();
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
+    nombre: "",
+    apellido: "",
     email: "",
-    password: "",
+    contrasenia: "",
     confirmPassword: "",
+    rol: "USER",
   });
 
   const [errors, setErrors] = useState({});
@@ -18,11 +19,11 @@ const Register = () => {
   const nameRegex = /^[a-zA-Z\s]*$/;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  const validateField = (name, value) => {
+  const validateField = (nombre, value) => {
     let error = "";
 
-    switch (name) {
-      case "firstName":
+    switch (nombre) {
+      case "nombre":
         if (!value) {
           error = "El nombre es requerido";
         } else if (!nameRegex.test(value)) {
@@ -30,7 +31,7 @@ const Register = () => {
         }
         break;
 
-      case "lastName":
+      case "apellido":
         if (!value) {
           error = "El apellido es requerido";
         } else if (!nameRegex.test(value)) {
@@ -46,7 +47,7 @@ const Register = () => {
         }
         break;
 
-      case "password":
+      case "contrasenia":
         if (!value) {
           error = "La contraseña es requerida";
         }
@@ -62,12 +63,12 @@ const Register = () => {
         break;
     }
 
-    setErrors((prevErrors) => ({ ...prevErrors, [name]: error }));
+    setErrors((prevErrors) => ({ ...prevErrors, [nombre]: error }));
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({ ...prevData, [name]: value }));
+    setFormData((prevData) => ({ ...prevData, [nombre]: value }));
   };
 
   const handleBlur = (e) => {
@@ -91,10 +92,10 @@ const Register = () => {
       };
       
       // Guardamos en localStorage
-      localStorage.setItem("user", JSON.stringify(newUser));
+      console.log("admin: ",newUser)
+		  dispatch({ type: "ADD_USER", payload: newUser });
       
-      // Actualizamos el estado global
-      dispatch({ type: 'SET_USER', payload: newUser });
+
       
       // Limpiamos errores y redireccionamos a la página principal
       setErrors({});
@@ -114,26 +115,26 @@ const Register = () => {
             type="text"
             name="firstName"
             className="w-full mt-1 p-2 border border-gray-300 rounded-lg"
-            value={formData.firstName}
+            value={formData.nombre}
             onChange={handleChange}
             onBlur={handleBlur}
             required
           />
-          {errors.firstName && <p className="text-red-500">{errors.firstName}</p>}
+          {errors.firstName && <p className="text-red-500">{errors.nombre}</p>}
         </label>
         
         <label className="mb-4">
           <span className="block text-sm font-medium text-gray-700">Apellido:</span>
           <input
             type="text"
-            name="lastName"
+            name="apellido"
             className="w-full mt-1 p-2 border border-gray-300 rounded-lg"
-            value={formData.lastName}
+            value={formData.apellido}
             onChange={handleChange}
             onBlur={handleBlur}
             required
           />
-          {errors.lastName && <p className="text-red-500">{errors.lastName}</p>}
+          {errors.apellido && <p className="text-red-500">{errors.apellido}</p>}
         </label>
         
         <label className="mb-4">
@@ -154,14 +155,14 @@ const Register = () => {
           <span className="block text-sm font-medium text-gray-700">Contraseña:</span>
           <input
             type="password"
-            name="password"
+            name="contrasenia"
             className="w-full mt-1 p-2 border border-gray-300 rounded-lg"
-            value={formData.password}
+            value={formData.contrasenia}
             onChange={handleChange}
             onBlur={handleBlur}
             required
           />
-          {errors.password && <p className="text-red-500">{errors.password}</p>}
+          {errors.contrasenia && <p className="text-red-500">{errors.contrasenia}</p>}
         </label>
         
         <label className="mb-4">

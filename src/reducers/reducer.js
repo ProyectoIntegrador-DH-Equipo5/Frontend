@@ -1,4 +1,4 @@
-import { saveToLocalStorage } from "../utils/localStorage";
+import { removeFromLocalStorage, saveToLocalStorage } from "../utils/localStorage";
 import { idCreator } from "../utils/formatFunctions";
 
 export const reducer = (state, action) => {
@@ -42,11 +42,21 @@ export const reducer = (state, action) => {
       return { ...state, users: newDataUser };
 
     case "LOGIN_USER":
+
+      saveToLocalStorage("loggedUser", action.payload)  
+    return {
+      ...state,
+        loggedUser: action.payload,        
+      };
+      case "LOGOUT_USER":
+
+      removeFromLocalStorage("loggedUser");
       return {
         ...state,
-        users: action.payload,
-        loggedUser: 1,
+        
+        loggedUser: null,
       };
+
 
     // UPDATE - EDITAR
     case "UPDATE_ART":
@@ -94,12 +104,9 @@ export const reducer = (state, action) => {
       saveToLocalStorage("users", filteredDataUser);
       return { ...state, users: filteredDataUser };
 
-    case "LOGOUT_USER":
-      return {
-        ...state,
-        users: null,
-        loggedUser: 0,
-      };
+
+      
+
 
     // IMAGENES - Manejo de imagenes en LocalStorage
     case "ADD_IMAGE":

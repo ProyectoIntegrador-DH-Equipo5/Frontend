@@ -85,7 +85,7 @@ const Admin = () => {
 		],
 	};
 
-	const buttonsToDisplay = { [activeSection]: buttons[activeSection] || [] };
+	const buttonsToDisplay = buttons[activeSection] || [];
 
 	const handleInputChange = (e) => {
 		const { name, value } = e.target;

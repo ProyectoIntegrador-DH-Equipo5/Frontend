@@ -8,14 +8,14 @@ import { AiFillCloseSquare } from "react-icons/ai";
 import { useContextGlobal } from '../utils/global.context';
 
 const Header = () => {
-  const { state, logoutUser } = useContextGlobal();
+  const { state, dispatch } = useContextGlobal();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [userName, setUserName] = useState("");
   const menuRef = useRef(null);
 
   const handleLogout = () => {
-    logoutUser();
+    dispatch({ type: "LOGOUT_USER" });
     navigate('/');
   };
 
@@ -49,7 +49,7 @@ const Header = () => {
   }, []);
 
   // Unifica los botones en un solo array
-  const buttons = state.users
+  const buttons = state.loggedUser
     ? [
         {
           text: userName,
@@ -76,7 +76,7 @@ const Header = () => {
     <header className="flex justify-between items-center fixed top-0 w-full h-24 bg-background p-4 border-b border-primary/50 z-10">
       <Logo size={16} />
       <div className="flex items-center relative">
-        {state.users && (
+        {state.loggedUser && (
           <div
             onClick={toggleMenu}
             className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-xl font-bold cursor-pointer"
