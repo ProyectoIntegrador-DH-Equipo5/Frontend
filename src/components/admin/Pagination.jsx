@@ -24,7 +24,7 @@ const Pagination = ({ currentPage, setCurrentPage, totalPages }) => {
 				<li>
 					<button
 						onClick={prevPage}
-						className="inline-flex size-8 items-center justify-center rounded border border-gray-100 bg-white text-gray-900 rtl:rotate-180"
+						className="inline-flex items-center justify-center w-8 h-8 rounded border border-gray-100 bg-white text-gray-900 rtl:rotate-180"
 						disabled={currentPage === 1}
 					>
 						<GrFormPrevious />
@@ -34,11 +34,11 @@ const Pagination = ({ currentPage, setCurrentPage, totalPages }) => {
 					<li key={i}>
 						<button
 							onClick={() => goToPage(i + 1)}
-							className={`block size-8 rounded border ${
+							className={`inline-flex items-center justify-center w-8 h-8 rounded border ${
 								currentPage === i + 1
 									? "bg-amber-600 text-white"
 									: "bg-white text-gray-900"
-							} text-center leading-8`}
+							}`}
 						>
 							{i + 1}
 						</button>
@@ -47,7 +47,7 @@ const Pagination = ({ currentPage, setCurrentPage, totalPages }) => {
 				<li>
 					<button
 						onClick={nextPage}
-						className="inline-flex size-8 items-center justify-center rounded border border-gray-100 bg-white text-gray-900 rtl:rotate-180"
+						className="inline-flex items-center justify-center w-8 h-8 rounded border border-gray-100 bg-white text-gray-900 rtl:rotate-180"
 						disabled={currentPage === totalPages}
 					>
 						<GrFormNext />

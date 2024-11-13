@@ -1,20 +1,28 @@
 import Button from "./Button";
+import PropTypes from 'prop-types';
 
 const ButtonSet = ({ buttons }) => {
+	if (!Array.isArray(buttons)) {
+		console.error("El prop 'buttons' debe ser un array");
+		return null;
+	}
+
+	ButtonSet.propTypes = {
+		buttons: PropTypes.array.isRequired,
+	}
+
 	return (
 		<div className="flex gap-5 px-5">
-			{Object.values(buttons).map((buttonGroup, index) =>
-				buttonGroup.map((button, btnIndex) => (
-					<Button
-						key={`${index}-${btnIndex}`}
-						text={button.text}
-						bgColor={button.bgColor}
-						textColor={button.textColor}
-						action={button.action} 
-						textSize={button.textSize}
-					/>
-				))
-			)}
+			{buttons.map((button, index) => (
+				<Button
+					key={index}
+					text={button.text}
+					bgColor={button.bgColor}
+					textColor={button.textColor}
+					action={button.action} 
+					textSize={button.textSize}
+				/>
+			))}
 		</div>
 	);
 };

@@ -12,6 +12,12 @@ export default {
         tertiary: "FFD557",
         background: "#000000",
         },
+        height: {
+          'screen-28': 'calc(100vh - 2.5rem)'
+        },
+        maxHeight: {
+          'screen-28': 'calc(100vh - 2.5rem)'
+        },
     },
   },
   plugins: [],

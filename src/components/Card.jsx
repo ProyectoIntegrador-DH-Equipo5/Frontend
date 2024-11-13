@@ -1,8 +1,37 @@
 import React, { useState } from 'react'
+import PropTypes from 'prop-types';
 import Modal from './Modal'
 
 const Card = ({ producto }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Verificar que 'producto' exista
+  if (!producto || !producto.nombre || !producto.movimientoArtistico) {
+    return <div className="relative overflow-hidden h-100 rounded-xl bg-white/10 backdrop-blur-sm border-dashed border-2 border-white-200 opacity-40">
+        <div className=" h-full w-full flex flex-col align-center justify-center text-center text-white">Obra no disponible 😔</div>
+      </div>
+  }
+
+  // Validación de props
+  Card.propTypes = {
+    producto: PropTypes.shape({
+      nombre: PropTypes.string.isRequired,
+      img: PropTypes.string.isRequired,
+      descripcion: PropTypes.string.isRequired,
+      precioRenta: PropTypes.number.isRequired,
+      tamano: PropTypes.string.isRequired,
+      tecnicaObra: PropTypes.shape({
+        nombre: PropTypes.string.isRequired,
+      }).isRequired,
+      movimientoArtistico: PropTypes.shape({
+        nombre: PropTypes.string.isRequired,
+      }).isRequired,
+      artista: PropTypes.shape({
+        nombre: PropTypes.string.isRequired,
+      }).isRequired,
+      fechaCreacion: PropTypes.string.isRequired,
+    }).isRequired,
+  };
 
   return (
     <>

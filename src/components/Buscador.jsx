@@ -5,13 +5,14 @@ import '../styles/App.css'
 const Buscador = () => {
   return (
     <section className="mx-auto bg-secondary p-7 pt-32 flex-col justify-center items-center text-center w-full search-section">
-        <h1 className="text-2xl mb-4 text-white text-left px-4 md:px-24 pt-6">Busca y alquila tus obras de arte favoritas</h1>
-        <form action="" className="flex flex-col md:flex-row justify-left gap-6 p-5 px-4 md:px-24 items-center">
+      <h1 className="text-primary font-serif text-4xl mt-16 leading-relaxed">ARTE EXCLUSIVO<br /> EXPERIENCIAS INOLVIDABLES</h1>
+        <div className="mx-auto flex justify-center"><h2 className="text-2xl mb-2 text-white text-left pt-16 px-4 md:pt-16">Busca y alquila tus obras de arte favoritas</h2></div>
+        <form action="" className="flex flex-col md:flex-row justify-center gap-6 p-5 px-4 md:px-24 items-center">
         <div className="relative w-full max-w-md">
             <input
               type="text"
               placeholder="Busca por cuadro, autor o categoría"
-              className="w-full rounded-lg border border-gray-300 bg-white py-3 pl-10 pr-4 text-gray-700 placeholder-gray-500 focus:outline-none"
+              className="w-full rounded-lg border border-gray-300 bg-white py-3 h-12 pl-10 pr-4 text-gray-700 placeholder-gray-500 focus:outline-none"
             />
             <svg
               className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400"
@@ -28,7 +29,7 @@ const Buscador = () => {
               />
             </svg>
           </div>
-            <input type="date" className="w-full max-w-[15rem] rounded-lg border border-gray-300 bg-white py-3 px-4 text-gray-700 focus:outline-none" />
+            <input type="date" className="w-full max-w-[15rem] rounded-lg border border-gray-300 h-12 bg-white py-3 px-4 text-gray-700 focus:outline-none" />
             <Button text={<BiSearchAlt />} bgColor="primary" textColor="black" textSize="2xl" widthSize="16" heightSize="12" />
         </form>
     </section>

@@ -1,6 +1,3 @@
-import { CiInstagram, CiFacebook, CiLinkedin } from "react-icons/ci";
-import { BsTwitterX } from "react-icons/bs";
-
 import { MdFacebook } from "react-icons/md";
 import { PiInstagramLogoFill } from "react-icons/pi";
 import { AiFillTikTok } from "react-icons/ai";
