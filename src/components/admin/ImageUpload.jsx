@@ -1,23 +1,53 @@
 import React, { useState, useEffect } from "react";
-import { saveToLocalStorage, loadFromLocalStorage } from "../../utils/localStorage";
+import axios from "axios";
+import { useContextGlobal } from "../../utils/global.context";
 
-const ImageUpload = ({ onFilesAdded, existingImage }) => {
-    const [files, setFiles] = useState({});
-    const [images, setImages] = useState(loadFromLocalStorage("images") || []); // Cargar las imágenes del localStorage
 
-    // Función para añadir un archivo y convertirlo a base64
-    const addFile = (file) => {
-        const reader = new FileReader();
-        
-        reader.onloadend = () => {
-            const base64Image = reader.result; // Obtener la imagen en base64
-            const newImages = [...images, base64Image]; // Añadirla a la lista de imágenes
-            setImages(newImages);
-            saveToLocalStorage("images", newImages); // Guardar en localStorage
-            onFilesAdded(base64Image); // Llamar al callback con la imagen
-        };
+const ImageUpload = ({ onFilesAdded, existingImage, artId }) => {
+    const { dispatch } = useContextGlobal(); 
+    const cloudName = "dr1jbzn9r"; // Your Cloudinary cloud name
+    const uploadPreset = "ml_default"; // Your Cloudinary upload preset
 
-        reader.readAsDataURL(file); // Convertir archivo a base64
+    // Fetch images directly from global state (no local component state)
+    const { images } = useContextGlobal().state; 
+
+    // Function to upload to Cloudinary
+    const uploadToCloudinary = async (file) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("upload_preset", uploadPreset);
+        formData.append("cloud_name", cloudName);
+
+        try {
+            const response = await axios.post(
+                `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+                formData
+            );
+            return response.data.secure_url; // Return the URL of the uploaded image
+        } catch (error) {
+            console.error("Error uploading image:", error);
+        }
+    };
+
+    // Function to add a file and upload to Cloudinary
+    const addFile = async (file) => {
+        const imageUrl = await uploadToCloudinary(file);
+        if (imageUrl) {
+            // Ensure the image is not already in the list to avoid duplicates
+            if (!images.includes(imageUrl)) {
+                // Dispatch action to add the image to the global state
+                dispatch({
+                    type: "ADD_IMAGE",
+                    payload: imageUrl,
+                });
+                // Also update the artwork with the image
+                dispatch({
+                    type: "ADD_IMAGE_TO_ART",
+                    payload: { artId, imgUrl: imageUrl }, // Pass the artId and image URL
+                });
+                onFilesAdded(imageUrl); // Pass the URL to parent component
+            }
+        }
     };
 
     const handleFileChange = (e) => {
@@ -36,25 +66,31 @@ const ImageUpload = ({ onFilesAdded, existingImage }) => {
     };
 
     const handleDelete = (url) => {
-        const newImages = images.filter((image) => image !== url);
-        setImages(newImages);
-        saveToLocalStorage("images", newImages); // Actualizar en localStorage
+        dispatch({
+            type: "DELETE_IMAGE",
+            payload: { id: url },
+        });
     };
 
     useEffect(() => {
-        // Si hay una imagen existente, se maneja de forma similar a como se hizo con las imágenes cargadas
         if (existingImage) {
             const objectURL = URL.createObjectURL(existingImage);
-            setImages((prevImages) => [...prevImages, objectURL]);
+            // Check if image already exists before adding
+            if (!images.includes(objectURL)) {
+                dispatch({
+                    type: "ADD_IMAGE",
+                    payload: objectURL,
+                });
+            }
         }
-    }, [existingImage]);
+    }, [existingImage, images, dispatch]);
 
     return (
         <div
             className="mt-4 border-2 border-dashed border-gray-400 py-12 flex flex-col items-center"
             onDrop={handleDrop}
-            onDragOver={(e) => e.preventDefault()} // Prevenir el comportamiento predeterminado
-            onClick={(e) => e.stopPropagation()} // Prevenir la propagación del click
+            onDragOver={(e) => e.preventDefault()} // Prevent default behavior
+            onClick={(e) => e.stopPropagation()} // Prevent click propagation
         >
             <p className="mb-3 font-semibold text-gray-900">Arrastra y suelta tus archivos aquí o</p>
             <input
@@ -63,13 +99,13 @@ const ImageUpload = ({ onFilesAdded, existingImage }) => {
                 multiple
                 className="hidden"
                 onChange={handleFileChange}
-                onClick={(e) => e.stopPropagation()} // Prevenir la propagación del click
+                onClick={(e) => e.stopPropagation()} // Prevent click propagation
             />
             <button
                 className="mt-2 rounded-sm px-3 py-1 bg-gray-200 hover:bg-gray-300 focus:shadow-outline focus:outline-none"
                 onClick={(e) => {
-                    e.preventDefault(); // Evitar cualquier comportamiento predeterminado
-                    e.stopPropagation(); // Evitar el cierre del formulario
+                    e.preventDefault();
+                    e.stopPropagation();
                     document.getElementById("hidden-input").click();
                 }}
             >
@@ -93,7 +129,7 @@ const ImageUpload = ({ onFilesAdded, existingImage }) => {
                                 <img
                                     alt="preview"
                                     className="img-preview w-full h-full object-cover rounded-md"
-                                    src={url} // Usar la URL base64
+                                    src={url} // Show the uploaded image URL
                                 />
                                 <button
                                     className="absolute top-1 right-1 focus:outline-none hover:bg-gray-300 p-1 rounded-md text-gray-600 bg-gray-200"

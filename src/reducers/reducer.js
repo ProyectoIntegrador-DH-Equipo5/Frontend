@@ -114,21 +114,21 @@ export const reducer = (state, action) => {
       saveToLocalStorage("images", newImages);
       return { ...state, images: newImages };
 
-    case "ADD_IMAGE_TO_ART":
-      return {
-        ...state,
-        data: state.data.map((obra) =>
-          obra.id === action.payload.artId
-            ? {
-                ...obra,
-                imagenesAdicionales: [
-                  ...obra.imagenesAdicionales,
-                  action.payload.imgUrl,
-                ],
-              }
-            : obra
-        ),
-      };
+      case "ADD_IMAGE_TO_ART":
+        return {
+          ...state,
+          data: state.data.map((obra) =>
+            obra.id === action.payload.artId
+              ? {
+                  ...obra,
+                  imagenesAdicionales: [
+                    ...obra.imagenesAdicionales,
+                    action.payload.imgUrl, // This will be the URL from Cloudinary
+                  ],
+                }
+              : obra
+          ),
+        };
 
     case "UPDATE_IMAGE":
       const updatedImages = state.images.map((image) =>

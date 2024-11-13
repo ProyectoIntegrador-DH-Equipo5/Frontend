@@ -27,7 +27,12 @@ export const initialState = {
     activeSection: "obras",
     user: null,
     loggedUser: loadFromLocalStorage("loggedUser") || null,
+    
 };
+
+    const cloudName = "dr1jbzn9r"; // Tu nombre de nube
+    const uploadPreset = "ml_default"
+
 
 export const ContextProvider = ({ children }) => {
     const [state, dispatch] = useReducer(reducer, initialState);
