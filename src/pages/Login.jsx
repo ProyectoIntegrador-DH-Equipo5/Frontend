@@ -25,7 +25,7 @@ const Login = () => {
 
     if (!validateEmail()) return;
 
-    const mockUser = { email: 'admin@artxp.com', password: 'admin', name: 'Admin' };
+    const mockUser = { name: 'Admin', email: 'admin@artxp.com', password: 'admin', role: 'ADMIN' };
 
     if (email === mockUser.email && password === mockUser.password) {
       // dispatch({ type: 'SET_USER', payload: mockUser });

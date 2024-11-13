@@ -1,10 +1,11 @@
 // Header.js
+import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Logo from "./Logo";
 import ButtonSet from "./ButtonSet";
-import { useNavigate } from "react-router-dom";
-import { useContextGlobal } from '../utils/global.context';
+import { FiLogOut } from "react-icons/fi";
 import { AiFillCloseSquare } from "react-icons/ai";
-import { useState, useRef, useEffect } from "react";
+import { useContextGlobal } from '../utils/global.context';
 
 const Header = () => {
   const { state, logoutUser } = useContextGlobal();
@@ -59,10 +60,10 @@ const Header = () => {
           avatar: true,
         },
         {
-          text: <AiFillCloseSquare size={20} className="text-primary font-bold" />,
+          text: <FiLogOut size={30} className="text-primary font-bold" />,
           bgColor: "transparent",
           textColor: "black",
-          textSize: "sm",
+          textSize: "md",
           action: handleLogout,
         }
       ]
@@ -84,7 +85,7 @@ const Header = () => {
           </div>
         )}
         {isMenuOpen && (
-          <div ref={menuRef} className="absolute top-16 right-0 w-40 bg-black text-primary rounded-lg shadow-lg z-20">
+          <div ref={menuRef} className="absolute top-16 right-20 w-40 bg-black text-primary rounded-lg shadow-lg z-20">
             <ul className="flex flex-col p-2">
               <li onClick={handleProfile} className="p-2 hover:bg-gray-200 hover:text-black cursor-pointer">
                 Ver Perfil

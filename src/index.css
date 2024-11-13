@@ -22,3 +22,8 @@
 ::-webkit-scrollbar-thumb:hover {
     background: #555;
 }
+
+::selection{
+    background-color: #BD9006;
+    color: #FFF;
+}
