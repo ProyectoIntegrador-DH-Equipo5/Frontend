@@ -19,7 +19,7 @@ function App() {
 					<Route
 						path="/administracion"
 						element={
-							state.loggedUser?.rol === "ADMIN" ? (
+							state.loggedUser?.rol === "ADMIN" || state.loggedUser?.rol === "COLAB" ? (
 								<Admin />
 							) : (
 								<Home />
