@@ -61,27 +61,27 @@ const Modal = ({ isOpen, onClose, producto }) => {
 
   return (
     <>
-      <div className="fixed inset-0 z-40 flex items-center justify-center lg:px-96">
+      <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-6 sm:px-6 md:px-8 lg:px-12 sm:overflow-y-scroll">
         <div
           className="absolute inset-0 bg-black/60 backdrop-blur-sm"
           onClick={onClose}
         />
 
         {/* Header negro */}
-        <div className="relative w-full max-w-[1200px] mx-4">
+        <div className="relative w-full max-w-6xl mx-auto">
           <div className="bg-black text-white p-4 rounded-t-xl">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
               <div>
-                <h2 className="text-2xl font-bold text-primary">
+                <h2 className="text-xl sm:text-2xl font-bold text-primary line-clamp-1">
                   {producto.nombre}
                 </h2>
-                <p className="text-primary italic">
+                <p className="text-primary italic text-sm sm:text-base">
                   {producto.artista?.nombre}
                 </p>
               </div>
               <button
                 onClick={onClose}
-                className="flex items-center gap-2 px-4 py-2 bg-primary rounded-lg text-black hover:bg-primary transition-colors"
+                className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-primary rounded-lg text-black hover:bg-primary/90 transition-colors text-sm sm:text-base"
               >
                 <RiArrowGoBackFill size={20} />
                 <span>Regresar</span>
@@ -90,45 +90,45 @@ const Modal = ({ isOpen, onClose, producto }) => {
           </div>
 
           {/* Contenido principal */}
-          <div className="bg-white rounded-b-xl p-6">
-            <div className="flex flex-col lg:flex-row gap-6">
+          <div className="bg-white rounded-b-xl p-4 sm:p-6 max-h-[calc(100vh-8rem)] overflow-y-auto">
+            <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
               {/* Columna izquierda: Imagen principal */}
               <div className="flex-1">
                 <img
                   src={producto.img}
                   alt={producto.nombre}
-                  className="w-full aspect-[4/3] object-cover rounded-lg mb-6"
+                  className="w-full aspect-[4/3] object-cover rounded-lg mb-4 sm:mb-6"
                 />
 
                 {/* Categorías */}
-                <div className="flex flex-wrap gap-3 mb-4">
-                  <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg w-48 h-14 text-md justify-center border-gray-400 border-2">
-                    <BsRulers className="text-2xl" />
-                    <span>{producto.tamano}</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 mb-4">
+                  <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg text-sm sm:text-base justify-center border-gray-400 border-2">
+                    <BsRulers className="text-xl" />
+                    <span className="line-clamp-1">{producto.tamano}</span>
                   </div>
-                  <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg w-48 h-14 text-md justify-center border-gray-400 border-2">
-                    <BsPalette className="text-2xl" />
-                    <span>{producto.tecnicaObra?.nombre}</span>
+                  <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg text-sm sm:text-base justify-center border-gray-400 border-2">
+                    <BsPalette className="text-xl" />
+                    <span className="line-clamp-1">{producto.tecnicaObra?.nombre}</span>
                   </div>
-                  <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg w-48 h-14 text-md justify-center border-gray-400 border-2">
-                    <BsPerson className="text-2xl" />
-                    <span>{producto.movimientoArtistico?.nombre}</span>
+                  <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg text-sm sm:text-base justify-center border-gray-400 border-2">
+                    <BsPerson className="text-xl" />
+                    <span className="line-clamp-1">{producto.movimientoArtistico?.nombre}</span>
                   </div>
                 </div>
 
                 {/* Información detallada */}
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   <div>
-                    <p className="text-sm text-gray-600">Fecha de creación:</p>
-                    <p>{producto.fechaCreacion}</p>
+                    <p className="text-xs sm:text-sm text-gray-600">Fecha de creación:</p>
+                    <p className="text-sm sm:text-base">{producto.fechaCreacion}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Descripción:</p>
-                    <p className="text-sm">{producto.descripcion}</p>
+                    <p className="text-xs sm:text-sm text-gray-600">Descripción:</p>
+                    <p className="text-sm sm:text-base">{producto.descripcion}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Dimensiones:</p>
-                    <p>{producto.tamano}</p>
+                    <p className="text-xs sm:text-sm text-gray-600">Dimensiones:</p>
+                    <p className="text-sm sm:text-base">{producto.tamano}</p>
                   </div>
                 </div>
               </div>
@@ -156,12 +156,12 @@ const Modal = ({ isOpen, onClose, producto }) => {
                       className="w-full aspect-square object-cover rounded-lg"
                     />
                     <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px] rounded-lg flex items-center justify-center">
-                      <span className="text-white font-semibold">Ver más</span>
+                      <span className="text-white font-semibold text-sm sm:text-base">Ver más</span>
                     </div>
                   </div>
                 </div>
 
-                {state.users ? (
+                {state.loggedUser ? (
                   <button className="w-full py-3 bg-primary text-black font-bold rounded-lg hover:bg-primary transition-colors mb-3">
                     Alquilar
                   </button>
@@ -173,13 +173,13 @@ const Modal = ({ isOpen, onClose, producto }) => {
                     >
                       Alquilar
                     </button>
-                    <p className="text-red-500 text-sm text-center mb-3">
+                    <p className="text-red-500 text-xs sm:text-sm text-center mb-2 sm:mb-3">
                       Debe estar autenticado para alquilar una obra
                     </p>
                   </>
                 )}
 
-                <p className="text-2xl font-bold text-center">
+                <p className="text-xl sm:text-2xl font-bold text-center">
                   $ {producto.precioRenta?.toLocaleString()} USD
                 </p>
               </div>
