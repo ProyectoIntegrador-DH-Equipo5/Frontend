@@ -105,19 +105,19 @@ const ProductTable = () => {
 												{obra.id}
 											</td>
 											<td className="whitespace-nowrap px-4 py-2 text-gray-700 text-left">
-												{obra.img ? (
+												{obra.imagenesAdicionales ? (
 													<img
-														src={obra.img}
+														src={obra.imagenesAdicionales[0] }
 														alt={
 															obra.nombre ||
 															"Imagen"
 														}
 														className="w-16 h-16 object-cover"
 													/>
-												) : obra.imagenes &&
-												  obra.imagenes.length > 0 ? (
+												) : obra.imagenesAdicionales &&
+												  obra.imagenesAdicionales.length > 0 ? (
 													<div className="flex gap-2">
-														{obra.imagenes.map(
+														{obra.imagenesAdicionales.map(
 															(url, index) => (
 																<img
 																	key={index}

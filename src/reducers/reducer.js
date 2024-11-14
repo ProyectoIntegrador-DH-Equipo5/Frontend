@@ -15,6 +15,7 @@ export const reducer = (state, action) => {
 
     // ADD - CREAR
     case "ADD_ART":
+      console.log("Agregando obra:", action.payload);
       const newObra = {
         ...action.payload,
         id: action.payload.id || idCreator(state.data),
@@ -109,8 +110,13 @@ export const reducer = (state, action) => {
 
 
     // IMAGENES - Manejo de imagenes en LocalStorage
+
     case "ADD_IMAGE":
-      const newImages = [...state.images, action.payload];
+      const newImage = {
+        id: idCreator(state.images),
+        ...action.payload,
+      };
+      const newImages = [...state.images, newImage];
       saveToLocalStorage("images", newImages);
       return { ...state, images: newImages };
 
@@ -122,8 +128,8 @@ export const reducer = (state, action) => {
               ? {
                   ...obra,
                   imagenesAdicionales: [
-                    ...obra.imagenesAdicionales,
-                    action.payload.imgUrl, // This will be the URL from Cloudinary
+                    ...(obra.imagenesAdicionales || []), // Si no tiene imágenes adicionales, lo inicializa como array vacío
+                    action.payload.imgUrl, // Esta es la URL de la imagen subida
                   ],
                 }
               : obra
@@ -137,12 +143,12 @@ export const reducer = (state, action) => {
       saveToLocalStorage("images", updatedImages);
       return { ...state, images: updatedImages };
 
-    case "DELETE_IMAGE":
-      const filteredImages = state.images.filter(
-        (image) => image.id !== action.payload.id
-      );
-      saveToLocalStorage("images", filteredImages);
-      return { ...state, images: filteredImages };
+      case "DELETE_IMAGE":
+        const filteredImages = state.images.filter(
+          (image) => image.id !== action.payload.id
+        );
+        saveToLocalStorage("images", filteredImages);
+        return { ...state, images: filteredImages };
 
     // OTRAS - Acciones extra
     case "CHANGE_THEME":

@@ -1,54 +1,11 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { useContextGlobal } from "../../utils/global.context";
+import { uploadToCloudinary } from "../../utils/upload"; // Importa la función para subir a Cloudinary
 
-
-const ImageUpload = ({ onFilesAdded, existingImage, artId }) => {
-    const { dispatch } = useContextGlobal(); 
-    const cloudName = "dr1jbzn9r"; // Your Cloudinary cloud name
-    const uploadPreset = "ml_default"; // Your Cloudinary upload preset
-
-    // Fetch images directly from global state (no local component state)
-    const { images } = useContextGlobal().state; 
-
-    // Function to upload to Cloudinary
-    const uploadToCloudinary = async (file) => {
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("upload_preset", uploadPreset);
-        formData.append("cloud_name", cloudName);
-
-        try {
-            const response = await axios.post(
-                `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-                formData
-            );
-            return response.data.secure_url; // Return the URL of the uploaded image
-        } catch (error) {
-            console.error("Error uploading image:", error);
-        }
-    };
-
-    // Function to add a file and upload to Cloudinary
-    const addFile = async (file) => {
-        const imageUrl = await uploadToCloudinary(file);
-        if (imageUrl) {
-            // Ensure the image is not already in the list to avoid duplicates
-            if (!images.includes(imageUrl)) {
-                // Dispatch action to add the image to the global state
-                dispatch({
-                    type: "ADD_IMAGE",
-                    payload: imageUrl,
-                });
-                // Also update the artwork with the image
-                dispatch({
-                    type: "ADD_IMAGE_TO_ART",
-                    payload: { artId, imgUrl: imageUrl }, // Pass the artId and image URL
-                });
-                onFilesAdded(imageUrl); // Pass the URL to parent component
-            }
-        }
-    };
+const ImageUpload = ({ onFilesAdded, existingImage, artId, imagenesAdicionales }) => {
+    const { dispatch, state } = useContextGlobal();
+    const images = state.images || []; // Fetch images from global state
+    const existingImages = imagenesAdicionales || []; // Existing images passed as prop
 
     const handleFileChange = (e) => {
         e.stopPropagation();
@@ -66,31 +23,44 @@ const ImageUpload = ({ onFilesAdded, existingImage, artId }) => {
     };
 
     const handleDelete = (url) => {
+        console.log("Deleting image:", url);
         dispatch({
             type: "DELETE_IMAGE",
             payload: { id: url },
         });
     };
 
-    useEffect(() => {
-        if (existingImage) {
-            const objectURL = URL.createObjectURL(existingImage);
-            // Check if image already exists before adding
-            if (!images.includes(objectURL)) {
+    const addFile = async (file) => {
+        const imageUrl = await uploadToCloudinary(file); // Usa la función de utilidad para subir
+        if (imageUrl) {
+            // Asegúrate de que la imagen no esté ya en la lista para evitar duplicados
+            if (!images.some(image => image.imgUrl === imageUrl)) {
+                // Primero, añade la imagen al estado global
                 dispatch({
                     type: "ADD_IMAGE",
-                    payload: objectURL,
+                    payload: { imgUrl: imageUrl },
                 });
+      
+                // Luego, añade la imagen a la obra de arte
+                dispatch({
+                    type: "ADD_IMAGE_TO_ART",
+                    payload: { artId, imgUrl: imageUrl },
+                });
+      
+                onFilesAdded(imageUrl); // Llama al callback si necesitas pasar algo a un componente padre
             }
         }
-    }, [existingImage, images, dispatch]);
+      };
+
+    const allImages = [...existingImages, ...images];
+    console.log("All images:", allImages); // Verifica las URLs de las imágenes en la consola
 
     return (
         <div
             className="mt-4 border-2 border-dashed border-gray-400 py-12 flex flex-col items-center"
             onDrop={handleDrop}
-            onDragOver={(e) => e.preventDefault()} // Prevent default behavior
-            onClick={(e) => e.stopPropagation()} // Prevent click propagation
+            onDragOver={(e) => e.preventDefault()} 
+            onClick={(e) => e.stopPropagation()}
         >
             <p className="mb-3 font-semibold text-gray-900">Arrastra y suelta tus archivos aquí o</p>
             <input
@@ -99,7 +69,7 @@ const ImageUpload = ({ onFilesAdded, existingImage, artId }) => {
                 multiple
                 className="hidden"
                 onChange={handleFileChange}
-                onClick={(e) => e.stopPropagation()} // Prevent click propagation
+                onClick={(e) => e.stopPropagation()} 
             />
             <button
                 className="mt-2 rounded-sm px-3 py-1 bg-gray-200 hover:bg-gray-300 focus:shadow-outline focus:outline-none"
@@ -113,7 +83,7 @@ const ImageUpload = ({ onFilesAdded, existingImage, artId }) => {
             </button>
             <h1 className="pt-8 pb-3 font-semibold sm:text-lg text-gray-900">Imágenes</h1>
             <ul className="flex flex-wrap m-1 w-full justify-center align-center gap-2">
-                {images.length === 0 ? (
+                {allImages.length === 0 ? (
                     <li className="h-full w-full text-center flex flex-col items-center justify-center">
                         <img
                             className="mx-auto w-32"
@@ -123,26 +93,30 @@ const ImageUpload = ({ onFilesAdded, existingImage, artId }) => {
                         <span className="text-small text-gray-500">No hay archivos seleccionados</span>
                     </li>
                 ) : (
-                    images.map((url, index) => (
-                        <li key={index} className="block p-1 w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/6 xl:w-1/8 h-24 relative">
-                            <article className="group w-full h-full rounded-md bg-gray-100 cursor-pointer relative shadow-sm">
-                                <img
-                                    alt="preview"
-                                    className="img-preview w-full h-full object-cover rounded-md"
-                                    src={url} // Show the uploaded image URL
-                                />
-                                <button
-                                    className="absolute top-1 right-1 focus:outline-none hover:bg-gray-300 p-1 rounded-md text-gray-600 bg-gray-200"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleDelete(url);
-                                    }}
-                                >
-                                    X
-                                </button>
-                            </article>
-                        </li>
-                    ))
+                    allImages.map((url, index) => {
+                        const imageUrl = url.imgUrl || url; // Verifica si es un objeto y usa la propiedad imgUrl, sino usa la URL directamente
+                        return (
+                            <li key={index} className="block p-1 w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/6 xl:w-1/8 h-24 relative">
+                                <article className="group w-full h-full rounded-md bg-gray-100 cursor-pointer relative shadow-sm">
+                                    <img
+                                        alt="preview"
+                                        className="img-preview w-full h-full object-cover rounded-md"
+                                        src={imageUrl} // Usar imageUrl para asegurarte de que siempre se pasa la URL correcta
+                                    />
+                                    <button
+                                        type="button"
+                                        className="absolute top-1 right-1 focus:outline-none hover:bg-gray-300 p-1 rounded-md text-gray-600 bg-gray-200"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDelete(imageUrl); // Elimina usando la URL correcta
+                                        }}
+                                    >
+                                        X
+                                    </button>
+                                </article>
+                            </li>
+                        );
+                    })
                 )}
             </ul>
         </div>
