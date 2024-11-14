@@ -40,7 +40,7 @@ const Header = () => {
     } else {
       setUserName("");
     }
-  }, [state.users]);
+  }, [state.loggedUser]);
 
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside);
