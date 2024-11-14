@@ -11,12 +11,12 @@ const Profile = () => {
       <h1 className="text-3xl font-bold text-center text-white mt-8 mb-8">Perfil de Usuario</h1>
       {state.users ? (
         <div className="text-white text-left mx-auto">
-          <p><span className="font-bold text-xl">Nombre:</span> {state.users.name}</p>
-          <p><span className="font-bold text-xl">Email:</span> {state.users.email}</p>
+          <p><span className="font-bold text-xl">Nombre:</span> {state.loggedUser.nombre}</p>
+          <p><span className="font-bold text-xl">Email:</span> {state.loggedUser.email}</p>
           <button 
             onClick={() => navigate('/administracion')}
-            className={`mt-4 py-2 px-4 font-bold rounded-lg ${state.users.role === 'ADMIN' ? 'bg-primary text-black' : 'bg-gray-600 text-gray-400 cursor-not-allowed'}`}
-        disabled={state.users.role !== 'ADMIN'}>
+            className={`mt-4 py-2 px-4 font-bold rounded-lg ${state.loggedUser.rol === 'ADMIN' ? 'bg-primary text-black' : 'bg-gray-600 text-gray-400 cursor-not-allowed'}`}
+        disabled={state.loggedUser.rol !== 'ADMIN'}>
             Administrar obras
           </button>
         </div>

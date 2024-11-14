@@ -54,7 +54,7 @@ const Register = () => {
         break;
 
       case "confirmPassword":
-        if (value !== formData.password) {
+        if (value !== formData.contrasenia) {
           error = "Las contraseñas no coinciden";
         }
         break;
@@ -68,7 +68,7 @@ const Register = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({ ...prevData, [nombre]: value }));
+    setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
   const handleBlur = (e) => {
@@ -85,10 +85,10 @@ const Register = () => {
     }, {});
     if (Object.keys(validationErrors).length === 0) {
       const newUser = {
-        name: `${formData.firstName} ${formData.lastName}`,
+        nombre: `${formData.nombre} ${formData.apellido}`,
         email: formData.email,
-        password: formData.password, // Guardamos la contraseña para el login
-        role: "USER",
+        contrasenia: formData.contrasenia, // Guardamos la contraseña para el login
+        rol: "USER",
       };
       
       // Guardamos en localStorage
@@ -113,14 +113,14 @@ const Register = () => {
           <span className="block text-sm font-medium text-gray-700">Nombre:</span>
           <input
             type="text"
-            name="firstName"
+            name="nombre"
             className="w-full mt-1 p-2 border border-gray-300 rounded-lg"
             value={formData.nombre}
             onChange={handleChange}
             onBlur={handleBlur}
             required
           />
-          {errors.firstName && <p className="text-red-500">{errors.nombre}</p>}
+          {errors.nombre && <p className="text-red-500">{errors.nombre}</p>}
         </label>
         
         <label className="mb-4">
