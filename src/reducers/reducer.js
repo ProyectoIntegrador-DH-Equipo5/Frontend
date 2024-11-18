@@ -47,7 +47,8 @@ export const reducer = (state, action) => {
       saveToLocalStorage("loggedUser", action.payload)  
     return {
       ...state,
-        loggedUser: action.payload,        
+        loggedUser: action.payload, 
+        //token: action.payload.token,       
       };
       case "LOGOUT_USER":
 
@@ -56,6 +57,7 @@ export const reducer = (state, action) => {
         ...state,
         
         loggedUser: null,
+        token: null,
       };
 
 

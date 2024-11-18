@@ -1,17 +1,15 @@
 import { useState } from "react";
-import { useContextGlobal } from "../utils/global.context.jsx";
-import { useNavigate } from "react-router-dom";
-import { AiFillExclamationCircle } from "react-icons/ai";
+import { useContextGlobal } from '../utils/global.context.jsx';
+import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
   const { dispatch } = useContextGlobal();
   const [formData, setFormData] = useState({
-    nombre: "",
-    apellido: "",
+    name: "",
+    lastName: "",
     email: "",
-    contrasenia: "",
+    password: "",
     confirmPassword: "",
-    rol: "USER",
   });
 
   const [errors, setErrors] = useState({});
@@ -20,11 +18,11 @@ const Register = () => {
   const nameRegex = /^[a-zA-Z\s]*$/;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  const validateField = (nombre, value) => {
+  const validateField = (name, value) => {
     let error = "";
 
-    switch (nombre) {
-      case "nombre":
+    switch (name) {
+      case "name":
         if (!value) {
           error = "El nombre es requerido";
         } else if (!nameRegex.test(value)) {
@@ -32,7 +30,7 @@ const Register = () => {
         }
         break;
 
-      case "apellido":
+      case "lastName":
         if (!value) {
           error = "El apellido es requerido";
         } else if (!nameRegex.test(value)) {
@@ -48,14 +46,14 @@ const Register = () => {
         }
         break;
 
-      case "contrasenia":
+      case "password":
         if (!value) {
           error = "La contraseña es requerida";
         }
         break;
 
       case "confirmPassword":
-        if (value !== formData.contrasenia) {
+        if (value !== formData.password) {
           error = "Las contraseñas no coinciden";
         }
         break;
@@ -64,7 +62,7 @@ const Register = () => {
         break;
     }
 
-    setErrors((prevErrors) => ({ ...prevErrors, [nombre]: error }));
+    setErrors((prevErrors) => ({ ...prevErrors, [name]: error }));
   };
 
   const handleChange = (e) => {
@@ -77,156 +75,129 @@ const Register = () => {
     validateField(name, value);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const validationErrors = Object.keys(formData).reduce((acc, field) => {
-      validateField(field, formData[field]);
-      if (errors[field]) acc[field] = errors[field];
-      return acc;
-    }, {});
+
+    const validationErrors = {}
+    Object.keys(formData).forEach(field => validateField(field, formData[field]));
+
     if (Object.keys(validationErrors).length === 0) {
-      const newUser = {
-        nombre: `${formData.nombre} ${formData.apellido}`,
-        email: formData.email,
-        contrasenia: formData.contrasenia, // Guardamos la contraseña para el login
-        rol: "USER",
-      };
+      try {
+        const response = await fetch('http://localhost:8080/api/auth/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: formData.name,
+            lastname: formData.lastName,
+            email: formData.email,
+            password: formData.password,
+      
+          }),
+        });
 
-      // Guardamos en localStorage
-      console.log("admin: ", newUser);
-      dispatch({ type: "ADD_USER", payload: newUser });
+        const data = await response.json();
+        console.log(data);
 
-      // Limpiamos errores y redireccionamos a la página principal
-      setErrors({});
-      navigate("/");
+        if (response.ok) {
+          dispatch({ type: 'SET_USER', payload: data.user });
+          localStorage.setItem('user', JSON.stringify(data.user));
+          navigate('/');
+        } else {
+          setErrors({ form: data.message || 'Error al registrarse.' });
+        }
+      } catch (error) {
+        setErrors({ form: 'Error del servidor.' });
+      }
     } else {
       setErrors(validationErrors);
     }
+      
+      
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <h1 className="text-4xl font-bold text-center text-[#FDB813] mb-8">
-          Registrarse
-        </h1>
-        <form
-          onSubmit={handleSubmit}
-          className="bg-[#1E1E1E] rounded-lg p-8 shadow-lg border border-[#FDB813]/20"
+    <div className="flex flex-col w-full pt-32 min-h-screen bg-black">
+      <h1 className="text-3xl font-bold text-center text-white mt-8 mb-8">Registrarse</h1>
+      <form onSubmit={handleSubmit} className="flex flex-col w-full max-w-md mx-auto bg-white p-8 rounded-lg shadow-md">
+        <label className="mb-4">
+          <span className="block text-sm font-medium text-gray-700">Nombre:</span>
+          <input
+            type="text"
+            name="name"
+            className="w-full mt-1 p-2 border border-gray-300 rounded-lg"
+            value={formData.name}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            required
+          />
+          {errors.name && <p className="text-red-500">{errors.name}</p>}
+        </label>
+        
+        <label className="mb-4">
+          <span className="block text-sm font-medium text-gray-700">Apellido:</span>
+          <input
+            type="text"
+            name="lastName"
+            className="w-full mt-1 p-2 border border-gray-300 rounded-lg"
+            value={formData.lastName}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            required
+          />
+          {errors.lastName && <p className="text-red-500">{errors.lastName}</p>}
+        </label>
+        
+        <label className="mb-4">
+          <span className="block text-sm font-medium text-gray-700">Email:</span>
+          <input
+            type="email"
+            name="email"
+            className="w-full mt-1 p-2 border border-gray-300 rounded-lg"
+            value={formData.email}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            required
+          />
+          {errors.email && <p className="text-red-500">{errors.email}</p>}
+        </label>
+        
+        <label className="mb-4">
+          <span className="block text-sm font-medium text-gray-700">Contraseña:</span>
+          <input
+            type="password"
+            name="password"
+            className="w-full mt-1 p-2 border border-gray-300 rounded-lg"
+            value={formData.password}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            required
+          />
+          {errors.password && <p className="text-red-500">{errors.password}</p>}
+        </label>
+        
+        <label className="mb-4">
+          <span className="block text-sm font-medium text-gray-700">Confirmar Contraseña:</span>
+          <input
+            type="password"
+            name="confirmPassword"
+            className="w-full mt-1 p-2 border border-gray-300 rounded-lg"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            required
+          />
+          {errors.confirmPassword && <p className="text-red-500">{errors.confirmPassword}</p>}
+        </label>
+        
+        <button
+          type="submit"
+          className="w-full py-2 mt-4 bg-primary text-black font-semibold rounded-lg"
         >
-          <div className="space-y-6">
-            <div>
-              <label className="block text-[#FDB813] text-lg mb-2">
-                Nombre
-              </label>
-              <input
-                type="text"
-                name="nombre"
-                className="w-full p-3 bg-white rounded-lg border-2 border-[#FDB813]/20 focus:border-[#FDB813] outline-none transition-colors"
-                value={formData.nombre}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                required
-              />
-              {errors.nombre && (
-                <p className="flex items-center text-red-500 mt-1 text-sm">
-                  <AiFillExclamationCircle className="mr-1" />
-                  {errors.nombre}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-[#FDB813] text-lg mb-2">
-                Apellido
-              </label>
-              <input
-                type="text"
-                name="apellido"
-                className="w-full p-3 bg-white rounded-lg border-2 border-[#FDB813]/20 focus:border-[#FDB813] outline-none transition-colors"
-                value={formData.apellido}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                required
-              />
-              {errors.apellido && (
-                <p className="flex items-center text-red-500 mt-1 text-sm">
-                  <AiFillExclamationCircle className="mr-1" />
-                  {errors.apellido}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-[#FDB813] text-lg mb-2">Email</label>
-              <input
-                type="email"
-                name="email"
-                className="w-full p-3 bg-white rounded-lg border-2 border-[#FDB813]/20 focus:border-[#FDB813] outline-none transition-colors"
-                value={formData.email}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                required
-              />
-              {errors.email && (
-                <p className="flex items-center text-red-500 mt-1 text-sm">
-                  <AiFillExclamationCircle className="mr-1" />
-                  {errors.email}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-[#FDB813] text-lg mb-2">
-                Contraseña
-              </label>
-              <input
-                type="password"
-                name="contrasenia"
-                className="w-full p-3 bg-white rounded-lg border-2 border-[#FDB813]/20 focus:border-[#FDB813] outline-none transition-colors"
-                value={formData.contrasenia}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                required
-              />
-              {errors.contrasenia && (
-                <p className="flex items-center text-red-500 mt-1 text-sm">
-                  <AiFillExclamationCircle className="mr-1" />
-                  {errors.contrasenia}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-[#FDB813] text-lg mb-2">
-                Confirmar Contraseña
-              </label>
-              <input
-                type="password"
-                name="confirmPassword"
-                className="w-full p-3 bg-white rounded-lg border-2 border-[#FDB813]/20 focus:border-[#FDB813] outline-none transition-colors"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                required
-              />
-              {errors.confirmPassword && (
-                <p className="flex items-center text-red-500 mt-1 text-sm">
-                  <AiFillExclamationCircle className="mr-1" />
-                  {errors.confirmPassword}
-                </p>
-              )}
-            </div>
-
-            <button
-              type="submit"
-              className="w-full py-3 bg-[#FDB813] text-black font-bold rounded-lg hover:bg-[#FDB813]/90 transition-colors"
-            >
-              Registrarse
-            </button>
-          </div>
-        </form>
-      </div>
+          Registrarse
+        </button>
+      </form>
     </div>
   );
 };

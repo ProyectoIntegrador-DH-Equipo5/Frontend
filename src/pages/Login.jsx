@@ -1,14 +1,15 @@
-import { useState } from "react";
-import { useContextGlobal } from "../utils/global.context.jsx";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from 'react';
+import { useContextGlobal } from '../utils/global.context.jsx';
+import { useNavigate } from 'react-router-dom';
 import { AiFillExclamationCircle } from "react-icons/ai";
+import { jwtDecode } from "jwt-decode";
 
 const Login = () => {
-  const { state, dispatch } = useContextGlobal();
+  const { dispatch } = useContextGlobal();
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [contrasenia, setContrasenia] = useState("");
-  const [error, setError] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -20,76 +21,100 @@ const Login = () => {
     return true;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!validateEmail()) return;
 
-    const allUsers = state.users;
-    console.log(allUsers);
+    try {
+      const response = await fetch('http://localhost:8080/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email,
+          password: password,
+        }),
+      });
 
-    allUsers.filter((user) => {
-      if (user.email === email && user.contrasenia === contrasenia) {
-        console.log(user);
-        dispatch({ type: "LOGIN_USER", payload: user });
-        navigate("/");
+      const data = await response.json();
+      const token = data.token;
+
+      if (response.status === 200) {
+        const user = jwtDecode(token); // Decodifica el token para obtener los datos del usuario
+        console.log("Token decodificado:", user);
+
+        localStorage.setItem('loggedUser', JSON.stringify(user)); //Almacenamos tanto el usuario como el token en el mismo objeto
+        localStorage.setItem('token', token);
+        
+        dispatch({type: 'LOGIN_USER', payload: user});  // Establecer el usuario en el contexto global
+        setError('');  // Limpiar el error
+        navigate('/');  // Redirigir al usuario a la página principal
       } else {
-        setError("Email o contraseña incorrectos.");
+        setError(data.message || 'Email o contraseña incorrectos.');
       }
-    });
+    } catch (err) {
+      setError('Hubo un error en el servidor. Inténtalo de nuevo.');
+    }
   };
 
+  
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('loggedUser');
+    console.log(storedUser);
+    
+    if (storedUser) {
+      try {
+        const userData = JSON.parse(storedUser);
+        // Dispatch para cargar el usuario desde el localStorage al contexto global
+        dispatch({ type: 'LOGIN_USER', payload: userData });
+        navigate('/');  // Redirigir al usuario a la página principal
+      } catch (err) {
+        console.error("Error al parsear el usuario desde localStorage:", err);
+      }
+    }
+  }, [dispatch, navigate]);
+
+
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <h1 className="text-4xl font-bold text-center text-[#FDB813] mb-8">
-          Iniciar sesión
-        </h1>
-        <form
-          onSubmit={handleSubmit}
-          className="bg-[#1E1E1E] rounded-lg p-8 shadow-lg border border-[#FDB813]/20"
+    <div className="flex flex-col w-full pt-32 min-h-screen bg-black">
+      <h1 className="text-3xl font-bold text-center text-white mt-8 mb-8">Iniciar Sesión</h1>
+      <form onSubmit={handleSubmit} className="flex flex-col w-full max-w-md mx-auto bg-white py-16 p-8 rounded-lg shadow-md">
+        <label className="mb-4">
+          <span className="block text-lg font-medium text-gray-700">Email:</span>
+          <input 
+            type="email" 
+            className="w-full mt-1 p-2 border border-gray-300 rounded-lg" 
+            value={email}
+            onChange={(e) => setEmail(e.target.value)} 
+            onBlur={validateEmail}
+            required
+          />
+        </label>
+        <label className="mb-4">
+          <span className="block text-lg font-medium text-gray-700">Contraseña:</span>
+          <input 
+            type="password" 
+            className="w-full mt-1 p-2 border border-gray-300 rounded-lg"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </label>
+        {error && (
+          <p className="flex items-center text-red-500 font-bold">
+            <AiFillExclamationCircle className="mr-2" />{error}
+          </p>
+        )}
+        <button 
+          type="submit"
+          className="w-full py-2 mt-4 bg-primary text-black font-semibold rounded-lg"
         >
-          <div className="space-y-6">
-            <div>
-              <label className="block text-[#FDB813] text-lg mb-2">
-                E-mail
-              </label>
-              <input
-                type="email"
-                className="w-full p-3 bg-white rounded-lg border-2 border-[#FDB813]/20 focus:border-[#FDB813] outline-none transition-colors"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                onBlur={validateEmail}
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-[#FDB813] text-lg mb-2">
-                Contraseña
-              </label>
-              <input
-                type="password"
-                className="w-full p-3 bg-white rounded-lg border-2 border-[#FDB813]/20 focus:border-[#FDB813] outline-none transition-colors"
-                value={contrasenia}
-                onChange={(e) => setContrasenia(e.target.value)}
-                required
-              />
-            </div>
-            {error && (
-              <div className="flex items-center text-red-500 font-medium">
-                <AiFillExclamationCircle className="mr-2" />
-                {error}
-              </div>
-            )}
-            <button
-              type="submit"
-              className="w-full py-3 bg-[#FDB813] text-black font-bold rounded-lg hover:bg-[#FDB813]/90 transition-colors"
-            >
-              Iniciar Sesión
-            </button>
-          </div>
-        </form>
-      </div>
+          Iniciar Sesión
+        </button>
+      </form>
     </div>
   );
 };
