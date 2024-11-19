@@ -10,7 +10,7 @@ import { useContextGlobal } from "./utils/global.context.jsx";
 
 function App() {
 	const { state } = useContextGlobal();
-	console.log(state.loggedUser?.apellido)
+	//console.log(state.loggedUser?.apellido)
 	return (
 		<Router>
 			<Routes>

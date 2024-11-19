@@ -43,32 +43,37 @@ export const reducer = (state, action) => {
       return { ...state, users: newDataUser };
 
     case "LOGIN_USER":
-
       saveToLocalStorage("loggedUser", action.payload)  
     return {
       ...state,
         loggedUser: action.payload, 
-        //token: action.payload.token,       
+        token: action.payload.token,       
       };
-      case "LOGOUT_USER":
-
-      removeFromLocalStorage("loggedUser");
-      return {
-        ...state,
-        
-        loggedUser: null,
-        token: null,
-      };
+      
+    case "LOGOUT_USER":
+    removeFromLocalStorage("loggedUser");
+    return {
+      ...state,
+      loggedUser: null,
+      token: null,
+    };
 
 
     // UPDATE - EDITAR
+    // case "UPDATE_ART":
+    //   return {
+    //     ...state,
+    //     data: state.data.map((obra) =>
+    //       obra.id === action.payload.id ? { ...obra, ...action.payload } : obra
+    //     ),
+    //   };
+
     case "UPDATE_ART":
-      return {
-        ...state,
-        data: state.data.map((obra) =>
-          obra.id === action.payload.id ? { ...obra, ...action.payload } : obra
-        ),
-      };
+      const updatedArtData = state.data.map((obra) =>
+        obra.id === action.payload.id ? { ...obra, ...action.payload } : obra
+      );
+      saveToLocalStorage("data", updatedArtData);
+      return { ...state, data: updatedArtData };
 
     case "UPDATE_CATEGORY":
       const updatedCategories = state.categories.map((item) =>
@@ -78,12 +83,11 @@ export const reducer = (state, action) => {
       return { ...state, categories: updatedCategories };
 
     case "UPDATE_USER":
-      return {
-        ...state,
-        users: state.users.map((user) =>
-          user.id === action.payload.id ? action.payload : user
-        ),
-      };
+      const updatedUsers = state.users.map((item) =>
+        user.id === action.payload.id ? action.payload : user
+      );
+      saveToLocalStorage("users", updatedUsers);
+      return { ...state, users: updatedUsers };
 
     // DELETE - ELIMINAR
     case "DELETE_ART":
@@ -106,10 +110,6 @@ export const reducer = (state, action) => {
       );
       saveToLocalStorage("users", filteredDataUser);
       return { ...state, users: filteredDataUser };
-
-
-      
-
 
     // IMAGENES - Manejo de imagenes en LocalStorage
 
@@ -159,6 +159,11 @@ export const reducer = (state, action) => {
     case "SET_ACTIVE_SECTION":
       console.log("Cambiando sección a reducer:", action.payload);
       return { ...state, activeSection: action.payload };
+
+    case "ERROR":
+      console.error("Error en la acción:", action.payload);
+      return { ...state };
+      
 
     default:
       return state;

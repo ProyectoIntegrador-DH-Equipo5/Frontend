@@ -23,6 +23,7 @@ const UserTable = () => {
 	const totalPages = Math.ceil(state.users.length / itemsPerPage);
 
 	const userRole = state.loggedUser.rol;
+	//state.loggedUser?.rol[0]?.authority
 	const handleEdit = (user) => {
 		// Solo permitir editar si el rol del usuario actual no es "COLAB" o si el usuario a editar no es "ADMIN"
 		if (userRole !== "COLAB" || user.rol !== "ADMIN") {

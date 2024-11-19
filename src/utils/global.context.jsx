@@ -27,12 +27,12 @@ export const initialState = {
     activeSection: "obras",
     user: null,
     loggedUser: loadFromLocalStorage("loggedUser") || null,
-    
 };
 
-    const cloudName = "dr1jbzn9r"; // Tu nombre de nube
-    const uploadPreset = "ml_default"
+const backendURL = "http://localhost:8080"; // *URL base del backend
 
+    // const cloudName = "dr1jbzn9r"; // Tu nombre de nube
+    // const uploadPreset = "ml_default"
 
 export const ContextProvider = ({ children }) => {
     const [state, dispatch] = useReducer(reducer, initialState);
@@ -51,46 +51,118 @@ export const ContextProvider = ({ children }) => {
         };
     }, []);
 
-    // Cargar datos de "data.json" si no están en localStorage
-    const url = data;
+    // Intentar cargar datos desde el backend
     useEffect(() => {
-        if (!loadFromLocalStorage("data")) {
-            dispatch({ type: "GET_ART", payload: url });
-        }
+        const fetchBackendData = async () => {
+            const token = localStorage.getItem("token");
+            try {            
+                // Verificar si el token existe  
+                const config = token
+                ? { headers: { 'Authorization': `Bearer ${token}` } }
+                : {}; // No enviar headers si no hay token
+
+                // Intentar obtener datos desde el backend
+                const [artResponse, categoriesResponse] = await Promise.all([
+                    axios.get(`${backendURL}/obra/listartodos`, config),
+                    axios.get(`${backendURL}/movimientoArtistico/listartodos`, config),
+                ]);
+
+                // Actualizar estado con los datos obtenidos
+                dispatch({ type: "GET_ART", payload: artResponse ? artResponse.data : [] });
+                dispatch({ type: "GET_CATEGORIES", payload: categoriesResponse ? categoriesResponse.data : [] });
+
+                // Guardar en localStorage
+                saveToLocalStorage("data", artResponse.data);
+                saveToLocalStorage("categories", categoriesResponse.data);
+
+                // // Verificar si el usuario está autenticado antes de acceder a 'rol
+                // console.log("lOGS");
+                // console.log(state.loggedUser);
+                // console.log(state.loggedUser.rol);
+                // console.log(token);
+                
+                // if (state.loggedUser && state.loggedUser.rol && token){
+                //     const userRole = state.loggedUser.rol;
+                //     console.log(userRole);
+                //     console.log(userRole[0]?.authority);
+           
+                //     if (userRole[0]?.authority === "ADMIN" || userRole[0]?.authority === "COLAB") {
+                //         const usersResponse = await axios.get(`${backendURL}/usuarios/listartodos`, { headers: { 'Authorization': `Bearer ${token}` } });
+                //         console.log("Usuarios obtenidos:", usersResponse.data);
+                //         dispatch({ type: "GET_USERS", payload: usersResponse ? usersResponse.data : [] });
+                //         saveToLocalStorage("users", usersResponse.data);
+                //     }
+                // } 
+
+            } catch (error) {
+                console.error("Error al conectar con el backend, cargando datos locales.", error);
+
+                // Cargar datos locales si el backend falla
+                // dispatch({ type: "GET_ART", payload: data });
+                // dispatch({ type: "GET_CATEGORIES", payload: categories });
+                // dispatch({ type: "GET_USERS", payload: users });
+            }
+        };
+
+        fetchBackendData();
     }, []);
 
-    // Cargar categorías desde "category.json" o localStorage
-    const urlCategories = categories;
-    useEffect(() => {
-        if (!loadFromLocalStorage("categories")) {
-            dispatch({ type: "GET_CATEGORIES", payload: urlCategories });
-        }
-    }, []);
 
-    // Cargar usuarios desde "user.json" o localStorage
-    const urlUsers = users;
-    useEffect(() => {
-        if (!loadFromLocalStorage("users")) {
-            dispatch({ type: "GET_USERS", payload: urlUsers });
+    //Esto está a medias, si quiere comentarlo para revisasr primero lo que va
+    const fetchUsersByRole = async (token, userRole) => {
+        if (!token || !userRole) return;
+    
+        try {
+            if (userRole[0]?.authority === "ADMIN" || userRole[0]?.authority === "COLAB") {
+                const response = await axios.get(`${backendURL}/usuarios/listartodos`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                console.log("Usuarios obtenidos:", response.data);
+    
+                // Actualiza el estado y localStorage
+                dispatch({ type: "GET_USERS", payload: response.data });
+                saveToLocalStorage("users", response.data);
+            }
+        } catch (error) {
+            console.error("Error al obtener usuarios por rol:", error.response?.data || error.message);
         }
-    }, []);
+    };
+    
 
-    // Guardar cambios de data, categorías y usuarios en localStorage
     useEffect(() => {
-        saveToLocalStorage("data", state.data);
-        saveToLocalStorage("categories", state.categories);
-        saveToLocalStorage("users", state.users);
+        const token = localStorage.getItem("token");
+        console.log("Estado de loggedUser:", state.loggedUser);
+   
+        // Si hay un usuario logueado y su rol está disponible, cargar los usuarios
+        if (state.loggedUser && state.loggedUser.rol) {
+            fetchUsersByRole(token, state.loggedUser.rol);
+        }
+    }, [state.loggedUser]); // Este effect depende de state.loggedUser, se ejecuta cuando el usuario se loguea
+
+
+    // Guardar cambios de estado en localStorage
+    useEffect(() => {
+        if (state.data.length > 0) saveToLocalStorage("data", state.data);
+        if (state.categories.length > 0) saveToLocalStorage("categories", state.categories);
+        if (state.users.length > 0) saveToLocalStorage("users", state.users);
     }, [state.data, state.categories, state.users]);
 
     // Guardar las imágenes en localStorage cuando cambien
-    useEffect(() => {
-        if (state.images.length > 0) {
-            saveToLocalStorage("images", state.images);
-        }
-    }, [state.images]);
+    // useEffect(() => {
+    //     if (state.images.length > 0) {
+    //         saveToLocalStorage("images", state.images);
+    //     }
+    // }, [state.images]);
 
-   
-
+    //Guardar las URL de las imágenes 
+    // useEffect(() => {
+    //     if (state.images.length > 0) {
+    //         const imageRefs = state.images.map((image) => image.url); // Solo guardar URLs
+    //         saveToLocalStorage("images", imageRefs);
+    //     }
+    // }, [state.images]);
+    
+    
     return (
         <ContextGlobal.Provider value={{ state, dispatch, isMobile }}>
             {children}
