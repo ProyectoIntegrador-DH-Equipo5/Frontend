@@ -108,12 +108,20 @@ export const ContextProvider = ({ children }) => {
     }, []);
 
 
-    //Esto está a medias, si quiere comentarlo para revisasr primero lo que va
-    const fetchUsersByRole = async (token, userRole) => {
+    //Esto está a medias, si quiere comentarlo para revisar primero lo que va
+    const fetchUsersByRole = async (token, userRole= state.loggedUser?.rol) => {
+        console.log("Hellooooooo");
+        console.log(userRole[0]?.authority);
+   
         if (!token || !userRole) return;
-    
+        console.log("Pasó primer if");
+        
         try {
             if (userRole[0]?.authority === "ADMIN" || userRole[0]?.authority === "COLAB") {
+                console.log("Pasó segundo if");
+                console.log("Token actual:", token);
+                console.log("URL del backend:", backendURL);
+
                 const response = await axios.get(`${backendURL}/usuarios/listartodos`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
@@ -124,6 +132,8 @@ export const ContextProvider = ({ children }) => {
                 saveToLocalStorage("users", response.data);
             }
         } catch (error) {
+            console.error("Error al obtener usuarios:", error.message);
+            console.error("Detalles del error:", error.response?.data || error);
             console.error("Error al obtener usuarios por rol:", error.response?.data || error.message);
         }
     };
@@ -155,12 +165,12 @@ export const ContextProvider = ({ children }) => {
     // }, [state.images]);
 
     //Guardar las URL de las imágenes 
-    // useEffect(() => {
-    //     if (state.images.length > 0) {
-    //         const imageRefs = state.images.map((image) => image.url); // Solo guardar URLs
-    //         saveToLocalStorage("images", imageRefs);
-    //     }
-    // }, [state.images]);
+    useEffect(() => {
+        if (state.images.length > 0) {
+            const imageRefs = state.images.map((image) => image.url); // Solo guardar URLs
+            saveToLocalStorage("images", imageRefs);
+        }
+    }, [state.images]);
     
     
     return (
