@@ -71,7 +71,7 @@ const Buscador = () => {
       {/* <div className="mx-auto flex justify-between">
         <h2 className="text-2xl mb-2 text-white text-left pt-16 px-4 md:pt-16">Busca y alquila tus obras favoritas</h2>
       </div> */}
-      <form action="" className="flex flex-col md:flex-row justify-center gap-6 p-5 px-4 md:px-24 items-center">
+      <form onSubmit={handleSearch} className="flex flex-col md:flex-row justify-center gap-6 p-5 px-4 md:px-24 items-center">
         <div className="relative w-full max-w-md">
           <input
             type="text"
@@ -96,7 +96,8 @@ const Buscador = () => {
         </div>
         <Calendar setDateRange={setDateRange} />
         <Button 
-        text={<BiSearchAlt />} 
+        type="button"
+        text={<BiSearchAlt /> } 
         bgColor="primary" 
         textColor="black" 
         textSize="2xl" 
