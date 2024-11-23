@@ -22,21 +22,21 @@ import axiosConfig from "../api/axiosConfig";
 //     }
 // };
 
-export const uploadToBackend = async (file) => {
-    const formData = new FormData();
-    formData.append("file", file);
+// export const uploadToBackend = async (file) => {
+//     const formData = new FormData();
+//     formData.append("file", file);
 
-    try {
-        const response = await axios.post(`${axiosConfig}/obra/upload`, formData, {
-            headers: {
-                "Content-Type": "multipart/form-data",
-                // Si usas autenticación basada en token:
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-        });
-        return response.data; // Aquí debes recibir la URL de la imagen desde el backend
-    } catch (error) {
-        console.error("Error uploading image to backend:", error);
-        return null;
-    }
-};
+//     try {
+//         const response = await axios.post(`${axiosConfig}/obra/upload`, formData, {
+//             headers: {
+//                 "Content-Type": "multipart/form-data",
+//                 // Si usas autenticación basada en token:
+//                 Authorization: `Bearer ${localStorage.getItem("token")}`,
+//             },
+//         });
+//         return response.data; // Aquí debes recibir la URL de la imagen desde el backend
+//     } catch (error) {
+//         console.error("Error uploading image to backend:", error);
+//         return null;
+//     }
+// };

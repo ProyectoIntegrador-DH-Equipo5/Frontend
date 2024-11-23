@@ -4,7 +4,7 @@ import Modal from './Modal'
 
 const Card = ({ producto }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  
   // Verificar que 'producto' exista
   if (!producto || !producto.nombre || !producto.movimientoArtistico) {
     return <div className="relative overflow-hidden h-100 rounded-xl bg-white/10 backdrop-blur-sm border-dashed border-2 border-white-200 opacity-40">
@@ -16,7 +16,11 @@ const Card = ({ producto }) => {
   Card.propTypes = {
     producto: PropTypes.shape({
       nombre: PropTypes.string.isRequired,
-      img: PropTypes.string.isRequired,
+      imagenes: PropTypes.arrayOf(
+        PropTypes.shape({
+          url: PropTypes.string.isRequired, // Cada imagen tiene una URL.
+        })
+      ).isRequired,
       descripcion: PropTypes.string.isRequired,
       precioRenta: PropTypes.number.isRequired,
       tamano: PropTypes.string.isRequired,
@@ -45,7 +49,8 @@ const Card = ({ producto }) => {
           <div className="relative">
             <img 
               className="h-48 w-full object-cover" 
-              src={producto.img} 
+              src={producto.imagenes?.find((imagen) => imagen.nombre.toLowerCase().startsWith("principal"))?.url ||
+                producto.imagenes?.[0]?.url}
               alt={producto.nombre}
               loading="lazy"
             />

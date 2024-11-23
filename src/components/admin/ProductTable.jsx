@@ -6,6 +6,7 @@ import Form from "./Form";
 import Modal from "./Modal";
 import Message from "./Message";
 import { priceRangeCalculator, roundToNearest50 } from "../../utils/formatFunctions";
+import { obrasService } from "../../api/services"
 
 
 const ProductTable = () => {
@@ -40,12 +41,18 @@ const ProductTable = () => {
 	};
 
 	// Función para confirmar la eliminación
-	const confirmDelete = () => {
-		// Enviar acción de eliminación al dispatch
-		dispatch({ type: "DELETE_ART", payload: { id: deletingItem } });
-
-		setSuccessMessage("El producto se ha eliminado correctamente");
-		setDeletingItem(null);
+	const confirmDelete = async() => {
+		try {
+			await obrasService.deleteObra(deletingItem);
+			// Enviar acción de eliminación al dispatch
+			dispatch({ type: "DELETE_ART", payload: { id: deletingItem } });
+			setSuccessMessage("El producto se ha eliminado correctamente");
+			setDeletingItem(null);
+		} catch (error) {
+			// Manejo de errores si algo falla al eliminar la obra
+			console.error("Error al eliminar la obra:", error);
+			setErrorMessage("Ocurrió un error al eliminar el producto. Por favor, intenta de nuevo.");
+		}
 	};
 
 	// Efecto para ocultar los mensajes después de unos segundos
@@ -59,10 +66,6 @@ const ProductTable = () => {
 			return () => clearTimeout(timer); // Limpiar el temporizador al desmontar
 		}
 	}, [successMessage, errorMessage]);
-
-	
-
-	
 
 	return (
 		<div className="flex flex-col items-center grow max-h-screen pt-28 relative ">
@@ -105,32 +108,17 @@ const ProductTable = () => {
 												{obra.id}
 											</td>
 											<td className="whitespace-nowrap px-4 py-2 text-gray-700 text-left">
-												{obra.imagenesAdicionales ? (
+												{console.log("Obra actual antes de mapear product table:", obra)}
+												{console.log("imagenes en product table "+ obra.imagenes)}
+												{obra.imagenes ? (
 													<img
-														src={obra.imagenesAdicionales[0] }
-														alt={
-															obra.nombre ||
-															"Imagen"
-														}
+														src={obra.imagenes.find((imagen) => 
+															imagen.nombre?.toLowerCase().startsWith("principal"))?.url || 
+															obra.imagenes[0]?.url }
+														alt={ obra.nombre || "Imagen"	}
+														//alt={`Imagen ${index + 1}`}
 														className="w-16 h-16 object-cover"
 													/>
-												) : obra.imagenesAdicionales &&
-												  obra.imagenesAdicionales.length > 0 ? (
-													<div className="flex gap-2">
-														{obra.imagenesAdicionales.map(
-															(url, index) => (
-																<img
-																	key={index}
-																	src={url} // Verifica que el url sea base64
-																	alt={`Imagen ${
-																		index +
-																		1
-																	}`}
-																	className="w-16 h-16 object-cover"
-																/>
-															)
-														)}
-													</div>
 												) : (
 													<span>
 														No hay imagen disponible

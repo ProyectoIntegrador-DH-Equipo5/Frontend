@@ -3,6 +3,7 @@ import { useContextGlobal } from '../utils/global.context.jsx';
 import { useNavigate } from 'react-router-dom';
 import { AiFillExclamationCircle } from "react-icons/ai";
 import { jwtDecode } from "jwt-decode";
+import axiosConfig from "../api/axiosConfig.js";
 
 const Login = () => {
   const { dispatch } = useContextGlobal();
@@ -25,21 +26,10 @@ const Login = () => {
     e.preventDefault();
 
     if (!validateEmail()) return;
-
+  
     try {
-      const response = await fetch('http://localhost:8080/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: email,
-          password: password,
-        }),
-      });
-
-      const data = await response.json();
-      const token = data.token;
+      const response = await axiosConfig.post('/api/auth/login', { email, password });
+      const { token } = response.data;
 
       if (response.status === 200) {
         const user = jwtDecode(token); // Decodifica el token para obtener los datos del usuario
@@ -52,14 +42,29 @@ const Login = () => {
         setError('');  // Limpiar el error
         navigate('/');  // Redirigir al usuario a la página principal
       } else {
-        setError(data.message || 'Email o contraseña incorrectos.');
+        setError(response.data.message || 'Email o contraseña incorrectos.');
       }
     } catch (err) {
       setError('Hubo un error en el servidor. Inténtalo de nuevo.');
     }
   };
 
-  
+  useEffect(() => {
+    const storedUser = localStorage.getItem('loggedUser');
+    console.log(storedUser);
+    
+    if (storedUser) {
+      try {
+        const userData = JSON.parse(storedUser);
+        // Dispatch para cargar el usuario desde el localStorage al contexto global
+        dispatch({ type: 'LOGIN_USER', payload: userData });
+        navigate('/');  // Redirigir al usuario a la página principal
+      } catch (err) {
+        console.error("Error al parsear el usuario desde localStorage:", err);
+      }
+    }
+  }, [dispatch, navigate]);
+
 
   useEffect(() => {
     const storedUser = localStorage.getItem('loggedUser');

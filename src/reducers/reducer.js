@@ -83,7 +83,7 @@ export const reducer = (state, action) => {
       return { ...state, categories: updatedCategories };
 
     case "UPDATE_USER":
-      const updatedUsers = state.users.map((item) =>
+      const updatedUsers = state.users.map((user) =>
         user.id === action.payload.id ? action.payload : user
       );
       saveToLocalStorage("users", updatedUsers);

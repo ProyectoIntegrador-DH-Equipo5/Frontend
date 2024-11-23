@@ -15,8 +15,7 @@ const Modal = ({ isOpen, onClose, producto }) => {
   if (!isOpen) return null;
 
   const todasLasImagenes = [
-    producto.img,
-    ...(producto.imagenesAdicionales || []),
+    ...(producto.imagenes || []),
   ];
 
   const siguienteImagen = () => {
@@ -52,7 +51,7 @@ const Modal = ({ isOpen, onClose, producto }) => {
         <MdNavigateNext size={40} />
       </button>
       <img
-        src={todasLasImagenes[imagenActual]}
+        src={todasLasImagenes[imagenActual]?.url}
         alt={`Imagen ${imagenActual + 1}`}
         className="max-h-[90vh] max-w-[90vw] object-contain"
       />
@@ -95,9 +94,10 @@ const Modal = ({ isOpen, onClose, producto }) => {
               {/* Columna izquierda: Imagen principal */}
               <div className="flex-1">
                 <img
-                  src={producto.img}
+                  src={producto.imagenes?.find((imagen) => imagen.nombre.toLowerCase().startsWith("principal"))?.url ||
+                    producto.imagenes?.[0]?.url}
                   alt={producto.nombre}
-                  className="w-full aspect-[4/3] object-cover rounded-lg mb-4 sm:mb-6"
+                  className="w-full aspect-[4/3] object-contain rounded-lg mb-4 sm:mb-6"
                 />
 
                 {/* Categorías */}
@@ -137,25 +137,29 @@ const Modal = ({ isOpen, onClose, producto }) => {
               {/* Columna derecha: Miniaturas y botones */}
               <div className="lg:w-1/3">
                 <div className="grid grid-cols-2 gap-2 mb-4">
-                  {producto.imagenesAdicionales
+                  {producto.imagenes
                     ?.slice(0, 3)
                     .map((imagen, index) => (
                       <img
                         key={index}
-                        src={imagen}
+                        src={imagen.url}
                         alt={`Miniatura ${index + 1}`}
                         className="w-full aspect-square object-cover rounded-lg"
                       />
                     ))}
                   <div
-                    className="relative cursor-pointer"
-                    onClick={() => setMostrarCarrusel(true)}
-                  >
-                    <img
-                      src={producto.imagenesAdicionales?.[3]}
-                      alt="Ver más"
-                      className="w-full aspect-square object-cover rounded-lg"
-                    />
+                    className="relative cursor-pointer" onClick={() => setMostrarCarrusel(true)}>
+                      {producto.imagenes?.[3] ? (
+                        <img
+                          src={producto.imagenes?.[3].url}
+                          alt="Ver más"
+                          className="w-full aspect-square object-cover rounded-lg"
+                        />
+                      ) : (
+                        <div className="w-full aspect-square flex items-center justify-center bg-gray-200 rounded-lg">
+                          <span className="text-gray-500 text-sm">No hay más imágenes</span>
+                        </div> 
+                      )}
                     <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px] rounded-lg flex items-center justify-center">
                       <span className="text-white font-semibold text-sm sm:text-base">Ver más</span>
                     </div>

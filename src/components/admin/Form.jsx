@@ -5,6 +5,7 @@ import FormField from "./FormField";
 import ImageUpload from "./ImageUpload";
 import Message from "./Message";
 import { removeFromLocalStorage } from "../../utils/localStorage";
+import { obrasService } from "../../api/services"
 
 const Form = ({ edit, obra = {}, onClose }) => {
 	const { state, dispatch } = useContextGlobal(); // Obtiene las categorías del estado global
@@ -90,9 +91,30 @@ const Form = ({ edit, obra = {}, onClose }) => {
 		}
 	};
 
-	const handleSubmit = (e) => {
+	//"aplanar" el objeto formData
+	const flattenFormData = (data) => {
+    const flattened = {};
+
+    const flatten = (obj, parentKey = "") => {
+        for (const key in obj) {
+            const value = obj[key];
+            const newKey = parentKey ? `${parentKey}.${key}` : key;
+
+            if (typeof value === "object" && value !== null && !Array.isArray(value)) {
+                flatten(value, newKey);
+            } else {
+                flattened[newKey] = value;
+            }
+        }
+    };
+
+    flatten(data);
+    return flattened;
+};
+
+	const handleSubmit = async(e) => {
 		e.preventDefault();
-	
+
 		// Verificar si se ha seleccionado o creado una categoría
 		const isCategoryValid =
 			formData.movimientoArtistico?.nombre ||
@@ -100,7 +122,7 @@ const Form = ({ edit, obra = {}, onClose }) => {
 		const existingProduct = state.data.find(
 			(product) => product.nombre === formData.nombre
 		);
-		if (existingProduct) {
+		if (!edit && existingProduct) { //Ojo q lo cambié
 			setErrorMessage("El nombre del producto ya existe.");
 			console.log("El nombre del producto ya existe.");
 			return;
@@ -112,24 +134,48 @@ const Form = ({ edit, obra = {}, onClose }) => {
 		}
 	
 		console.log("Form data:", formData);
-		if (edit) {
-			// Actualiza la obra en el estado global (o en el backend)
-			dispatch({ type: "UPDATE_ART", payload: formData });
-			removeFromLocalStorage("images"); // Eliminar las imágenes del localStorage
-		} else {
-			// Crear nueva obra en el estado global
-			dispatch({ type: "ADD_ART", payload: formData });
-			setFormData(initialFormData); // Restablecer el formulario
-			removeFromLocalStorage("images"); // Eliminar las imágenes del localStorage
+
+		try {
+			// Aplanar los datos para el envío a Backend
+			const flattenedData = flattenFormData(formData);
+			console.log("Flattened data:", flattenedData);
+
+			// Preparar las imágenes adicionales
+			const files = formData.imagenesAdicionales || [];
+			
+			// Llamar al servicio para crear o actualizar la obra
+				if (edit) {
+					// Actualiza la obra en el estado global (o en el backend)
+					// Extraer IDs de imágenes existentes en Cloudinary
+					const existingImagesIds = formData.imagenes.map((imagen) => imagen.id); 
+					// Preparar datos de update para el backend
+					const updatedArt = { ...flattenedData }; // Crear una copia de flattenedData
+					updatedArt.imagenes = existingImagesIds;  
+					console.log(updatedArt);
+					await obrasService.updateObra(updatedArt, files); // Llama al servicio con los datos y las imágenes
+					dispatch({ type: "UPDATE_ART", payload: formData });
+			} else {
+					// Crear nueva obra en el estado global
+					await obrasService.createObra(flattenedData, files); 
+					dispatch({ type: "ADD_ART", payload: formData });
+					setFormData(initialFormData); // Restablecer el formulario
+					removeFromLocalStorage("images"); // Eliminar las imágenes del localStorage
+
+					setSuccessMessage(
+						edit
+							? "La obra se ha editado correctamente."
+							: "La obra se ha creado correctamente."
+					);
+					onClose();
+				};
+			}
+		catch (error) {
+			console.error("Error al enviar los datos al backend:", error);
+			setErrorMessage(
+					"Hubo un error al enviar los datos. Por favor, inténtalo de nuevo."
+			);
 		}
-	
-		setSuccessMessage(
-			edit
-				? "La obra se ha editado correctamente."
-				: "La obra se ha creado correctamente."
-		);
-		onClose();
-	};
+	}
 
 	const handleCreateCategory = () => {
 		// Simulación de creación de la categoría
@@ -165,7 +211,7 @@ const Form = ({ edit, obra = {}, onClose }) => {
 	const fieldsToRender = edit
 		? Object.keys(obra).filter(
 				(field) =>
-					field !== "img" &&
+					//field !== "img" &&
 					field !== "id" &&
 					field !== "tecnicaObra" &&
 					field !== "movimientoArtistico" &&
@@ -353,8 +399,8 @@ const Form = ({ edit, obra = {}, onClose }) => {
 				{renderNestedFields()}
 				<ImageUpload
 					artId={formData.id} // Reemplazar art.id con formData.id
-					existingImage={formData.img} // Reemplazar art.img con formData.img
-					imagenesAdicionales={formData.imagenesAdicionales} // Reemplazar art.imagenesAdicionales con formData.imagenesAdicionales
+					existingImages={formData.imagenesAdicionales} // Reemplazar art.img con formData.img
+					//imagenesAdicionales={formData.imagenesAdicionales} // Reemplazar art.imagenesAdicionales con formData.imagenesAdicionales
 					onFilesAdded={onFilesAdded}
 				/>
 

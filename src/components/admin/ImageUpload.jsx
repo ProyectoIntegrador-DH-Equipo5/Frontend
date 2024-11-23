@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useContextGlobal } from "../../utils/global.context";
-import { uploadToCloudinary } from "../../utils/upload"; // Importa la función para subir a Cloudinary
 
-const ImageUpload = ({ onFilesAdded, existingImage, artId, imagenesAdicionales }) => {
+const ImageUpload = ({ onFilesAdded, imagenesAdicionales }) => {
     const { dispatch, state } = useContextGlobal();
     const images = state.images || []; // Fetch images from global state
     const existingImages = imagenesAdicionales || []; // Existing images passed as prop
@@ -30,27 +29,22 @@ const ImageUpload = ({ onFilesAdded, existingImage, artId, imagenesAdicionales }
         });
     };
 
-    const addFile = async (file) => {
-        const imageUrl = await uploadToCloudinary(file); // Usa la función de utilidad para subir
-        if (imageUrl) {
-            // Asegúrate de que la imagen no esté ya en la lista para evitar duplicados
-            if (!images.some(image => image.imgUrl === imageUrl)) {
-                // Primero, añade la imagen al estado global
-                dispatch({
-                    type: "ADD_IMAGE",
-                    payload: { imgUrl: imageUrl },
-                });
-      
-                // Luego, añade la imagen a la obra de arte
-                dispatch({
-                    type: "ADD_IMAGE_TO_ART",
-                    payload: { artId, imgUrl: imageUrl },
-                });
-      
-                onFilesAdded(imageUrl); // Llama al callback si necesitas pasar algo a un componente padre
-            }
+    const addFile = (file) => {
+        // Asegúrate de que la imagen no esté ya en la lista para evitar duplicados
+        const imageExists = images.some(existingImage => existingImage.nombre === file.nombre); // Comparar por nombre
+        if (!imageExists) {
+            // Crea una URL de objeto para los archivos no procesados
+            const fileUrl = URL.createObjectURL(file);
+            // Primero, añade la imagen al estado global
+            dispatch({
+                type: "ADD_IMAGE",
+                payload: { ...file, url: fileUrl  }, // Añade la URL generada
+            });
+            onFilesAdded(file); // Llamar a callback para añadir el archivo
+        } else {
+            console.log("Imagen duplicada detectada:", file.name);
         }
-      };
+    };
 
     const allImages = [...existingImages, ...images];
     console.log("All images:", allImages); // Verifica las URLs de las imágenes en la consola
@@ -93,8 +87,10 @@ const ImageUpload = ({ onFilesAdded, existingImage, artId, imagenesAdicionales }
                         <span className="text-small text-gray-500">No hay archivos seleccionados</span>
                     </li>
                 ) : (
-                    allImages.map((url, index) => {
-                        const imageUrl = url.imgUrl || url; // Verifica si es un objeto y usa la propiedad imgUrl, sino usa la URL directamente
+                    allImages.map((image, index) => {
+                        // Si el archivo es en bruto, creamos una URL local para la vista previa
+                        const imageUrl = image?.url ? image.url : URL.createObjectURL(image);
+
                         return (
                             <li key={index} className="block p-1 w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/6 xl:w-1/8 h-24 relative">
                                 <article className="group w-full h-full rounded-md bg-gray-100 cursor-pointer relative shadow-sm">

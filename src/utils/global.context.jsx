@@ -7,9 +7,9 @@ import {
     useState,
 } from "react";
 import { reducer } from "../reducers/reducer";
-import data from "./data.json";
-import categories from './category.json';
-import users from "./user.json";
+// import data from "./data.json";
+// import categories from './category.json';
+// import users from "./user.json";
 import { 
     saveToLocalStorage, 
     loadFromLocalStorage, 
@@ -30,9 +30,6 @@ export const initialState = {
 };
 
 const backendURL = "http://localhost:8080"; // *URL base del backend
-
-    // const cloudName = "dr1jbzn9r"; // Tu nombre de nube
-    // const uploadPreset = "ml_default"
 
 export const ContextProvider = ({ children }) => {
     const [state, dispatch] = useReducer(reducer, initialState);
@@ -75,25 +72,6 @@ export const ContextProvider = ({ children }) => {
                 saveToLocalStorage("data", artResponse.data);
                 saveToLocalStorage("categories", categoriesResponse.data);
 
-                // // Verificar si el usuario está autenticado antes de acceder a 'rol
-                // console.log("lOGS");
-                // console.log(state.loggedUser);
-                // console.log(state.loggedUser.rol);
-                // console.log(token);
-                
-                // if (state.loggedUser && state.loggedUser.rol && token){
-                //     const userRole = state.loggedUser.rol;
-                //     console.log(userRole);
-                //     console.log(userRole[0]?.authority);
-           
-                //     if (userRole[0]?.authority === "ADMIN" || userRole[0]?.authority === "COLAB") {
-                //         const usersResponse = await axios.get(`${backendURL}/usuarios/listartodos`, { headers: { 'Authorization': `Bearer ${token}` } });
-                //         console.log("Usuarios obtenidos:", usersResponse.data);
-                //         dispatch({ type: "GET_USERS", payload: usersResponse ? usersResponse.data : [] });
-                //         saveToLocalStorage("users", usersResponse.data);
-                //     }
-                // } 
-
             } catch (error) {
                 console.error("Error al conectar con el backend, cargando datos locales.", error);
 
@@ -107,10 +85,7 @@ export const ContextProvider = ({ children }) => {
         fetchBackendData();
     }, []);
 
-
-    //Esto está a medias, si quiere comentarlo para revisar primero lo que va
     const fetchUsersByRole = async (token, userRole= state.loggedUser?.rol) => {
-        console.log("Hellooooooo");
         console.log(userRole[0]?.authority);
    
         if (!token || !userRole) return;
@@ -120,7 +95,6 @@ export const ContextProvider = ({ children }) => {
             if (userRole[0]?.authority === "ADMIN" || userRole[0]?.authority === "COLAB") {
                 console.log("Pasó segundo if");
                 console.log("Token actual:", token);
-                console.log("URL del backend:", backendURL);
 
                 const response = await axios.get(`${backendURL}/usuarios/listartodos`, {
                     headers: { Authorization: `Bearer ${token}` },
@@ -138,7 +112,6 @@ export const ContextProvider = ({ children }) => {
         }
     };
     
-
     useEffect(() => {
         const token = localStorage.getItem("token");
         console.log("Estado de loggedUser:", state.loggedUser);
@@ -165,13 +138,12 @@ export const ContextProvider = ({ children }) => {
     // }, [state.images]);
 
     //Guardar las URL de las imágenes 
-    useEffect(() => {
-        if (state.images.length > 0) {
-            const imageRefs = state.images.map((image) => image.url); // Solo guardar URLs
-            saveToLocalStorage("images", imageRefs);
-        }
-    }, [state.images]);
-    
+    // useEffect(() => {
+    //     if (state.images.length > 0) {
+    //         const imageRefs = state.images.map((image) => image.url); // Solo guardar URLs
+    //         saveToLocalStorage("images", imageRefs);
+    //     }
+    // }, [state.images]);
     
     return (
         <ContextGlobal.Provider value={{ state, dispatch, isMobile }}>

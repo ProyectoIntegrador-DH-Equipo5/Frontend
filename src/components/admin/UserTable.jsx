@@ -5,6 +5,7 @@ import Pagination from "./Pagination";
 import Modal from "./Modal";
 import Message from "./Message";
 import { FaTimes } from "react-icons/fa"; // Importar el ícono de cierre
+import { userService } from "../../api/userService";
 
 const UserTable = () => {
 	const { state, dispatch } = useContextGlobal(); // Usamos dispatch del contexto global
@@ -22,11 +23,23 @@ const UserTable = () => {
 	const currentItems = state.users.slice(indexOfFirstItem, indexOfLastItem);
 	const totalPages = Math.ceil(state.users.length / itemsPerPage);
 
-	const userRole = state.loggedUser.rol;
+	const loggedUserRole = state.loggedUser?.rol[0]?.authority;
+	console.log("editing item");
+		console.log(editingItem);
+	
+	
+	//state.loggedUser.rol
 	//state.loggedUser?.rol[0]?.authority
 	const handleEdit = (user) => {
+		console.log("usuario");
+		console.log(user); //si trae id
+		console.log(state.loggedUser); //no trae id
+
+		// Editar si el usuario logueado y el usuario a editar no es el mismo o si el usuario a editar no es admin
+		//if (state.loggedUser.email !== user.email || user.rol !== "ADMIN") {
+
 		// Solo permitir editar si el rol del usuario actual no es "COLAB" o si el usuario a editar no es "ADMIN"
-		if (userRole !== "COLAB" || user.rol !== "ADMIN") {
+			if (loggedUserRole !== "COLAB" || user.rol !== "ADMIN") {
 			setEditingItem(user);
 		} else {
 			setErrorMessage(
@@ -37,16 +50,38 @@ const UserTable = () => {
 
 	const handleDelete = (id) => {
 		setDeletingItem(id); // Store the ID of the user to be deleted
+		setErrorMessage(
+			"No tienes permiso para editar usuarios con rol de ADMIN"
+		);
 	};
 
-	const confirmDelete = () => {
-		dispatch({ type: "DELETE_USER", payload: { id: deletingItem } });
-		setSuccessMessage("El usuario se ha eliminado correctamente");
-		setDeletingItem(null);
+	const confirmDelete = async () => {
+		try {
+			await userService.deleteUserById(deletingItem)
+			dispatch({ type: "DELETE_USER", payload: { id: deletingItem } });
+			setSuccessMessage("El usuario se ha eliminado correctamente");
+			setDeletingItem(null);
+		} catch (error) {
+			console.error("Error al eliminar el usuario:", error);
+			setErrorMessage("Ocurrió un error al eliminar el usuario. Por favor, intenta de nuevo.");
+		}		
 	};
 
-	const handleSaveEdit = (updatedUser) => {
-		dispatch({ type: "UPDATE_USER", payload: updatedUser });
+	const handleSaveEdit = async(updatedUser) => {
+		// Sólo enviamos los datos que pide Backend, no el objeto completo
+		const updatedUserData = {
+			id: updatedUser.id,
+			name: updatedUser.name,
+			lastname: updatedUser.lastname,
+			email: updatedUser.email,
+			password: updatedUser.password,
+			rol: updatedUser.rol,
+	};
+		console.log("updated user");
+		console.log(updatedUserData);
+		
+		await userService.updateUser(updatedUserData)
+		dispatch({ type: "UPDATE_USER", payload: updatedUserData });
 		setSuccessMessage("Usuario actualizado con éxito");
 		setEditingItem(null);
 	};
@@ -103,7 +138,7 @@ const UserTable = () => {
 								<input
 									type="text"
 									id="nombre"
-									value={editingItem.nombre}
+									value={editingItem.name}
 									onChange={(e) =>
 										setEditingItem({
 											...editingItem,
@@ -123,7 +158,7 @@ const UserTable = () => {
 								<input
 									type="text"
 									id="apellido"
-									value={editingItem.apellido}
+									value={editingItem.lastname}
 									onChange={(e) =>
 										setEditingItem({
 											...editingItem,
@@ -161,7 +196,13 @@ const UserTable = () => {
 								>
 									Rol
 								</label>
-								<select
+
+								{/* Solo mostrar "Colaborador" y "Usuario" */}
+								{ editingItem.rol === "ADMIN" ? (
+										// Mostrar el rol como texto si el rol del usuario es ADMIN
+										<span>Administrador</span>
+									) : (
+								<select 
 									id="rol"
 									value={editingItem.rol}
 									onChange={(e) =>
@@ -171,16 +212,12 @@ const UserTable = () => {
 										})
 									}
 									className="w-full p-2 border border-gray-300 rounded"
-								>
-									{/* Solo mostrar "Colaborador" y "Usuario" si el loggedUser es COLAB */}
-									{userRole !== "COLAB" && (
-										<option value="ADMIN">
-											Administrador
-										</option>
-									)}
+								>										
+									{/* Sólo puede haber un admin y no se pueden asignar más */}
 									<option value="COLAB">Colaborador</option>
 									<option value="USER">Usuario</option>
 								</select>
+								)}
 							</div>
 							<div className="flex justify-between">
 								<button
@@ -241,9 +278,8 @@ const UserTable = () => {
 													"Correo no disponible"}
 											</td>
 											<td className="whitespace-nowrap px-4 py-2 text-gray-700 text-left">
-												{userRole === "COLAB" &&
-												user.rol === "ADMIN" ? (
-													// Mostrar el rol como texto si el usuario actual es COLAB y el rol del usuario es ADMIN
+												{ user.rol === "ADMIN" ? (
+													// Mostrar el rol como texto si el rol del usuario es ADMIN
 													<span>Administrador</span>
 												) : (
 													<select
@@ -256,17 +292,17 @@ const UserTable = () => {
 														}
 														className="px-2 py-1 rounded border border-gray-300"
 														disabled={
-															userRole ===
+															loggedUserRole ===
 																"COLAB" &&
 															user.rol === "ADMIN"
 														}
 													>
-														{userRole !==
+														{/* {loggedUserRole !==
 															"COLAB" && (
 															<option value="ADMIN">
 																Administrador
 															</option>
-														)}
+														)} */}
 														<option value="COLAB">
 															Colaborador
 														</option>
@@ -282,13 +318,13 @@ const UserTable = () => {
 														handleEdit(user)
 													}
 													className={`text-lg font-bold p-3 border-2 rounded ${
-														userRole === "COLAB" &&
+														loggedUserRole === "COLAB" &&
 														user.rol === "ADMIN"
 															? "text-gray-400 border-gray-400 cursor-not-allowed"
 															: "text-blue-600 border-blue-600 hover:bg-blue-600/75 hover:text-white hover:border-blue-400"
 													}`}
 													disabled={
-														userRole === "COLAB" &&
+														loggedUserRole === "COLAB" &&
 														user.rol === "ADMIN"
 													}
 												>
@@ -298,14 +334,12 @@ const UserTable = () => {
 													onClick={() =>
 														handleDelete(user.id)
 													}
-													className={`text-lg font-bold p-3 border-2 rounded ${
-														userRole === "COLAB" &&
+													className={`text-lg font-bold p-3 border-2 rounded ${			
 														user.rol === "ADMIN"
 															? "text-gray-400 border-gray-400 cursor-not-allowed"
 															: "text-red-600 border-red-600 hover:bg-red-600/75 hover:text-white hover:border-red-400"
 													}`}
 													disabled={
-														userRole === "COLAB" &&
 														user.rol === "ADMIN"
 													}
 												>

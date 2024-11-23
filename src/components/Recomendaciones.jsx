@@ -34,9 +34,10 @@ const Recomendaciones = () => {
                 </h2>
                 {randomProducts.length > 0 ? (
                     <div className="flex grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {randomProducts.map((producto) => (
-                            <Card key={producto.id} producto={producto} />
-                        ))}
+                        {randomProducts.map((producto) => {
+                            console.log("Producto para Card:", producto)
+                            return <Card key={producto.id} producto={producto} />
+                    })}
                     </div>
                 ) : (
                     <div className="text-center py-12">
