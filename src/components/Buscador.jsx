@@ -81,11 +81,10 @@ const Buscador = () => {
   return (
     <section className="mx-auto bg-secondary p-7 pt-32 flex-col justify-center items-center text-center w-full search-section">
       <h1 className="text-primary font-serif text-4xl mt-16 leading-relaxed">ARTE EXCLUSIVO<br /> EXPERIENCIAS INOLVIDABLES</h1>
-      {/* <div className="mx-auto flex justify-between">
-        <h2 className="text-2xl mb-2 text-white text-left pt-16 px-4 md:pt-16">Busca y alquila tus obras favoritas</h2>
-      </div> */}
-      <form onSubmit={handleSearch} className="flex flex-col md:flex-row justify-center gap-6 p-5 px-4 md:px-24 items-center">
+      <div className="mx-auto flex justify-between w-full">
+      <form onSubmit={handleSearch} className="flex flex-col w-full md:flex-row justify-center gap-6 p-5 px-4 md:px-24 items-center">
         <div className="relative w-full max-w-md">
+        <h2 className="text-2xl mb-2 text-white text-left pt-16 px-4 md:pt-16">Busca y alquila tus obras favoritas</h2>
           <input
             type="text"
             placeholder="Encuentra tu obra favorita"
@@ -107,17 +106,24 @@ const Buscador = () => {
             </ul>
           )}
         </div>
-        <Calendar setDateRange={setDateRange} />
-        <Button 
-        type="button"
-        text={<BiSearchAlt /> } 
-        bgColor="primary" 
-        textColor="black" 
-        textSize="2xl" 
-        widthSize="16" 
-        heightSize="12"
-        onClick={handleSearch} />
+        <div className="flex flex-col">
+          <h2 className="text-2xl mb-2 text-white text-left pt-16 px-4 md:pt-16">Rango de Fecha</h2>
+          <Calendar setDateRange={setDateRange} />
+        </div>
+        <div className="flex flex-col justify-self-end ">
+        <h2 className="mb-10 pt-16 md:pt-16"></h2>
+          <Button 
+          type="button"
+          text={<BiSearchAlt /> } 
+          bgColor="primary" 
+          textColor="black" 
+          textSize="2xl" 
+          widthSize="16" 
+          heightSize="12"
+          onClick={handleSearch} />
+        </div>
       </form>
+      </div>
       
       {/* Renderizar las obras seleccionadas */}
       <div className="mt-8">
