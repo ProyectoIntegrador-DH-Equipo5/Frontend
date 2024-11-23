@@ -5,6 +5,7 @@ import '../styles/App.css';
 import { useContextGlobal } from '../utils/global.context'; // Importar el contexto
 import { useState } from 'react';
 import Card from './Card'; // Asegúrate de importar Card
+import reservas from '../utils/reserva.json'; // Importar el archivo de reservas
 
 const Buscador = () => {
   const { state } = useContextGlobal(); // Obtener el estado del contexto
@@ -62,7 +63,19 @@ const Buscador = () => {
       option.categoria?.toLowerCase().includes(inputValue.toLowerCase())) 
     );
 
-    setSelectedArtworks(results); // Actualiza las obras seleccionadas
+    // Filtrar resultados que no tengan reservas en el rango de fechas
+    const filteredResults = results.filter(art => {
+      return !reservas.some(reserva => {
+        const fechaInicio = new Date(reserva.fechaInicio);
+        const fechaFin = new Date(reserva.fechaFin);
+        return art.id === reserva.obra.id && 
+               ((dateRange[0].startDate >= fechaInicio && dateRange[0].startDate <= fechaFin) ||
+                (dateRange[0].endDate >= fechaInicio && dateRange[0].endDate <= fechaFin) ||
+                (dateRange[0].startDate <= fechaInicio && dateRange[0].endDate >= fechaFin));
+      });
+    });
+
+    setSelectedArtworks(filteredResults); // Actualiza las obras seleccionadas
   };
 
   return (
