@@ -35,7 +35,7 @@ const Recomendaciones = () => {
                 {randomProducts.length > 0 ? (
                     <div className="flex grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {randomProducts.map((producto) => (
-                            <Card key={producto.id} producto={producto} />
+                            <Card key={producto.id} producto={producto} isFavorite={state.favorites.some((fav) => fav.id === producto.id)} />
                         ))}
                     </div>
                 ) : (

@@ -27,7 +27,7 @@ export const initialState = {
     activeSection: "obras",
     user: null,
     loggedUser: loadFromLocalStorage("loggedUser") || null,
-    
+    favorites: loadFromLocalStorage("favorites") || [],
 };
 
     const cloudName = "dr1jbzn9r"; // Tu nombre de nube
