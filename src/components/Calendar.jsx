@@ -1,10 +1,15 @@
 import { useState, useEffect } from 'react';
 import { DateRangePicker } from "react-date-range";
-import 'react-date-range/dist/styles.css';
-import 'react-date-range/dist/theme/default.css';
+// import 'react-date-range/dist/styles.css';
+// import 'react-date-range/dist/theme/default.css';
 import '../styles/App.css'
+import '../styles/default.css'
+import '../styles/styles.css'
+import { useContextGlobal } from '../utils/global.context';
+
 
 const Calendar = ({ setDateRange }) => {
+  const { isMobile } = useContextGlobal();
   const [dateRange, setLocalDateRange] = useState([
     {
       startDate: new Date(),
@@ -62,7 +67,7 @@ const Calendar = ({ setDateRange }) => {
             }}
             moveRangeOnFirstSelection={false}
             months={2}
-            direction="horizontal"
+            direction={isMobile ? 'vertical' : 'horizontal'}
             staticRanges={[]}
             inputRanges={[]}
             showDateDisplay={true}
