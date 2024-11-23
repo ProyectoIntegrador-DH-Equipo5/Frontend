@@ -31,6 +31,7 @@ const Buscador = () => {
     ...state.categories.map(category => ({ label: category.nombre, type: translations.category })), // Mapeo de categorías
     ...state.data.map(art => ({ label: art.nombre, type: translations.art })), // Mapeo de obras
   ];
+  
 
   const handleInputChange = (event) => {
     const value = event.target.value;
@@ -47,11 +48,11 @@ const Buscador = () => {
     setInputValue(option.label);
     setFilteredOptions([]); // Limpiar las opciones filtradas
     
-    const selectedArtwork = state.data.find(art => art.nombre === option.label);
-    if (selectedArtwork) {
-        setSelectedArtworks(prev => [...prev, selectedArtwork]); // Agregar la obra seleccionada al estado
-    }
-  setSelectedArtworks([selectedArtwork]); // Resetea el estado de selectedArtworks con la nueva obra seleccionada
+  //   const selectedArtwork = state.data.find(art => art.nombre === option.label);
+  //   if (selectedArtwork) {
+  //       setSelectedArtworks(prev => [...prev, selectedArtwork]); // Agregar la obra seleccionada al estado
+  //   }
+  // setSelectedArtworks([selectedArtwork]); // Resetea el estado de selectedArtworks con la nueva obra seleccionada
   };
 
   const handleSearch = (event) => {
@@ -108,7 +109,7 @@ const Buscador = () => {
         </div>
         <div className="flex flex-col">
           <h2 className="text-2xl mb-2 text-white text-left pt-16 px-4 md:pt-16">Rango de Fecha</h2>
-          <Calendar setDateRange={setDateRange} />
+          <Calendar setDateRange={setDateRange}/>
         </div>
         <div className="flex flex-col justify-self-end ">
         <h2 className="mb-10 pt-16 md:pt-16"></h2>
@@ -120,7 +121,8 @@ const Buscador = () => {
           textSize="2xl" 
           widthSize="16" 
           heightSize="12"
-          onClick={handleSearch} />
+          onClick={handleSearch}
+          />
         </div>
       </form>
       </div>
