@@ -45,6 +45,7 @@ const Buscador = () => {
   const handleOptionClick = (option) => {
     setInputValue(option.label);
     setFilteredOptions([]); // Limpiar las opciones filtradas
+    
     const selectedArtwork = state.data.find(art => art.nombre === option.label);
     if (selectedArtwork) {
         setSelectedArtworks(prev => [...prev, selectedArtwork]); // Agregar la obra seleccionada al estado
