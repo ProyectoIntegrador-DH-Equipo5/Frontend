@@ -34,13 +34,10 @@ export const reducer = (state, action) => {
       return { ...state, categories: newDataCategories };
 
     case "ADD_USER":
-      const newUserWithId = {
-        ...action.payload,
-        id: idCreator(state.users),
-      };
-      const newDataUser = [...state.users, newUserWithId];
-      saveToLocalStorage("users", newDataUser);
-      return { ...state, users: newDataUser };
+      const newUser = action.payload; // La respuesta de la API con el usuario creado
+      const updatedListUsers = [...state.users, newUser];
+      saveToLocalStorage("users", updatedListUsers);
+      return { ...state, users: updatedListUsers };
 
     case "LOGIN_USER":
       saveToLocalStorage("loggedUser", action.payload)  

@@ -80,8 +80,11 @@ Componente modal para confirmaciones de eliminación y otros mensajes importante
 2. Las obras se almacenan en el estado global y en localStorage.
 
 ### Gestión de Usuarios
-1. El administrador puede agregar, editar y eliminar usuarios desde el panel de administración.
-2. Los usuarios se almacenan en el estado global y en localStorage.
+1. El administrador puede ver, agregar, editar y eliminar usuarios desde el panel de administración.
+2. Ningún usuario puede eliminar ni cambiar el rol del administrador, incluido él mismo.
+3. Colab puede ver, agregar y editar usuarios. No puede eliminar ningún usuario, ni editar al admin.
+4. Colab no se puede 
+4. Los usuarios se almacenan en el estado global y en localStorage.
 
 ### Gestión de Categorías
 1. El administrador puede agregar, editar y eliminar categorías desde el panel de administración.

@@ -64,7 +64,7 @@ const Profile = () => {
                       ? 'bg-[#FDB813] text-black hover:bg-[#FDB813]/90' 
                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
-                  disabled={state.loggedUser?.rol[0]?.authority !== 'ADMIN' || state.loggedUser?.rol[0]?.authority === 'COLAB'}
+                  disabled={state.loggedUser?.rol[0]?.authority !== 'ADMIN' && state.loggedUser?.rol[0]?.authority !== 'COLAB'}
                 >
                   Administrar obras
                 </button>

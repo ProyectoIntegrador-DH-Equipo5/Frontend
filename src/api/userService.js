@@ -5,7 +5,7 @@ export const userService = {
     getUsers: async () => {
         try {
             const response = await axiosConfig.get("/usuarios/listartodos", {
-              headers: { Authorization: `Bearer ${token}` },
+              headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
             });
             return response.data;
         } catch (error) {
@@ -20,7 +20,7 @@ export const userService = {
     getUserById: async (id) => {
         try {
             const response = await axiosConfig.get(`/usuarios/${id}`, {
-                headers: { Authorization: `Bearer ${token}` },
+                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
             });
             return response.data;
         } catch (error) {

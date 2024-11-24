@@ -10,6 +10,8 @@ import Form from "../components/admin/Form";
 import { FaTimes } from "react-icons/fa";
 import { idCreator } from "../utils/formatFunctions";
 import Message from "../components/admin/Message";
+import { authService } from "../api/authService";
+import { userService } from "../api/userService";
 
 const Admin = () => {
 	const { isMobile, state, dispatch } = useContextGlobal();
@@ -17,11 +19,10 @@ const Admin = () => {
 	const [successMessage, setSuccessMessage] = useState("");
 	const [errorMessage, setErrorMessage] = useState("");
 	const [newUser, setNewUser] = useState({
-		id: "",
-		nombre: "",
-		apellido: "",
+		name: "",
+		lastname: "",
 		email: "",
-		rol: "admin",
+		password: "password",
 	});
 
 	const [newCat, setNewCat] = useState({
@@ -105,30 +106,52 @@ const Admin = () => {
 			return () => clearTimeout(timer); // Limpiar el temporizador al desmontar
 		}
 	}, [successMessage, errorMessage]);
-	const handleSubmitUser = (e) => {
+	
+	const handleSubmitUser = async(e) => {
 		e.preventDefault(); // Previene el comportamiento predeterminado de envío del formulario
 
-		if (!newUser.nombre || !newUser.apellido || !newUser.email) {
+		if (!newUser.name || !newUser.lastname || !newUser.email) {
 			setErrorMessage("Por favor, complete todos los campos.");
 			return;
 		}
 
-		// Asignar el ID
-		const newUserWithId = {
-			...newUser,
-			id: idCreator(state.users),
-		};
-
+		// Sólo enviamos los datos que pide Backend, no el objeto completo
+		const newUserRegister = {
+			name: newUser.name,
+			lastname: newUser.lastname,
+			email: newUser.email,
+			password: "password",
+		}
 		// Agregar el nuevo usuario
-        console.log("admin: ",newUserWithId)
-		dispatch({ type: "ADD_USER", payload: newUserWithId });
-		setSuccessMessage("Usuario creado con éxito");
-
-		// Limpiar los campos después de la creación
-		setNewUser({ nombre: "", apellido: "", email: "", rol: "user" });
-        
-		handleListItems();
+		try {
+			const createdUser = await authService.register(newUserRegister);
+			// Actualizar el estado global con el usuario creado
+			dispatch({ type: "ADD_USER", payload: createdUser });
+			setSuccessMessage("Usuario creado con éxito");
+			// Limpiar los campos después de la creación
+			setNewUser({ name: "", lastname: "", email: ""});
+			// Actualizar la lista de usuarios en la interfaz (si es necesario)
+			handleListItems();
+		} catch (error) {
+			setErrorMessage("Hubo un error al crear el usuario. Intente nuevamente.");
+		}
 	};
+
+	useEffect(() => {
+    const fetchUsers = async () => {
+        try {
+            const users = await userService.getUsers();
+            dispatch({ type: "GET_USERS", payload: users });
+        } catch (error) {
+            console.error("Error al obtener usuarios:", error);
+        }
+    };
+
+    if (successMessage === "Usuario creado con éxito") {
+        fetchUsers();
+    }
+}, [successMessage, dispatch]);
+
 
 
 	//Categorias
@@ -200,15 +223,15 @@ const Admin = () => {
 												<div className="flex-1">
 													<label
 														className="block text-sm font-semibold mb-2"
-														htmlFor="nombre"
+														htmlFor="name"
 													>
 														Nombre
 													</label>
 													<input
 														type="text"
-														id="nombre"
-														name="nombre"
-														value={newUser.nombre}
+														id="name"
+														name="name"
+														value={newUser.name}
 														onChange={
 															handleInputChange
 														}
@@ -219,15 +242,15 @@ const Admin = () => {
 												<div className="flex-1">
 													<label
 														className="block text-sm font-semibold mb-2"
-														htmlFor="apellido"
+														htmlFor="lastname"
 													>
 														Apellido
 													</label>
 													<input
 														type="text"
-														id="apellido"
-														name="apellido"
-														value={newUser.apellido}
+														id="lastname"
+														name="lastname"
+														value={newUser.lastname}
 														onChange={
 															handleInputChange
 														}
@@ -252,32 +275,6 @@ const Admin = () => {
 													className="w-full p-2 border border-gray-300 rounded"
 													required
 												/>
-											</div>
-											<div className="mb-4">
-												<label
-													className="block text-sm font-semibold mb-2"
-													htmlFor="rol"
-												>
-													Rol
-												</label>
-												<select
-													id="rol"
-													name="rol"
-													value={newUser.rol}
-													onChange={handleInputChange}
-													className="w-full p-2 border border-gray-300 rounded"
-													required
-												>
-													<option value="admin">
-														Administrador
-													</option>
-													<option value="colab">
-														Colaborador
-													</option>
-													<option value="user">
-														Usuario
-													</option>
-												</select>
 											</div>
 											<div className="flex justify-between">
 												<button

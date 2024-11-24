@@ -24,21 +24,12 @@ const UserTable = () => {
 	const totalPages = Math.ceil(state.users.length / itemsPerPage);
 
 	const loggedUserRole = state.loggedUser?.rol[0]?.authority;
-	console.log("editing item");
-		console.log(editingItem);
-	
-	
-	//state.loggedUser.rol
-	//state.loggedUser?.rol[0]?.authority
+	//state.loggedUser.rol o state.loggedUser?.rol[0]?.authority
 	const handleEdit = (user) => {
-		console.log("usuario");
 		console.log(user); //si trae id
 		console.log(state.loggedUser); //no trae id
 
-		// Editar si el usuario logueado y el usuario a editar no es el mismo o si el usuario a editar no es admin
-		//if (state.loggedUser.email !== user.email || user.rol !== "ADMIN") {
-
-		// Solo permitir editar si el rol del usuario actual no es "COLAB" o si el usuario a editar no es "ADMIN"
+		// Solo permitir editar Admin si el rol del usuario actual no es "COLAB" o si el usuario a editar no es "ADMIN"
 			if (loggedUserRole !== "COLAB" || user.rol !== "ADMIN") {
 			setEditingItem(user);
 		} else {
@@ -49,18 +40,28 @@ const UserTable = () => {
 	};
 
 	const handleDelete = (id) => {
-		setDeletingItem(id); // Store the ID of the user to be deleted
-		setErrorMessage(
-			"No tienes permiso para editar usuarios con rol de ADMIN"
-		);
+		const userToDelete = state.users.find(user => user.id === id);
+    if (userToDelete && userToDelete.rol === "ADMIN") {
+        setErrorMessage("No se puede eliminar un usuario con rol de ADMIN");
+    } else {
+        setDeletingItem(id); // Guardar el ID del usuario a eliminar
+        setErrorMessage(""); // Limpiar el mensaje de error si no es un ADMIN
+    }
 	};
 
 	const confirmDelete = async () => {
+
+		if(loggedUserRole !== "ADMIN"){
+			setErrorMessage("No tienes permisos para eliminar usuarios");
+			setDeletingItem(null); // Cerrar el modal de confirmación de cancelación
+			return;
+		} 
+
 		try {
 			await userService.deleteUserById(deletingItem)
 			dispatch({ type: "DELETE_USER", payload: { id: deletingItem } });
 			setSuccessMessage("El usuario se ha eliminado correctamente");
-			setDeletingItem(null);
+			setDeletingItem(null);			
 		} catch (error) {
 			console.error("Error al eliminar el usuario:", error);
 			setErrorMessage("Ocurrió un error al eliminar el usuario. Por favor, intenta de nuevo.");
@@ -86,11 +87,25 @@ const UserTable = () => {
 		setEditingItem(null);
 	};
 
-	const handleRoleChange = (id, newRole) => {
+	const handleRoleChange = async(id, newRole) => {
 		const updatedUser = state.users.find((user) => user.id === id);
+		const updatedUserData = {
+			id: updatedUser.id,
+			name: updatedUser.name,
+			lastname: updatedUser.lastname,
+			email: updatedUser.email,
+			password: updatedUser.password,
+			rol: updatedUser.rol,
+	};
 		if (updatedUser) {
-			updatedUser.rol = newRole;
-			dispatch({ type: "UPDATE_USER", payload: updatedUser });
+			updatedUserData.rol = newRole;
+			try {
+				await userService.updateUser(updatedUserData);
+				dispatch({ type: "UPDATE_USER", payload: updatedUserData });
+			} catch (error) {
+				console.error("Error al actualizar el rol:", error);
+			setErrorMessage("Ocurrió un error al actualizar el rol. Intenta nuevamente.");
+			}
 		}
 	};
 
@@ -212,6 +227,10 @@ const UserTable = () => {
 										})
 									}
 									className="w-full p-2 border border-gray-300 rounded"
+									disabled={
+									
+										editingItem.rol === "COLAB" && editingItem.email === state.loggedUser.email
+									}
 								>										
 									{/* Sólo puede haber un admin y no se pueden asignar más */}
 									<option value="COLAB">Colaborador</option>
@@ -292,9 +311,8 @@ const UserTable = () => {
 														}
 														className="px-2 py-1 rounded border border-gray-300"
 														disabled={
-															loggedUserRole ===
-																"COLAB" &&
-															user.rol === "ADMIN"
+															loggedUserRole === "COLAB" && user.rol === "ADMIN" ||
+															loggedUserRole === "COLAB" && user.email === state.loggedUser.email
 														}
 													>
 														{/* {loggedUserRole !==
