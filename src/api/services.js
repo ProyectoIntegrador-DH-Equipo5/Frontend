@@ -66,7 +66,12 @@ export const obrasService = {
                     formData.append("files", file);
                 });
             }
-            const response = await axiosConfig.put("/obra", formData);
+            const response = await axiosConfig.put("/obra", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
             return response.data;
         } catch (error) {
             console.error("Error actualizando la obra con imágenes:", error);

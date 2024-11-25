@@ -12,6 +12,7 @@ import { idCreator } from "../utils/formatFunctions";
 import Message from "../components/admin/Message";
 import { authService } from "../api/authService";
 import { userService } from "../api/userService";
+import { categoriaService } from "../api/categoriaService";
 
 const Admin = () => {
 	const { isMobile, state, dispatch } = useContextGlobal();
@@ -31,6 +32,13 @@ const Admin = () => {
 		descripcion: "",
 		url: "",
 	});
+
+	// const [newCat, setNewCat] = useState({
+	// 	nombre: "",
+	// 	descripcion: "",
+	// 	url: "",
+	// });
+	
 	const handleAddItem = (itemType) => {
 		setIsCreatingItem(itemType); // Establece el tipo de ítem que se va a crear
 	};
@@ -162,9 +170,9 @@ const Admin = () => {
 			[name]: value,
 		});
 	};
+
 	const submitCategory = (e)=>{
 		e.preventDefault(); 
-
 
 		// Asignar el ID
 		const newCatWithId = {
@@ -182,6 +190,21 @@ const Admin = () => {
         
 		handleListItems();
 	}
+
+	// const submitCategory = async(e)=>{
+	// 	e.preventDefault(); 
+
+	// 	try {
+	// 		await categoriaService.createCategoria(newCat);
+	// 		console.log("categoria: ",newCat)
+	// 		dispatch({ type: "ADD_CATEGORY", payload: newCat });
+	// 		setSuccessMessage("Categoría creada con éxito");
+	// 		setNewCat({ nombre: "", descripcion: "", url: ""});
+	// 		handleListItems();
+	// 	} catch (error) {
+	// 		setErrorMessage("Hubo un error al crear la categoría. Intente nuevamente.");
+	// 	}
+	// }
 
 	return (
 		<>

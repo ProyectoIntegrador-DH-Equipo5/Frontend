@@ -91,7 +91,7 @@ const Form = ({ edit, obra = {}, onClose }) => {
 		}
 	};
 
-	//"aplanar" el objeto formData
+	//Función para "aplanar" el objeto formData
 	const flattenFormData = (data) => {
     const flattened = {};
 
@@ -132,7 +132,6 @@ const Form = ({ edit, obra = {}, onClose }) => {
 			console.log("Por favor, seleccione o cree una categoría.");
 			return;
 		}
-	
 		console.log("Form data:", formData);
 
 		try {
@@ -140,27 +139,33 @@ const Form = ({ edit, obra = {}, onClose }) => {
 			const flattenedData = flattenFormData(formData);
 			console.log("Flattened data:", flattenedData);
 
-			// Preparar las imágenes adicionales
-			const files = formData.imagenesAdicionales || [];
+			// Preparar las imágenes adicionales y existentes
+			const files = formData.imagenesAdicionales || []; //Nuevas imágenes a subir
 			
 			// Llamar al servicio para crear o actualizar la obra
 				if (edit) {
 					// Actualiza la obra en el estado global (o en el backend)
-					// Extraer IDs de imágenes existentes en Cloudinary
-					const existingImagesIds = formData.imagenes.map((imagen) => imagen.id); 
-					// Preparar datos de update para el backend
-					const updatedArt = { ...flattenedData }; // Crear una copia de flattenedData
-					updatedArt.imagenes = existingImagesIds;  
-					console.log(updatedArt);
-					await obrasService.updateObra(updatedArt, files); // Llama al servicio con los datos y las imágenes
-					dispatch({ type: "UPDATE_ART", payload: formData });
+					const existingImagesIds = formData.imagenes.map((imagen) => imagen.imagenId);	// Extraer IDs de imágenes existentes en Cloudinary
+
+					// Transformar existingImagesIds en un array de arrays
+					const imagesArrayOfArrays = existingImagesIds.map(id => [id]);
+
+					const updatedArt = {                            // Crear copia de flattenedData con id, ids de img 
+						...flattenedData,
+						id: formData.id,
+						imagenes: imagesArrayOfArrays,          
+					};
+
+					console.log("Updated art",updatedArt);
+					const response = await obrasService.updateObra(updatedArt, files); // Llama al servicio con los datos y las imágenes
+					dispatch({ type: "UPDATE_ART", payload: response });
 			} else {
 					// Crear nueva obra en el estado global
-					await obrasService.createObra(flattenedData, files); 
-					dispatch({ type: "ADD_ART", payload: formData });
+					const response = await obrasService.createObra(flattenedData, files); 
+					dispatch({ type: "ADD_ART", payload: response });
 					setFormData(initialFormData); // Restablecer el formulario
 					removeFromLocalStorage("images"); // Eliminar las imágenes del localStorage
-
+					
 					setSuccessMessage(
 						edit
 							? "La obra se ha editado correctamente."
@@ -400,7 +405,6 @@ const Form = ({ edit, obra = {}, onClose }) => {
 				<ImageUpload
 					artId={formData.id} // Reemplazar art.id con formData.id
 					existingImages={formData.imagenesAdicionales} // Reemplazar art.img con formData.img
-					//imagenesAdicionales={formData.imagenesAdicionales} // Reemplazar art.imagenesAdicionales con formData.imagenesAdicionales
 					onFilesAdded={onFilesAdded}
 				/>
 

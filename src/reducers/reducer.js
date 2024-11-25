@@ -16,10 +16,7 @@ export const reducer = (state, action) => {
     // ADD - CREAR
     case "ADD_ART":
       console.log("Agregando obra:", action.payload);
-      const newObra = {
-        ...action.payload,
-        id: action.payload.id || idCreator(state.data),
-      };
+      const newObra = action.payload;
       const newDataArt = [...state.data, newObra];
       saveToLocalStorage("data", newDataArt);
       return { ...state, data: newDataArt };

@@ -79,7 +79,11 @@ export const categoriaService = {
           return response.data;
       } catch (error) {
           console.error("Error en la eliminacion de categoria:", error);
-          throw new Error("No se pudo eliminar la categoria. Por favor, verifica tu conexión o intenta nuevamente.");
+          if (error.response) {
+            throw new Error(error.response.data || "Error desconocido al eliminar la categoría.");
+          }else{
+            throw new Error("No se pudo eliminar la categoria. Por favor, verifica tu conexión o intenta nuevamente.");
+          } 
       }
   },
 }

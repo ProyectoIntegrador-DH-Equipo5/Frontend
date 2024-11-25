@@ -5,6 +5,7 @@ import Pagination from "./Pagination";
 import Modal from "./Modal";
 import Message from "./Message";
 import { FaTimes } from "react-icons/fa"; 
+import { categoriaService } from "../../api/categoriaService";
 
 const CategoryTable = () => {
   const { state, dispatch } = useContextGlobal();
@@ -29,10 +30,20 @@ const CategoryTable = () => {
     setDeletingItem(id);
   };
 
-  const confirmDelete = () => {
-    dispatch({ type: "DELETE_CATEGORY", payload: { id: deletingItem } });
-    setSuccessMessage("La categoría se ha eliminado correctamente");
-    setDeletingItem(null);
+  const confirmDelete = async() => {
+    try {
+      await categoriaService.deleteCategoria(deletingItem);
+      dispatch({ type: "DELETE_CATEGORY", payload: { id: deletingItem } });
+      setSuccessMessage("La categoría se ha eliminado correctamente");
+      setDeletingItem(null);  
+    } catch (error) {
+      setDeletingItem(null);
+      if (error.message) {
+        setErrorMessage(error.message); // Si el backend envió un mensaje de error, lo mostramos
+      } else {
+        setErrorMessage("Hubo un error al eliminar la categoría.");
+      }
+  }
   };
 
   const handleSaveEdit = (updatedCategory) => {
@@ -41,6 +52,14 @@ const CategoryTable = () => {
     setSuccessMessage("Categoría actualizada con éxito");
     setEditingItem(null);
   };
+
+  // const handleSaveEdit = async(updatedCategory) => {
+  //   await categoriaService.updateCategoria(updatedCategory)
+  //   console.log("categoría a actualizar: ", updatedCategory)
+  //   dispatch({ type: "UPDATE_CATEGORY", payload: updatedCategory });
+  //   setSuccessMessage("Categoría actualizada con éxito");
+  //   setEditingItem(null);
+  // };
 
  
   useEffect(() => {
