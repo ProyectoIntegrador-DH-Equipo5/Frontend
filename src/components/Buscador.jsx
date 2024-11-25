@@ -2,16 +2,16 @@ import Button from './Button';
 import Calendar from './Calendar';
 import { BiSearchAlt } from "react-icons/bi";
 import '../styles/App.css';
-import { useContextGlobal } from '../utils/global.context'; // Importar el contexto
+import { useContextGlobal } from '../utils/global.context';
 import { useState } from 'react';
-import Card from './Card'; // Asegúrate de importar Card
-import reservas from '../utils/reserva.json'; // Importar el archivo de reservas
+import Card from './Card';
+import reservas from '../utils/reserva.json';
 
 const Buscador = () => {
-  const { state } = useContextGlobal(); // Obtener el estado del contexto
+  const { state } = useContextGlobal();
   const [inputValue, setInputValue] = useState('');
   const [filteredOptions, setFilteredOptions] = useState([]);
-  const [selectedArtworks, setSelectedArtworks] = useState([]); // Estado para las obras seleccionadas
+  const [selectedArtworks, setSelectedArtworks] = useState([]);
   const [dateRange, setDateRange] = useState([
     {
       startDate: new Date(),
@@ -28,8 +28,18 @@ const Buscador = () => {
   
   // Mapeo de obras y categorias en el autocompletado
   const options = [
-    ...state.categories.map(category => ({ label: category.nombre, type: translations.category })), // Mapeo de categorías
-    ...state.data.map(art => ({ label: art.nombre, type: translations.art })), // Mapeo de obras
+    // Mapeo de categorías
+    ...state.categories.map(category => ({ 
+      label: category.nombre, 
+      type: translations.category,
+      id: category.id 
+    })),
+    // Mapeo de obras
+    ...state.data.map(art => ({ 
+      label: art.nombre, 
+      type: translations.art,
+      id: art.id
+    })),
   ];
   
 
@@ -37,7 +47,6 @@ const Buscador = () => {
     const value = event.target.value;
     setInputValue(value);
 
-    // Filtrar opciones basadas en el valor del input y el rango de fechas
     const filtered = options.filter(option => 
       option.label.toLowerCase().startsWith(value.toLowerCase())
     );
@@ -46,37 +55,48 @@ const Buscador = () => {
 
   const handleOptionClick = (option) => {
     setInputValue(option.label);
-    setFilteredOptions([]); // Limpiar las opciones filtradas
-    
-  //   const selectedArtwork = state.data.find(art => art.nombre === option.label);
-  //   if (selectedArtwork) {
-  //       setSelectedArtworks(prev => [...prev, selectedArtwork]); // Agregar la obra seleccionada al estado
-  //   }
-  // setSelectedArtworks([selectedArtwork]); // Resetea el estado de selectedArtworks con la nueva obra seleccionada
+    setFilteredOptions([]);
   };
 
-  const handleSearch = (event) => {
-    event.preventDefault(); // Evita la recarga de la página
-
-    // Filtrar las obras basadas en el input y la disponibilidad
-    const results = state.data.filter(option => 
-      (option.nombre.toLowerCase().includes(inputValue.toLowerCase()) || 
-      option.categoria?.toLowerCase().includes(inputValue.toLowerCase())) 
-    );
-
-    // Filtrar resultados que no tengan reservas en el rango de fechas
-    const filteredResults = results.filter(art => {
+  const filterByAvailability = (artworks) => {
+    return artworks.filter(art => {
       return !reservas.some(reserva => {
         const fechaInicio = new Date(reserva.fechaInicio);
         const fechaFin = new Date(reserva.fechaFin);
         return art.id === reserva.obra.id && 
-               ((dateRange[0].startDate >= fechaInicio && dateRange[0].startDate <= fechaFin) ||
+              ((dateRange[0].startDate >= fechaInicio && dateRange[0].startDate <= fechaFin) ||
                 (dateRange[0].endDate >= fechaInicio && dateRange[0].endDate <= fechaFin) ||
                 (dateRange[0].startDate <= fechaInicio && dateRange[0].endDate >= fechaFin));
       });
     });
+  };
 
-    setSelectedArtworks(filteredResults); // Actualiza las obras seleccionadas
+  const handleSearch = (event) => {
+    event.preventDefault();
+    
+    // Primero verificamos si el input coincide exactamente con una categoría
+    const selectedCategory = state.categories.find(
+      category => category.nombre.toLowerCase() === inputValue.toLowerCase()
+    );
+
+    let results = [];
+    
+    if (selectedCategory) {
+      // Si es una categoría exacta, mostramos todas las obras de esa categoría
+      results = state.data.filter(art => 
+        art.movimientoArtistico.id === selectedCategory.id
+      );
+    } else {
+      // Si no es una categoría exacta, buscamos coincidencias parciales en obras y categorías
+      results = state.data.filter(art => 
+        art.nombre.toLowerCase().includes(inputValue.toLowerCase()) || 
+        art.movimientoArtistico.nombre.toLowerCase().includes(inputValue.toLowerCase())
+      );
+    }
+
+    // Aplicamos el filtro de disponibilidad
+    const availableResults = filterByAvailability(results);
+    setSelectedArtworks(availableResults);
   };
 
   return (
