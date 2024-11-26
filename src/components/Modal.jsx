@@ -1,15 +1,24 @@
 import React, { useState } from "react";
+import { useContextGlobal } from "../utils/global.context.jsx";
+import Calendar from "./Calendar.jsx"
+
 import { RiArrowGoBackFill } from "react-icons/ri";
 import { IoMdClose } from "react-icons/io";
 import { MdNavigateNext, MdNavigateBefore } from "react-icons/md";
 import { BsRulers } from "react-icons/bs";
 import { BsPalette } from "react-icons/bs";
 import { BsPerson } from "react-icons/bs";
-import { useContextGlobal } from "../utils/global.context.jsx";
 
 const Modal = ({ isOpen, onClose, producto }) => {
   const [mostrarCarrusel, setMostrarCarrusel] = useState(false);
   const [imagenActual, setImagenActual] = useState(0);
+  const [dateRange, setDateRange] = useState([
+    {
+      startDate: new Date(),
+      endDate: new Date(),
+      key: 'selection'
+    }
+  ]);
   const { state } = useContextGlobal();
 
   if (!isOpen) return null;
@@ -67,8 +76,8 @@ const Modal = ({ isOpen, onClose, producto }) => {
           onClick={onClose}
         />
 
-        {/* Header negro */}
         <div className="relative w-full max-w-6xl mx-auto">
+        {/* Header negro */}
           <div className="bg-black text-white p-4 rounded-t-xl">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
               <div>
@@ -93,7 +102,7 @@ const Modal = ({ isOpen, onClose, producto }) => {
           <div className="bg-white rounded-b-xl p-4 sm:p-6 max-h-[calc(100vh-8rem)] overflow-y-auto">
             <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
               {/* Columna izquierda: Imagen principal */}
-              <div className="flex-1">
+              <div className="flex-1 overflow-y-auto">
                 <img
                   src={producto.img}
                   alt={producto.nombre}
@@ -101,23 +110,10 @@ const Modal = ({ isOpen, onClose, producto }) => {
                 />
 
                 {/* Categorías */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 mb-4">
-                  <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg text-sm sm:text-base justify-center border-gray-400 border-2">
-                    <BsRulers className="text-xl" />
-                    <span className="line-clamp-1">{producto.tamano}</span>
-                  </div>
-                  <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg text-sm sm:text-base justify-center border-gray-400 border-2">
-                    <BsPalette className="text-xl" />
-                    <span className="line-clamp-1">{producto.tecnicaObra?.nombre}</span>
-                  </div>
-                  <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg text-sm sm:text-base justify-center border-gray-400 border-2">
-                    <BsPerson className="text-xl" />
-                    <span className="line-clamp-1">{producto.movimientoArtistico?.nombre}</span>
-                  </div>
-                </div>
+                  <Calendar setDateRange={setDateRange} />
 
                 {/* Información detallada */}
-                <div className="space-y-3 sm:space-y-4">
+                <div className="space-y-3 mt-5 mb-5 sm:space-y-4">
                   <div>
                     <p className="text-xs sm:text-sm text-gray-600">Fecha de creación:</p>
                     <p className="text-sm sm:text-base">{producto.fechaCreacion}</p>
@@ -160,6 +156,22 @@ const Modal = ({ isOpen, onClose, producto }) => {
                     </div>
                   </div>
                 </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2 sm:gap-3 mb-4">
+                  <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg text-sm sm:text-base justify-center border-gray-400 border-2">
+                    <BsRulers className="text-xl" />
+                    <span className="line-clamp-1">{producto.tamano}</span>
+                  </div>
+                  <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg text-sm sm:text-base justify-center border-gray-400 border-2">
+                    <BsPalette className="text-xl" />
+                    <span className="line-clamp-1">{producto.tecnicaObra?.nombre}</span>
+                  </div>
+                  <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg text-sm sm:text-base justify-center border-gray-400 border-2">
+                    <BsPerson className="text-xl" />
+                    <span className="line-clamp-1">{producto.movimientoArtistico?.nombre}</span>
+                  </div>
+                </div>
+                
 
                 {state.loggedUser ? (
                   <button className="w-full py-3 bg-primary text-black font-bold rounded-lg hover:bg-primary transition-colors mb-3">
