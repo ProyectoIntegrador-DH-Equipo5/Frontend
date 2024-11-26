@@ -84,7 +84,8 @@ const Buscador = () => {
     if (selectedCategory) {
       // Si es una categoría exacta, mostramos todas las obras de esa categoría
       results = state.data.filter(art => 
-        art.movimientoArtistico.id === selectedCategory.id
+        // art.movimientoArtistico.id === selectedCategory.id
+        art.movimientoArtistico.nombre.toLowerCase() === selectedCategory.nombre.toLowerCase()
       );
     } else {
       // Si no es una categoría exacta, buscamos coincidencias parciales en obras y categorías
