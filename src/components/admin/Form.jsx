@@ -46,6 +46,14 @@ const Form = ({ edit, obra = {}, onClose }) => {
 		}));
 	};
 
+	// const onFilesDeleted = (file) => {  
+	// 	console.log("Archivo añadido:", file);
+	// 	setFormData((prevData) => ({
+	// 		...prevData,
+	// 		imagenesAdicionales: [...(prevData.imagenesAdicionales || []), imagenes[imagenId] = file], // Agregar el archivo al array de imágenes
+	// 	}));
+	// };
+
 	const handleChange = (e) => {
 		const { name, value } = e.target;
 		if (name === "precioRenta") {
@@ -235,6 +243,7 @@ const Form = ({ edit, obra = {}, onClose }) => {
 
 	const renderFields = (fields) => {
 		return fields.map((field) => {
+			console.log(field)
 			const fieldValue = formData[field] || "";
 			const fieldType =
 				field === "descripcion"
@@ -243,6 +252,8 @@ const Form = ({ edit, obra = {}, onClose }) => {
 					? "select"
 					: field === "fechaCreacion"
 					? "date"
+					: field === "imagenes"
+					? "imagen"
 					: "input";
 
 			return (

@@ -46,20 +46,27 @@ const CategoryTable = () => {
   }
   };
 
-  const handleSaveEdit = (updatedCategory) => {
-    console.log("admin: ", updatedCategory)
+  const handleSaveEdit = async(updatedCategory) => {
+    // Obtener las categorías existentes
+    const response = await categoriaService.getCategorias();
+    const existingCategories = response;
+
+    // Verificar si la categoría ya existe
+    const duplicateCategory = existingCategories.find(
+        (category) => category.nombre.toLowerCase() === updatedCategory.nombre.toLowerCase()
+    );
+
+    if (duplicateCategory) {
+        setErrorMessage("El nombre de la categoría que intenta actualizar ya existe.");
+        return; 
+    }
+
+    await categoriaService.updateCategoria(updatedCategory)
+    console.log("categoría a actualizar: ", updatedCategory)
     dispatch({ type: "UPDATE_CATEGORY", payload: updatedCategory });
     setSuccessMessage("Categoría actualizada con éxito");
     setEditingItem(null);
   };
-
-  // const handleSaveEdit = async(updatedCategory) => {
-  //   await categoriaService.updateCategoria(updatedCategory)
-  //   console.log("categoría a actualizar: ", updatedCategory)
-  //   dispatch({ type: "UPDATE_CATEGORY", payload: updatedCategory });
-  //   setSuccessMessage("Categoría actualizada con éxito");
-  //   setEditingItem(null);
-  // };
 
  
   useEffect(() => {
@@ -108,7 +115,7 @@ const CategoryTable = () => {
                 <label className="block text-sm font-semibold mb-2" htmlFor="descripcion">Descripción</label>
                 <textarea
                   id="descripcion"
-                  value={editingItem.descripcion}
+                  value={editingItem.descripcion || ""}
                   onChange={(e) => setEditingItem({ ...editingItem, descripcion: e.target.value })}
                   className="w-full p-2 border border-gray-300 rounded"
                 />

@@ -109,7 +109,7 @@ const ProductTable = () => {
 											</td>
 											<td className="whitespace-nowrap px-4 py-2 text-gray-700 text-left">
 												{console.log("Obra actual antes de mapear product table:", obra)}
-												{console.log("imagenes en product table "+ obra.imagenes)}
+												{console.log("imagenes en product table "+ JSON.stringify(obra.imagenes))}
 												{obra.imagenes ? (
 													<img
 														src={obra.imagenes.find((imagen) => 

@@ -1,4 +1,4 @@
-import { formatLabel} from "../../utils/formatFunctions"; 
+import { formatLabel } from "../../utils/formatFunctions";
 
 const FormField = ({
 	element = "input",
@@ -10,6 +10,7 @@ const FormField = ({
 }) => {
 	return (
 		<label className="font-bold">
+			{console.log(JSON.stringify(value), element)}
 			{formatLabel(label)}:
 			{element === "select" ? (
 				<select
@@ -27,6 +28,17 @@ const FormField = ({
 					onChange={onChange}
 					className="block w-full font-normal mt-1 mb-4 p-2 border border-gray-300 rounded"
 				/>
+			) : element === "imagen" ? (
+				<div className="col">
+					{...value.map(element => 
+						 <img
+							src={element.url}
+							alt={element.nombre || "Imagen"}
+							//alt={`Imagen ${index + 1}`}
+							className="w-16 h-16 object-cover"
+						/>
+					)}
+				</div>
 			) : element === "date" ? (
 				<input
 					type="date"

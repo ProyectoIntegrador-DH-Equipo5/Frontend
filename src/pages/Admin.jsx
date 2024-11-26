@@ -171,40 +171,34 @@ const Admin = () => {
 		});
 	};
 
-	const submitCategory = (e)=>{
+	const submitCategory = async(e)=>{
 		e.preventDefault(); 
 
-		// Asignar el ID
-		const newCatWithId = {
-			...newCat,
-			id: idCreator(state.categories),
-		};
+		try {
+			 // Obtener las categorías existentes
+			 const response = await categoriaService.getCategorias();
+			 const existingCategories = response;
 
-		// Agregar el nuevo usuario
-        console.log("admin: ",newCatWithId)
-		dispatch({ type: "ADD_CATEGORY", payload: newCatWithId });
-		setSuccessMessage("Categoría creada con éxito");
+			 // Verificar si la categoría ya existe
+			 const duplicateCategory = existingCategories.find(
+					 (category) => category.nombre.toLowerCase() === newCat.nombre.toLowerCase()
+			 );
 
-		// Limpiar los campos después de la creación
-		setNewCat({ nombre: "", descripcion: "", url: ""});
-        
-		handleListItems();
+			 if (duplicateCategory) {
+					 setErrorMessage("La categoría ya existe.");
+					 return; 
+			 }
+
+			await categoriaService.createCategoria(newCat);
+			console.log("categoria: ",newCat)
+			dispatch({ type: "ADD_CATEGORY", payload: newCat });
+			setSuccessMessage("Categoría creada con éxito");
+			setNewCat({ nombre: "", descripcion: "", url: ""});
+			handleListItems();		
+		}catch (error) {
+			setErrorMessage("Hubo un error al crear la categoría. Intente nuevamente.");
+		} 
 	}
-
-	// const submitCategory = async(e)=>{
-	// 	e.preventDefault(); 
-
-	// 	try {
-	// 		await categoriaService.createCategoria(newCat);
-	// 		console.log("categoria: ",newCat)
-	// 		dispatch({ type: "ADD_CATEGORY", payload: newCat });
-	// 		setSuccessMessage("Categoría creada con éxito");
-	// 		setNewCat({ nombre: "", descripcion: "", url: ""});
-	// 		handleListItems();
-	// 	} catch (error) {
-	// 		setErrorMessage("Hubo un error al crear la categoría. Intente nuevamente.");
-	// 	}
-	// }
 
 	return (
 		<>

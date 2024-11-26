@@ -4,7 +4,7 @@ export const categoriaService = {
   getCategorias: async () => {
       try {
           const response = await axiosConfig.get("/movimientoArtistico/listartodos", {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
           });
           return response.data;
       } catch (error) {
@@ -19,7 +19,7 @@ export const categoriaService = {
   getCategoria: async (id) => {
       try {
           const response = await axiosConfig.get(`/movimientoArtistico/${id}`, {
-              headers: { Authorization: `Bearer ${token}` },
+              headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
           });
           return response.data;
       } catch (error) {
@@ -45,8 +45,11 @@ export const categoriaService = {
       } catch (error) {
           console.error("Error guardando la categoria:", error);
           if (error.response) {
-              console.error("Response data:", error.response.data);
-          }
+            throw new Error(error.response.data || "Error desconocido al crear la categoría.");
+              //console.error("Response data:", error.response.data);
+          }else{
+            throw new Error("No se pudo crear la categoria. Por favor, verifica tu conexión o intenta nuevamente.");
+          } 
           throw error;
       }
   },
@@ -63,9 +66,12 @@ export const categoriaService = {
       } catch (error) {
           console.error("Error actualizando la categoria:", error);
           if (error.response) {
-              console.error("Response data:", error.response.data);
-          }
-          throw error;
+            throw new Error(error.response.data || "Error desconocido al actualziar la categoría.");
+              //console.error("Response data:", error.response.data);
+          }else{
+            throw new Error("No se pudo actualizar la categoria. Por favor, verifica tu conexión o intenta nuevamente.");
+          } 
+          //throw error;
       }
   },
 
