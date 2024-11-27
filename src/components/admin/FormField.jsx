@@ -29,12 +29,11 @@ const FormField = ({
 					className="block w-full font-normal mt-1 mb-4 p-2 border border-gray-300 rounded"
 				/>
 			) : element === "imagen" ? (
-				<div className="col">
+				<div className="row flex flex-wrap gap-2">
 					{...value.map(element => 
 						 <img
 							src={element.url}
 							alt={element.nombre || "Imagen"}
-							//alt={`Imagen ${index + 1}`}
 							className="w-16 h-16 object-cover"
 						/>
 					)}

@@ -32,17 +32,21 @@ const Form = ({ edit, obra = {}, onClose }) => {
 	const [errorMessage, setErrorMessage] = useState("");
 
 	useEffect(() => {
-		if (edit) {
-			setFormData({ ...obra });
-			updatePriceRangeSymbol(obra.precioRenta || "");
-		}
-	}, [edit, obra]);
+    if (edit && obra) {
+        const formattedObra = {
+            ...obra,
+            imagenes: obra.imagenes || [] // Asegurarse de que siempre haya un array
+        };
+        setFormData(formattedObra);
+        updatePriceRangeSymbol(obra.precioRenta || "");
+    }
+}, [edit, obra]);
 
-	const onFilesAdded = (file) => {
-		console.log("Archivo añadido:", file);
+	const onFilesAdded = (files) => {
+		console.log("Archivo añadidos:", files);
 		setFormData((prevData) => ({
 			...prevData,
-			imagenesAdicionales: [...(prevData.imagenesAdicionales || []), file], // Agregar el archivo al array de imágenes
+			imagenesAdicionales: files
 		}));
 	};
 
@@ -127,9 +131,11 @@ const Form = ({ edit, obra = {}, onClose }) => {
 		const isCategoryValid =
 			formData.movimientoArtistico?.nombre ||
 			(isAddingCategory && newCategory.nombre);
+
 		const existingProduct = state.data.find(
 			(product) => product.nombre === formData.nombre
 		);
+
 		if (!edit && existingProduct) { //Ojo q lo cambié
 			setErrorMessage("El nombre del producto ya existe.");
 			console.log("El nombre del producto ya existe.");
@@ -147,28 +153,54 @@ const Form = ({ edit, obra = {}, onClose }) => {
 			const flattenedData = flattenFormData(formData);
 			console.log("Flattened data:", flattenedData);
 
-			// Preparar las imágenes adicionales y existentes
+			// Preparar las imágenes
 			const files = formData.imagenesAdicionales || []; //Nuevas imágenes a subir
 			
-			// Llamar al servicio para crear o actualizar la obra
-				if (edit) {
-					// Actualiza la obra en el estado global (o en el backend)
-					const existingImagesIds = formData.imagenes.map((imagen) => imagen.imagenId);	// Extraer IDs de imágenes existentes en Cloudinary
+			// Llamar al servicio para actualizar la obra
+			if (edit) {
+				// Crear un FormData para enviar los datos
+				const formDataToSend = new FormData();
 
-					// Transformar existingImagesIds en un array de arrays
-					const imagesArrayOfArrays = existingImagesIds.map(id => [id]);
+				// Agregar los datos básicos
+				Object.keys(flattenedData).forEach(key => {
+					if (key !== 'imagenes' && flattenedData[key] !== undefined) {
+							formDataToSend.append(key, flattenedData[key]);
+					}
+				});
 
-					const updatedArt = {                            // Crear copia de flattenedData con id, ids de img 
-						...flattenedData,
-						id: formData.id,
-						imagenes: imagesArrayOfArrays,          
-					};
+				// Agregar el ID de la obra
+				formDataToSend.append('id', formData.id);
 
-					console.log("Updated art",updatedArt);
-					const response = await obrasService.updateObra(updatedArt, files); // Llama al servicio con los datos y las imágenes
-					dispatch({ type: "UPDATE_ART", payload: response });
+				// Manejar imágenes existentes y nuevas
+				const existingImages = formData.imagenes || [];
+				const newImages = formData.imagenesAdicionales || [];
+		
+				// Agregar imágenes existentes
+				existingImages.forEach((imagen, index) => {
+						if (imagen.imagenId) {
+								formDataToSend.append(`imagenes[${index}].imagenId`, imagen.imagenId);
+						}
+				});
+		
+				// Agregar nuevas imágenes
+				newImages.forEach((file, index) => {
+						if (file instanceof File) {
+								formDataToSend.append('files', file);
+						}
+				});
+
+				console.log("FormData contents:");
+				for (let pair of formDataToSend.entries()) {
+						console.log(pair[0] + ': ' + pair[1]);
+				}
+
+				console.log("Sending update data:", Object.fromEntries(formDataToSend));
+				const response = await obrasService.updateObra(formDataToSend);
+				dispatch({ type: "UPDATE_ART", payload: response });
+				setSuccessMessage("La obra se ha actualizado correctamente.");
+				onClose();
 			} else {
-					// Crear nueva obra en el estado global
+					// Crear nueva obra y guardar en el estado global
 					const response = await obrasService.createObra(flattenedData, files); 
 					dispatch({ type: "ADD_ART", payload: response });
 					setFormData(initialFormData); // Restablecer el formulario
@@ -180,8 +212,8 @@ const Form = ({ edit, obra = {}, onClose }) => {
 							: "La obra se ha creado correctamente."
 					);
 					onClose();
-				};
-			}
+			};
+		}
 		catch (error) {
 			console.error("Error al enviar los datos al backend:", error);
 			setErrorMessage(
@@ -415,7 +447,7 @@ const Form = ({ edit, obra = {}, onClose }) => {
 				{renderNestedFields()}
 				<ImageUpload
 					artId={formData.id} // Reemplazar art.id con formData.id
-					existingImages={formData.imagenesAdicionales} // Reemplazar art.img con formData.img
+					existingImages={formData.imagenes} 
 					onFilesAdded={onFilesAdded}
 				/>
 

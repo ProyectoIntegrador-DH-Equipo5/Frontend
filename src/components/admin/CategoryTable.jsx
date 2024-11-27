@@ -51,10 +51,13 @@ const CategoryTable = () => {
     const response = await categoriaService.getCategorias();
     const existingCategories = response;
 
-    // Verificar si la categoría ya existe
-    const duplicateCategory = existingCategories.find(
-        (category) => category.nombre.toLowerCase() === updatedCategory.nombre.toLowerCase()
-    );
+   // Verificar si la categoría ya existe
+   const duplicateCategory = existingCategories.find(existingCategory => {
+    const isSameName = existingCategory.nombre.toLowerCase() === updatedCategory.nombre.toLowerCase();
+    const isDifferentId = existingCategory.id !== updatedCategory.id;
+    
+    return isSameName && isDifferentId;
+    });
 
     if (duplicateCategory) {
         setErrorMessage("El nombre de la categoría que intenta actualizar ya existe.");

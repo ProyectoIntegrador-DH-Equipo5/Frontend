@@ -54,18 +54,6 @@ export const obrasService = {
 
     updateObra: async (obra, files) => {
         try {
-            const formData = new FormData();
-            
-            Object.keys(obra).forEach(key => {
-                formData.append(key, obra[key]);
-            });
-
-            // Agregar las nuevas imágenes al FormData
-            if (files && files.length > 0) {
-                files.forEach(file => {
-                    formData.append("files", file);
-                });
-            }
             const response = await axiosConfig.put("/obra", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
@@ -81,6 +69,24 @@ export const obrasService = {
             throw error;
         }
     },
+
+    // updateObra: async (formData) => {
+    //     try {
+    //         const response = await axiosConfig.put("/obra", formData, {
+    //             headers: {
+    //                 "Content-Type": "multipart/form-data",
+    //                 Authorization: `Bearer ${localStorage.getItem("token")}`,
+    //             },
+    //         });
+    //         return response.data;
+    //     } catch (error) {
+    //         console.error("Error actualizando la obra con imágenes:", error);
+    //         if (error.response) {
+    //             console.error("Response data:", error.response.data);
+    //         }
+    //         throw error;
+    //     }
+    // },
 
     deleteObra: async (id) => {
         try {
