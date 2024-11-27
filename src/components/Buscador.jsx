@@ -99,6 +99,7 @@ const Buscador = () => {
     if (selectedCategory) {
       // Si es una categoría exacta, mostramos todas las obras de esa categoría
       results = state.data.filter(art => 
+        // art.movimientoArtistico.id === selectedCategory.id
         art.movimientoArtistico.nombre.toLowerCase() === selectedCategory.nombre.toLowerCase()
       );
     } else {
