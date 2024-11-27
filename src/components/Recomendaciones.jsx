@@ -36,7 +36,7 @@ const Recomendaciones = () => {
                     <div className="flex grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {randomProducts.map((producto) => {
                             console.log("Producto para Card:", producto)
-                            return <Card key={producto.id} producto={producto} />
+                            return <Card key={producto.id} producto={producto} isFavorite={state.favorites.some((fav) => fav.id === producto.id)} />
                     })}
                     </div>
                 ) : (

@@ -105,6 +105,23 @@ export const reducer = (state, action) => {
       saveToLocalStorage("users", filteredDataUser);
       return { ...state, users: filteredDataUser };
 
+
+      // FAVORITOS - Agregar y eliminar de favoritos
+      case "ADD_TO_FAVORITES":
+        // Agregar el producto a la lista de favoritos
+        const addedFavorites = [...state.favorites, action.payload];
+        saveToLocalStorage("favorites", addedFavorites); // Guardar en localStorage
+        return { ...state, favorites: addedFavorites };
+  
+      case "REMOVE_FROM_FAVORITES":
+        // Eliminar el producto de la lista de favoritos
+        const filteredFavorites = state.favorites.filter(
+          (product) => product.id !== action.payload.id
+        );
+        saveToLocalStorage("favorites", filteredFavorites); // Guardar en localStorage
+        return { ...state, favorites: filteredFavorites };  
+
+
     // IMAGENES - Manejo de imagenes en LocalStorage
 
     case "ADD_IMAGE":
@@ -163,3 +180,4 @@ export const reducer = (state, action) => {
       return state;
   }
 };
+

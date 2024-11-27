@@ -27,6 +27,7 @@ export const initialState = {
     activeSection: "obras",
     user: null,
     loggedUser: loadFromLocalStorage("loggedUser") || null,
+    favorites: loadFromLocalStorage("favorites") || [],
 };
 
 const backendURL = "http://localhost:8080"; // *URL base del backend

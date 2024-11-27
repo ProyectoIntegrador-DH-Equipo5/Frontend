@@ -1,10 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useContextGlobal } from '../utils/global.context.jsx';
 import { useNavigate } from 'react-router-dom';
+import Card from '../components/Card';
 
 const Profile = () => {
   const { state } = useContextGlobal();
   const navigate = useNavigate();
+  const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
+
+  const toggleFavorites = () => {
+    setIsFavoritesOpen(!isFavoritesOpen);
+  };
   console.log(state.loggedUser?.rol);
  // Verifica que loggedUser esté definido
 
@@ -70,6 +76,31 @@ const Profile = () => {
                 </button>
               </div>
             </div>
+
+                  {/* Menú desplegable de favoritos: */}
+
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-600 mb-1">Favoritos</h2>
+              <button onClick={toggleFavorites} className="text-gray-400">
+                {isFavoritesOpen ? (
+                  <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 12l-4-4h8l-4 4z" />
+                  </svg>
+                ) : (
+                  <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 8l4 4H6l4-4z" />
+                  </svg>
+                )}
+              </button>
+            </div>
+
+            {isFavoritesOpen && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {state.favorites.map((producto) => (
+                  <Card key={producto.id} producto={producto} isFavorite={true} />
+                ))}
+              </div>
+            )}
           </div>
         </div>
       ) : (
