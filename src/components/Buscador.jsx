@@ -3,7 +3,7 @@ import Calendar from './Calendar';
 import { BiSearchAlt } from "react-icons/bi";
 import '../styles/App.css';
 import { useContextGlobal } from '../utils/global.context';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Card from './Card';
 import reservas from '../utils/reserva.json';
 
@@ -19,6 +19,21 @@ const Buscador = () => {
       key: 'selection'
     }
   ]);
+
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (inputRef.current && !inputRef.current.contains(event.target)) {
+        setFilteredOptions([]); // Cierra la lista de sugerencias
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   // Cambia los nombres de categoria y obra para mejorar legibilidad.
   const translations = {
@@ -84,7 +99,7 @@ const Buscador = () => {
     if (selectedCategory) {
       // Si es una categoría exacta, mostramos todas las obras de esa categoría
       results = state.data.filter(art => 
-        art.movimientoArtistico.id === selectedCategory.id
+        art.movimientoArtistico.nombre.toLowerCase() === selectedCategory.nombre.toLowerCase()
       );
     } else {
       // Si no es una categoría exacta, buscamos coincidencias parciales en obras y categorías
@@ -104,7 +119,7 @@ const Buscador = () => {
       <h1 className="text-primary font-serif text-4xl mt-16 leading-relaxed">ARTE EXCLUSIVO<br /> EXPERIENCIAS INOLVIDABLES</h1>
       <div className="mx-auto flex justify-between w-full">
       <form onSubmit={handleSearch} className="flex flex-col w-full md:flex-row justify-center gap-6 p-5 px-4 md:px-24 sm:items-start md:items-start lg:items-center">
-        <div className="relative w-full max-w-md">
+        <div className="relative w-full max-w-md" ref={inputRef}>
         <h2 className="text-2xl mb-2 text-white text-left pt-16 px-4 md:pt-16">Busca y alquila tus obras favoritas</h2>
           <input
             type="text"
@@ -118,7 +133,7 @@ const Buscador = () => {
               {filteredOptions.map((option, index) => (
                 <li 
                   key={index} 
-                  onClick={() => handleOptionClick(option)} 
+                  onMouseDown={() => handleOptionClick(option)} 
                   className="cursor-pointer hover:bg-gray-200 p-2 text-left"
                 >
                   {option.label} ({option.type.charAt(0).toUpperCase() + option.type.slice(1)})
