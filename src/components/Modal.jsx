@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useContextGlobal } from "../utils/global.context.jsx";
-import Calendar from "./Calendar.jsx"
+import CalendarioModal from './calendarioModal.jsx';
 
 import { RiArrowGoBackFill } from "react-icons/ri";
 import { IoMdClose } from "react-icons/io";
@@ -20,6 +20,8 @@ const Modal = ({ isOpen, onClose, producto }) => {
     }
   ]);
   const { state } = useContextGlobal();
+
+  const [selectedDates, setSelectedDates] = useState(null);
 
   if (!isOpen) return null;
 
@@ -73,7 +75,7 @@ const Modal = ({ isOpen, onClose, producto }) => {
       <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-6 sm:px-6 md:px-8 lg:px-12 sm:overflow-y-scroll">
         <div
           className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-          onClick={onClose}
+          // onClick={onClose}
         />
 
         <div className="relative w-full max-w-6xl mx-auto">
@@ -110,7 +112,9 @@ const Modal = ({ isOpen, onClose, producto }) => {
                 />
 
                 {/* Categorías */}
-                  <Calendar setDateRange={setDateRange} />
+                <div onClick={(e) => e.stopPropagation()}>
+                  <CalendarioModal obra={producto} setSelectedDates={setSelectedDates} />
+                </div>
 
                 {/* Información detallada */}
                 <div className="space-y-3 mt-5 mb-5 sm:space-y-4">
