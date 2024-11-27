@@ -192,3 +192,29 @@
 }
 
 .rdrInputRangeInput{}
+
+.calendar-day {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.available-date {
+  background-color: rgba(0, 255, 0, 0.2);
+  color: #2c3e50;
+}
+
+.disabled-date {
+  background-color: rgba(255, 0, 0, 0.2);
+  color: #7f8c8d;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+.rdrDay:hover .calendar-day {
+  transform: scale(1.1);
+}

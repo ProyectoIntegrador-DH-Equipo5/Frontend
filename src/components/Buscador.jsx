@@ -147,7 +147,7 @@ const Buscador = () => {
           <h2 className="text-2xl mb-2 text-white text-left pt-16 px-4 md:pt-16">Rango de Fecha</h2>
           <Calendar setDateRange={setDateRange}/>
         </div>
-        <div className="flex flex-col justify-self-end ">
+        <div className="flex flex-col justify-self-end">
         <h2 className="mb-10 pt-16 md:pt-16"></h2>
           <Button 
           type="button"

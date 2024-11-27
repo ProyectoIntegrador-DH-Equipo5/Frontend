@@ -1,16 +1,24 @@
 import React, { useState } from "react";
+import { useContextGlobal } from "../utils/global.context.jsx";
+import CalendarioModal from './CalendarioModal.jsx';
+
 import { RiArrowGoBackFill } from "react-icons/ri";
 import { IoMdClose } from "react-icons/io";
 import { MdNavigateNext, MdNavigateBefore } from "react-icons/md";
 import { BsRulers } from "react-icons/bs";
 import { BsPalette } from "react-icons/bs";
 import { BsPerson } from "react-icons/bs";
-import { useContextGlobal } from "../utils/global.context.jsx";
+import { FaCalendarCheck } from "react-icons/fa";
 
 const Modal = ({ isOpen, onClose, producto }) => {
   const [mostrarCarrusel, setMostrarCarrusel] = useState(false);
   const [imagenActual, setImagenActual] = useState(0);
   const { state } = useContextGlobal();
+
+  // Estados para el calendario
+  const [mostrarCalendario, setMostrarCalendario] = useState(false);
+  const [selectedDates, setSelectedDates] = useState(null);
+  const [isDateValid, setIsDateValid] = useState(false);
 
   if (!isOpen) return null;
 
@@ -29,6 +37,14 @@ const Modal = ({ isOpen, onClose, producto }) => {
     setImagenActual((prev) =>
       prev === 0 ? todasLasImagenes.length - 1 : prev - 1
     );
+  };
+
+  const toggleCalendario = () => {
+    setMostrarCalendario(!mostrarCalendario);
+  };
+
+  const handleDateValidation = (isValid) => {
+    setIsDateValid(isValid);
   };
 
   const CarruselModal = () => (
@@ -59,16 +75,28 @@ const Modal = ({ isOpen, onClose, producto }) => {
     </div>
   );
 
+  const calcularDuracionAlquiler = () => {
+    if (!selectedDates) return 0;
+    const millisecondsPerDay = 24 * 60 * 60 * 1000;
+    return Math.ceil((selectedDates.endDate - selectedDates.startDate) / millisecondsPerDay);
+  };
+
+  const calcularPrecioTotal = () => {
+    if (!selectedDates) return 0;
+    const duracion = calcularDuracionAlquiler();
+    return duracion * producto.precioRenta;
+  };
+
   return (
     <>
       <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-6 sm:px-6 md:px-8 lg:px-12 sm:overflow-y-scroll">
         <div
           className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-          onClick={onClose}
+          // onClick={onClose}
         />
 
-        {/* Header negro */}
         <div className="relative w-full max-w-6xl mx-auto">
+        {/* Header negro */}
           <div className="bg-black text-white p-4 rounded-t-xl">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
               <div>
@@ -93,31 +121,62 @@ const Modal = ({ isOpen, onClose, producto }) => {
           <div className="bg-white rounded-b-xl p-4 sm:p-6 max-h-[calc(100vh-8rem)] overflow-y-auto">
             <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
               {/* Columna izquierda: Imagen principal */}
-              <div className="flex-1">
+              <div className="flex-1 overflow-y-auto">
                 <img
                   src={producto.img}
                   alt={producto.nombre}
                   className="w-full aspect-[4/3] object-cover rounded-lg mb-4 sm:mb-6"
                 />
 
-                {/* Categorías */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 mb-4">
-                  <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg text-sm sm:text-base justify-center border-gray-400 border-2">
-                    <BsRulers className="text-xl" />
-                    <span className="line-clamp-1">{producto.tamano}</span>
-                  </div>
-                  <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg text-sm sm:text-base justify-center border-gray-400 border-2">
-                    <BsPalette className="text-xl" />
-                    <span className="line-clamp-1">{producto.tecnicaObra?.nombre}</span>
-                  </div>
-                  <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg text-sm sm:text-base justify-center border-gray-400 border-2">
-                    <BsPerson className="text-xl" />
-                    <span className="line-clamp-1">{producto.movimientoArtistico?.nombre}</span>
-                  </div>
+                {/* Botón para mostrar/ocultar calendario */}
+                <div className="mb-4 flex items-center justify-between">
+                  <button 
+                    onClick={toggleCalendario}
+                    className="flex items-center gap-2 px-4 py-2 bg-primary text-black rounded hover:bg-primary/90"
+                  >
+                    <FaCalendarCheck />
+                    {mostrarCalendario ? 'Ocultar Calendario' : 'Mostrar Calendario'}
+                  </button>
                 </div>
 
+                {/* Calendario Modal */}
+                {mostrarCalendario && (
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <CalendarioModal 
+                      obra={producto} 
+                      setSelectedDates={setSelectedDates}
+                      onDateValidation={handleDateValidation}
+                    />
+                  </div>
+                )}
+
+                {/* Resumen de Fechas Seleccionadas */}
+                {selectedDates && (
+                  <div className="mt-4 p-4 bg-gray-100 rounded-lg">
+                    <h3 className="text-lg font-semibold mb-2">Resumen de Alquiler</h3>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <p className="text-sm text-gray-600">Fecha de Inicio:</p>
+                        <p>{selectedDates.startDate.toLocaleDateString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Fecha de Fin:</p>
+                        <p>{selectedDates.endDate.toLocaleDateString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Duración:</p>
+                        <p>{calcularDuracionAlquiler()} días</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Precio Total:</p>
+                        <p>$ {calcularPrecioTotal().toLocaleString()} USD</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Información detallada */}
-                <div className="space-y-3 sm:space-y-4">
+                <div className="space-y-3 mt-5 mb-5 sm:space-y-4">
                   <div>
                     <p className="text-xs sm:text-sm text-gray-600">Fecha de creación:</p>
                     <p className="text-sm sm:text-base">{producto.fechaCreacion}</p>
@@ -161,9 +220,33 @@ const Modal = ({ isOpen, onClose, producto }) => {
                   </div>
                 </div>
 
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2 sm:gap-3 mb-4">
+                  <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg text-sm sm:text-base justify-center border-gray-400 border-2">
+                    <BsRulers className="text-xl" />
+                    <span className="line-clamp-1">{producto.tamano}</span>
+                  </div>
+                  <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg text-sm sm:text-base justify-center border-gray-400 border-2">
+                    <BsPalette className="text-xl" />
+                    <span className="line-clamp-1">{producto.tecnicaObra?.nombre}</span>
+                  </div>
+                  <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg text-sm sm:text-base justify-center border-gray-400 border-2">
+                    <BsPerson className="text-xl" />
+                    <span className="line-clamp-1">{producto.movimientoArtistico?.nombre}</span>
+                  </div>
+                </div>
+                
+
+                {/* Botón de Alquiler con validación de fechas */}
                 {state.loggedUser ? (
-                  <button className="w-full py-3 bg-primary text-black font-bold rounded-lg hover:bg-primary transition-colors mb-3">
-                    Alquilar
+                  <button 
+                    className={`w-full py-3 font-bold rounded-lg transition-colors mb-3 ${
+                      isDateValid 
+                        ? 'bg-primary text-black hover:bg-primary/90' 
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    }`}
+                    disabled={!isDateValid}
+                  >
+                    {isDateValid ? 'Alquilar' : 'Seleccione Fechas Válidas'}
                   </button>
                 ) : (
                   <>

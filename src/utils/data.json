@@ -100,7 +100,7 @@
 		"disponibilidad": true,
 		"tamano": "GRANDE",
 		"tecnicaObra": { "id": 5, "nombre": "Óleo sobre lienzo" },
-		"movimientoArtistico": { "id": 5, "nombre": "Barroco" },
+		"movimientoArtistico": { "id": 2, "nombre": "Barroco" },
 		"artista": { "id": 5, "nombre": "Diego Velázquez" }
 	},
 	{
@@ -162,7 +162,7 @@
 		"disponibilidad": true,
 		"tamano": "MEDIANO",
 		"tecnicaObra": { "id": 8, "nombre": "Óleo sobre lienzo" },
-		"movimientoArtistico": { "id": 8, "nombre": "Fauvismo" },
+		"movimientoArtistico": { "id": 5, "nombre": "Fauvismo" },
 		"artista": { "id": 8, "nombre": "Henri Matisse" }
 	},
 	{
@@ -201,7 +201,7 @@
 		"disponibilidad": true,
 		"tamano": "PEQUEÑO",
 		"tecnicaObra": { "id": 10, "nombre": "Óleo sobre lienzo" },
-		"movimientoArtistico": { "id": 10, "nombre": "Barroco" },
+		"movimientoArtistico": { "id": 2, "nombre": "Barroco" },
 		"artista": { "id": 10, "nombre": "Johannes Vermeer" }
 	},
 	{
@@ -262,7 +262,7 @@
 		"disponibilidad": true,
 		"tamano": "MEDIANO",
 		"tecnicaObra": { "id": 14, "nombre": "Óleo sobre lienzo" },
-		"movimientoArtistico": { "id": 14, "nombre": "Romanticismo" },
+		"movimientoArtistico": { "id": 13, "nombre": "Romanticismo" },
 		"artista": { "id": 14, "nombre": "Caspar David Friedrich" }
 	},
 	{
@@ -302,7 +302,7 @@
 		"disponibilidad": true,
 		"tamano": "GRANDE",
 		"tecnicaObra": { "id": 16, "nombre": "Tempera sobre lienzo" },
-		"movimientoArtistico": { "id": 16, "nombre": "Renacimiento" },
+		"movimientoArtistico": { "id": 1, "nombre": "Renacimiento" },
 		"artista": { "id": 16, "nombre": "Sandro Botticelli" }
 	},
 	{
@@ -322,7 +322,7 @@
 		"disponibilidad": true,
 		"tamano": "MEDIANO",
 		"tecnicaObra": { "id": 17, "nombre": "Óleo sobre lienzo" },
-		"movimientoArtistico": { "id": 17, "nombre": "Postimpresionismo" },
+		"movimientoArtistico": { "id": 6, "nombre": "Postimpresionismo" },
 		"artista": { "id": 17, "nombre": "Vincent van Gogh" }
 	},
 	{
@@ -342,7 +342,7 @@
 		"disponibilidad": true,
 		"tamano": "GRANDE",
 		"tecnicaObra": { "id": 18, "nombre": "Óleo sobre panel" },
-		"movimientoArtistico": { "id": 18, "nombre": "Barroco" },
+		"movimientoArtistico": { "id": 2, "nombre": "Barroco" },
 		"artista": { "id": 18, "nombre": "Willem van de Velde" }
 	},
 	{
@@ -362,7 +362,7 @@
 		"disponibilidad": true,
 		"tamano": "GRANDE",
 		"tecnicaObra": { "id": 19, "nombre": "Óleo sobre lienzo" },
-		"movimientoArtistico": { "id": 19, "nombre": "Barroco" },
+		"movimientoArtistico": { "id": 2, "nombre": "Barroco" },
 		"artista": { "id": 19, "nombre": "Nicolas Poussin" }
 	},
 	{
@@ -382,7 +382,7 @@
 		"disponibilidad": true,
 		"tamano": "GRANDE",
 		"tecnicaObra": { "id": 20, "nombre": "Óleo sobre nogal" },
-		"movimientoArtistico": { "id": 20, "nombre": "Barroco" },
+		"movimientoArtistico": { "id": 2, "nombre": "Barroco" },
 		"artista": { "id": 20, "nombre": "Nicolas Poussin" }
 	}
 ]

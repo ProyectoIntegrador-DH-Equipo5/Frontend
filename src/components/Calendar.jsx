@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { DateRangePicker } from "react-date-range";
-// import 'react-date-range/dist/styles.css';
-// import 'react-date-range/dist/theme/default.css';
+import { FaCalendar } from 'react-icons/fa';
 import '../styles/App.css'
 import '../styles/default.css'
 import '../styles/styles.css'
@@ -40,14 +39,16 @@ const Calendar = ({ setDateRange }) => {
   }, [showCalendar]);
 
   return (
-    <div className="relative" id="calendar">
+    <div className="relative w-full max-w-xs" id="calendar">
       <div
         className="border p-3 rounded-lg cursor-pointer text-gray-700 bg-gray-50 shadow-md hover:shadow-lg transition"
         onClick={() => setShowCalendar(!showCalendar)}>
-        
+        <div className="flex items-center space-x-2">
+        <FaCalendar className="w-5 h-5 text-gray-500" />
         <span>
           {dateRange[0].startDate.toLocaleDateString()} - {dateRange[0].endDate.toLocaleDateString()}
         </span>
+        </div>
       </div>
 
       {showCalendar && (
