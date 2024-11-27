@@ -1,35 +1,43 @@
-import React, { useState } from 'react';
-import PropTypes from 'prop-types';
-import { FaHeart } from 'react-icons/fa'; // Ícono de corazón
-import { useContextGlobal } from '../utils/global.context';
-import Modal from './Modal';
+import React, { useState, useCallback } from "react";
+import PropTypes from "prop-types";
+import { FaHeart } from "react-icons/fa"; // Ícono de corazón
+import { useContextGlobal } from "../utils/global.context";
+import Modal from "./Modal";
 
-const Card = ({ producto, isFavorite }) => {
+const Card = ({ producto, isFavorite: initialIsFavorite }) => {
   const { state, dispatch } = useContextGlobal();
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  // Mantener un estado local para el estado de favorito
+  const [localIsFavorite, setLocalIsFavorite] = useState(initialIsFavorite);
 
-   // Función para alternar entre agregar y quitar de favoritos
-   const toggleFavorite = (e) => {
-    e.stopPropagation(); // Previene que el click se propague y active el modal
+  // Memoizar la función toggleFavorite para evitar re-renders innecesarios
+  const toggleFavorite = useCallback((e) => {
+    e.stopPropagation();
 
     if (!state.loggedUser) {
-      setErrorMessage('Debes estar logueado para guardar favoritos.');
-      setTimeout(() => setErrorMessage(''), 3000); // Ocultar el mensaje después de 3 segundos
+      setErrorMessage("Debes estar logueado para guardar favoritos.");
+      setTimeout(() => setErrorMessage(""), 3000);
       return;
     }
 
-    if (isFavorite) {
-      // Si ya es favorito, eliminarlo de favoritos
+    // Verificar si el producto ya está en favoritos antes de agregarlo
+    const isCurrentlyInFavorites = state.favorites?.some(
+      (fav) => fav.id === producto.id
+    );
+
+    if (isCurrentlyInFavorites) {
       dispatch({ type: "REMOVE_FROM_FAVORITES", payload: producto });
+      setLocalIsFavorite(false);
     } else {
-      // Si no es favorito, agregarlo a favoritos
       dispatch({ type: "ADD_TO_FAVORITES", payload: producto });
+      setLocalIsFavorite(true);
     }
-  };
+  }, [state.loggedUser, state.favorites, producto, dispatch]);
+
 
   // Si no hay usuario logueado, el ícono de favoritos debe mostrarse como no marcado
-  const displayFavorite = state.loggedUser ? isFavorite : false;
+  const displayFavorite = state.loggedUser ? localIsFavorite : false;
 
   // Verificar que 'producto' exista
   if (!producto || !producto.nombre || !producto.movimientoArtistico) {
@@ -64,13 +72,15 @@ const Card = ({ producto, isFavorite }) => {
             />
             <button
               className={`absolute top-2 right-2 text-white p-2 rounded-full ${
-                displayFavorite ? 'bg-red-500' : 'bg-gray-500'
+                displayFavorite ? "bg-red-500" : "bg-gray-500"
               } hover:opacity-80 transition-opacity`}
               onClick={toggleFavorite}
-              aria-label={displayFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+              aria-label={
+                displayFavorite ? "Quitar de favoritos" : "Agregar a favoritos"
+              }
               disabled={!state.loggedUser}
             >
-              <FaHeart size={20} color={displayFavorite ? 'white' : 'black'} />
+              <FaHeart size={20} color={displayFavorite ? "text-white" : "text-black"} />
             </button>
           </div>
           <div className="p-4 bg-white flex flex-col h-48">
