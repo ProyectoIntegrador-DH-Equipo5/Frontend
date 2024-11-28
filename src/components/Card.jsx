@@ -62,7 +62,7 @@ const Card = ({ producto, isFavorite: initialIsFavorite }) => {
         onClick={() => setIsModalOpen(true)}
       >
         <div className="absolute inset-0 rounded-xl bg-gradient-to-b from-transparent via-black/20 to-black/80 opacity-0" />
-        <div className="relative overflow-hidden h-100 rounded-xl bg-white/10 backdrop-blur-sm">
+        <div className="relative overflow-hidden h-100 rounded-xl bg-white backdrop-blur-sm text-black">
           <div className="relative">
             <img
               className="h-48 w-full object-cover"
@@ -72,7 +72,7 @@ const Card = ({ producto, isFavorite: initialIsFavorite }) => {
             />
             <button
               className={`absolute top-2 right-2 text-white p-2 rounded-full ${
-                displayFavorite ? "bg-red-500" : "bg-gray-500"
+                displayFavorite ? "bg-black" : "bg-gray-500"
               } hover:opacity-80 transition-opacity`}
               onClick={toggleFavorite}
               aria-label={
@@ -80,10 +80,10 @@ const Card = ({ producto, isFavorite: initialIsFavorite }) => {
               }
               disabled={!state.loggedUser}
             >
-              <FaHeart size={20} color={displayFavorite ? "text-white" : "text-black"} />
+              <FaHeart size={20} color={displayFavorite ? "#EFB810" : "black"} />
             </button>
           </div>
-          <div className="p-4 bg-white flex flex-col h-48">
+          <div className="p-4 bg-white flex flex-col h-48 text-black">
             <h3 className="text-2xl font-semibold text-gray-800 mb-2">
               {producto.nombre}
             </h3>

@@ -185,7 +185,7 @@ const CategoryTable = () => {
       {deletingItem && (
         <Modal
           type="delete"
-          text="¿Realmente deseas eliminar este elemento? Esta acción no se puede deshacer."
+          text={`¿Realmente deseas eliminar ${state.categories.find(cat => cat.id === deletingItem)?.nombre || 'esta categoría'}? Esta acción no se puede deshacer.`}
           options={{
             confirmText: "Eliminar",
             cancelText: "Cancelar",
