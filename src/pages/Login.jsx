@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { useContextGlobal } from '../utils/global.context.jsx';
 import { useNavigate } from 'react-router-dom';
 import { AiFillExclamationCircle } from "react-icons/ai";
-import { jwtDecode } from "jwt-decode";
-import axiosConfig from "../api/axiosConfig.js";
+import { authService } from "../api/authService.js";
+import { favoritosService } from "../api/favoritosService.js";
 
 const Login = () => {
   const { dispatch } = useContextGlobal();
@@ -28,22 +28,18 @@ const Login = () => {
     if (!validateEmail()) return;
   
     try {
-      const response = await axiosConfig.post('/api/auth/login', { email, password });
-      const { token } = response.data;
+      // Usar authService para el login
+      const user = await authService.login({ email, password});
+      console.log("Usuario logueado:", user);
+      dispatch({type: 'LOGIN_USER', payload: user});  // Establecer el usuario en el contexto global
+      
+      // Obtener y establecer favoritos
+      const favoritos = await favoritosService.obtenerFavoritos();
+      dispatch({ type: "SET_FAVORITES", payload: favoritos });
+      
+      setError('');  // Limpiar el error
+      navigate('/');  // Redirigir al usuario a la página principal
 
-      if (response.status === 200) {
-        const user = jwtDecode(token); // Decodifica el token para obtener los datos del usuario
-        console.log("Token decodificado:", user);
-
-        localStorage.setItem('loggedUser', JSON.stringify(user)); //Almacenamos tanto el usuario como el token en el mismo objeto
-        localStorage.setItem('token', token);
-        
-        dispatch({type: 'LOGIN_USER', payload: user});  // Establecer el usuario en el contexto global
-        setError('');  // Limpiar el error
-        navigate('/');  // Redirigir al usuario a la página principal
-      } else {
-        setError(response.data.message || 'Email o contraseña incorrectos.');
-      }
     } catch (err) {
       setError('Hubo un error en el servidor. Inténtalo de nuevo.');
     }
@@ -58,30 +54,24 @@ const Login = () => {
         const userData = JSON.parse(storedUser);
         // Dispatch para cargar el usuario desde el localStorage al contexto global
         dispatch({ type: 'LOGIN_USER', payload: userData });
+        
+        // También cargar los favoritos si hay un usuario
+        const loadFavorites = async () => {
+          try {
+            const favoritos = await favoritosService.obtenerFavoritos();
+            dispatch({ type: "SET_FAVORITES", payload: favoritos });
+          } catch (error) {
+            console.error("Error al cargar favoritos:", error);
+          }
+        };
+        loadFavorites();
+
         navigate('/');  // Redirigir al usuario a la página principal
       } catch (err) {
         console.error("Error al parsear el usuario desde localStorage:", err);
       }
     }
   }, [dispatch, navigate]);
-
-
-  useEffect(() => {
-    const storedUser = localStorage.getItem('loggedUser');
-    console.log(storedUser);
-    
-    if (storedUser) {
-      try {
-        const userData = JSON.parse(storedUser);
-        // Dispatch para cargar el usuario desde el localStorage al contexto global
-        dispatch({ type: 'LOGIN_USER', payload: userData });
-        navigate('/');  // Redirigir al usuario a la página principal
-      } catch (err) {
-        console.error("Error al parsear el usuario desde localStorage:", err);
-      }
-    }
-  }, [dispatch, navigate]);
-
 
   return (
     <div className="flex flex-col w-full pt-32 min-h-screen bg-black">

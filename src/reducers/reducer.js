@@ -107,6 +107,11 @@ export const reducer = (state, action) => {
 
 
       // FAVORITOS - Agregar y eliminar de favoritos
+      case "SET_FAVORITES":
+      // Para establecer la lista inicial de favoritos
+      saveToLocalStorage("favorites", action.payload);
+      return { ...state, favorites: action.payload };
+
       case "ADD_TO_FAVORITES":
         // Agregar el producto a la lista de favoritos
         const addedFavorites = [...state.favorites, action.payload];

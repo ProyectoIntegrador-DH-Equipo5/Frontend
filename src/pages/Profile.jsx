@@ -13,6 +13,7 @@ const Profile = () => {
     setIsFavoritesOpen(!isFavoritesOpen);
   };
   console.log(state.loggedUser?.rol);
+  console.log(state.loggedUser);
  // Verifica que loggedUser esté definido
 
 
@@ -22,8 +23,7 @@ const Profile = () => {
       <h1 className="text-4xl font-bold text-[#FDB813] text-center mb-12 pl-4 pt-12">
         Perfil
       </h1>
-      console.log(state.loggedUser);
-
+      
       <button className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-primary rounded-lg text-black hover:bg-primary/90 transition-colors text-sm sm:text-base" onClick={() => navigate("/")}>
         <RiArrowGoBackFill size={20} />
         <span>Regresar</span>
@@ -60,7 +60,7 @@ const Profile = () => {
 
               <div className="w-96 mx-auto flex flex-col items-center justify-center">
                 <h2 className="text-xl font-bold text-gray-800 mb-4">
-                  {state.loggedUser.rol}
+                  {state.loggedUser?.rol[0]?.authority}
                 </h2>
                 <div className="w-32 h-32 bg-gray-200 rounded-full flex items-center justify-center">
                   <svg

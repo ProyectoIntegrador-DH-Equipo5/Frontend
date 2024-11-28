@@ -24,7 +24,7 @@ const CategoryCard = ({ categoria }) => {
         <div className="h-full">
           <img 
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" 
-            src={categoria.url} 
+            src={categoria.imagen.url} 
             alt={categoria.nombre}
             loading="lazy"
           />
@@ -43,7 +43,9 @@ const CategoryCard = ({ categoria }) => {
 CategoryCard.propTypes = {
   categoria: PropTypes.shape({
     nombre: PropTypes.string.isRequired,
-    url: PropTypes.string.isRequired,
+    imagen: PropTypes.shape({
+      url: PropTypes.string.isRequired,
+  }).isRequired,
   }).isRequired,
 };
 

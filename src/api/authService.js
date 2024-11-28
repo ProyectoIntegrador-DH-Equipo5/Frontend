@@ -18,14 +18,17 @@ export const authService = {
             const response = await axiosConfig.post("/api/auth/login", credentials);
             const { token } = response.data;
 
-            // Almacenar el token
-            localStorage.setItem("token", token);
+            if (response.status === 200) {
+                localStorage.setItem('token', token);
+                const user = jwtDecode(token); // Decodifica el token para obtener los datos del usuario
+                console.log("Token decodificado:", user);
+                localStorage.setItem('loggedUser', JSON.stringify(user)); //Almacenamos tanto el usuario como el token en el mismo objeto
+                return user;
+            } else {
+                setError(response.data.message || 'Email o contraseña incorrectos.');
+            }
 
-            // Opcional: Decodificar y guardar el usuario en localStorage
-            const user = jwtDecode(token);
-            localStorage.setItem("loggedUser", JSON.stringify(user));
-
-            return user;
+            
         } catch (error) {
             console.error("Error en el inicio de sesión:", error);
             throw error.response?.data?.message || "Error al iniciar sesión";
