@@ -151,6 +151,7 @@ const Buscador = () => {
     try {
       setError(false);
       setInputValue(categoryName);
+      setHasSearched(true);
       
       if (!state.data || state.data.length === 0) {
         throw new Error('No se pudieron cargar los datos');

@@ -108,14 +108,16 @@ const Profile = () => {
             </div>
 
             {isFavoritesOpen && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {state.favorites.map((producto) => (
-                  <Card
-                    key={producto.id}
-                    producto={producto}
-                    isFavorite={true}
-                  />
-                ))}
+              <div className="bg-white p-4 rounded-lg text-black">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 [&>*]:text-black">
+                  {state.favorites.map((producto) => (
+                    <Card
+                      key={producto.id}
+                      producto={producto}
+                      isFavorite={true}
+                    />
+                  ))}
+                </div>
               </div>
             )}
           </div>
