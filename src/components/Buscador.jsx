@@ -19,6 +19,7 @@ const Buscador = () => {
       key: 'selection'
     }
   ]);
+  const [error, setError] = useState(false);
 
   const inputRef = useRef(null);
 
@@ -89,31 +90,71 @@ const Buscador = () => {
   const handleSearch = (event) => {
     event.preventDefault();
     
-    // Primero verificamos si el input coincide exactamente con una categoría
-    const selectedCategory = state.categories.find(
-      category => category.nombre.toLowerCase() === inputValue.toLowerCase()
-    );
+    try {
+      setError(false);
 
-    let results = [];
-    
-    if (selectedCategory) {
-      // Si es una categoría exacta, mostramos todas las obras de esa categoría
-      results = state.data.filter(art => 
-        // art.movimientoArtistico.id === selectedCategory.id
-        art.movimientoArtistico.nombre.toLowerCase() === selectedCategory.nombre.toLowerCase()
+      if (!state.data || state.data.length === 0) {
+        throw new Error('No se pudieron cargar los datos');
+      }
+
+      // Primero verificamos si el input coincide exactamente con una categoría
+      const selectedCategory = state.categories.find(
+        category => category.nombre.toLowerCase() === inputValue.toLowerCase()
       );
-    } else {
-      // Si no es una categoría exacta, buscamos coincidencias parciales en obras y categorías
-      results = state.data.filter(art => 
-        art.nombre.toLowerCase().includes(inputValue.toLowerCase()) || 
-        art.movimientoArtistico.nombre.toLowerCase().includes(inputValue.toLowerCase())
-      );
+
+      let results = [];
+      
+      if (selectedCategory) {
+        // Si es una categoría exacta, mostramos todas las obras de esa categoría
+        results = state.data.filter(art => 
+          // art.movimientoArtistico.id === selectedCategory.id
+          art.movimientoArtistico.nombre.toLowerCase() === selectedCategory.nombre.toLowerCase()
+        );
+      } else {
+        // Si no es una categoría exacta, buscamos coincidencias parciales en obras y categorías
+        results = state.data.filter(art => 
+          art.nombre.toLowerCase().includes(inputValue.toLowerCase()) || 
+          art.movimientoArtistico.nombre.toLowerCase().includes(inputValue.toLowerCase())
+        );
+      }
+
+      // Aplicamos el filtro de disponibilidad
+      const availableResults = filterByAvailability(results);
+      setSelectedArtworks(availableResults);
+    } catch (err) {
+      setError(true);
+      console.error('Error al realizar la búsqueda:', err);
     }
-
-    // Aplicamos el filtro de disponibilidad
-    const availableResults = filterByAvailability(results);
-    setSelectedArtworks(availableResults);
   };
+
+  // Nueva función para búsqueda programática
+  const searchByCategory = (categoryName) => {
+    try {
+      setError(false);
+      setInputValue(categoryName);
+      
+      if (!state.data || state.data.length === 0) {
+        throw new Error('No se pudieron cargar los datos');
+      }
+
+      const results = state.data.filter(art => 
+        art.movimientoArtistico.nombre.toLowerCase() === categoryName.toLowerCase()
+      );
+
+      const availableResults = filterByAvailability(results);
+      setSelectedArtworks(availableResults);
+    } catch (err) {
+      setError(true);
+      console.error('Error al buscar categoría:', err);
+    }
+  };
+
+  // Exponer la función a través del contexto global
+  useEffect(() => {
+    if (window) {
+      window.searchByCategory = searchByCategory;
+    }
+  }, []);
 
   return (
     <section className="mx-auto bg-secondary p-7 pt-32 flex-col justify-center items-center text-center w-full search-section">
@@ -163,21 +204,29 @@ const Buscador = () => {
       </form>
       </div>
       
-      {/* Renderizar las obras seleccionadas */}
-      <div className="mt-8">
-        <h2 className="text-3xl text-primary text-left mb-4">Obras Seleccionadas</h2>
-        {selectedArtworks.length > 0 ? (
-          <div className="flex grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {selectedArtworks.map((producto) => (
-              <Card key={producto.id} producto={producto} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <p className="text-xl text-secondary">No hay obras seleccionadas.</p>
-          </div>
-        )}
-      </div>
+      {/* Renderizar las obras seleccionadas o mensaje de error */}
+      {inputValue && (
+        <div className="mt-8">
+          <h2 className="text-3xl text-primary text-left mb-4">Resultado de búsqueda</h2>
+          {error ? (
+            <div className="text-center py-12 bg-red-100 rounded-lg">
+              <p className="text-xl text-red-600">
+                Ha ocurrido un error. Reintente más tarde.
+              </p>
+            </div>
+          ) : selectedArtworks.length > 0 ? (
+            <div className="flex grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {selectedArtworks.map((producto) => (
+                <Card key={producto.id} producto={producto} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-xl text-secondary">No hay obras seleccionadas.</p>
+            </div>
+          )}
+        </div>
+      )}
     </section>
   )
 }
