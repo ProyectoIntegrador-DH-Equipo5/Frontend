@@ -19,7 +19,7 @@ const Sidebar = () => {
         <ul className="sidebar-list flex flex-col gap-8 w-full pl-4">
           <li className="py-2 w-full">
             <a onClick={() => handleSectionChange("obras")}>
-              <span className="text-white text-sm flex items-center gap-4">
+              <span className="text-white text-sm flex items-center gap-4 hover:cursor-pointer">
                 <AiFillPicture className="text-lg" />
                 <h3 className="hidden sidebar-text">Obras</h3>
               </span>
@@ -28,7 +28,7 @@ const Sidebar = () => {
           
           <li className="py-2 w-full">
             <a onClick={() => handleSectionChange("categorias")}>
-              <span className="text-white text-sm flex items-center gap-4">
+              <span className="text-white text-sm flex items-center gap-4 hover:cursor-pointer">
                 <MdCategory />
                 <h3 className="hidden sidebar-text">Categorías</h3>
               </span>
@@ -36,7 +36,7 @@ const Sidebar = () => {
           </li>
           <li className="py-2 w-full">
             <a onClick={() => handleSectionChange("usuarios")}>
-              <span className="text-white text-sm flex items-center gap-4">
+              <span className="text-white text-sm flex items-center gap-4 hover:cursor-pointer">
                 <ImUsers />
                 <h3 className="hidden sidebar-text">Usuarios</h3>
               </span>

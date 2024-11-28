@@ -9,6 +9,7 @@ import reservas from '../utils/reserva.json';
 
 const Buscador = () => {
   const { state } = useContextGlobal();
+  // state.data = []; QUITAR COMENTARIO PARA DISPARAR ERROR
   const [inputValue, setInputValue] = useState('');
   const [filteredOptions, setFilteredOptions] = useState([]);
   const [selectedArtworks, setSelectedArtworks] = useState([]);
@@ -182,7 +183,7 @@ const Buscador = () => {
       <div className="mx-auto flex justify-between w-full">
       <form onSubmit={handleSearch} className="flex flex-col w-full md:flex-row justify-center gap-6 p-5 px-4 md:px-24 sm:items-start md:items-start lg:items-center">
         <div className="relative w-full max-w-md" ref={inputRef}>
-        <h2 className="text-2xl mb-2 text-white text-left pt-16 px-4 md:pt-16">Busca y alquila tus obras favoritas</h2>
+        <h2 className="text-2xl mb-2 text-white text-left pt-16 px-4 md:pt-16 sm:pt-8">Busca y alquila tus obras favoritas</h2>
           <input
             type="text"
             placeholder="Encuentra tu obra favorita"
@@ -205,18 +206,18 @@ const Buscador = () => {
           )}
         </div>
         <div className="flex flex-col">
-          <h2 className="text-2xl mb-2 text-white text-left pt-16 px-4 md:pt-16">Rango de Fecha</h2>
+          <h2 className="text-2xl mb-2 text-white text-left pt-16 px-4 md:pt-16 sm:pt-8">Rango de Fecha</h2>
           <Calendar setDateRange={setDateRange}/>
         </div>
         <div className="flex flex-col justify-self-end">
-        <h2 className="mb-10 pt-16 md:pt-16"></h2>
+        <h2 className="mb-10 pt-16 md:pt-16 sm:pt-8"></h2>
           <Button 
           type="button"
           text={<BiSearchAlt /> } 
           bgColor="primary" 
           textColor="black" 
           textSize="2xl" 
-          widthSize="16" 
+          widthSize={window.innerWidth <= 480 ? "full" : "16"} 
           heightSize="12"
           onClick={handleSearch}
           />
