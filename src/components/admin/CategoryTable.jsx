@@ -21,6 +21,7 @@ const CategoryTable = () => {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = state.categories.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(state.categories.length / itemsPerPage);
+  //console.log(editingItem.imagen.url);
 
   const handleEdit = (categoria) => {
     setEditingItem(categoria);
@@ -46,15 +47,15 @@ const CategoryTable = () => {
   }
   };
 
-  const handleSaveEdit = async(updatedCategory) => {
+  const handleSaveEdit = async(updateCategory) => {
     // Obtener las categorías existentes
     const response = await categoriaService.getCategorias();
     const existingCategories = response;
 
    // Verificar si la categoría ya existe
    const duplicateCategory = existingCategories.find(existingCategory => {
-    const isSameName = existingCategory.nombre.toLowerCase() === updatedCategory.nombre.toLowerCase();
-    const isDifferentId = existingCategory.id !== updatedCategory.id;
+    const isSameName = existingCategory.nombre.toLowerCase() === updateCategory.nombre.toLowerCase();
+    const isDifferentId = existingCategory.id !== updateCategory.id;
     
     return isSameName && isDifferentId;
     });
@@ -64,9 +65,30 @@ const CategoryTable = () => {
         return; 
     }
 
-    await categoriaService.updateCategoria(updatedCategory)
-    console.log("categoría a actualizar: ", updatedCategory)
-    dispatch({ type: "UPDATE_CATEGORY", payload: updatedCategory });
+    // Crear FormData para enviar los datos
+    const formData = new FormData();
+    formData.append('id', updateCategory.id);
+    formData.append('nombre', updateCategory.nombre);
+    formData.append('descripcion', updateCategory.descripcion);
+    
+    // Si hay una imagen existente, enviar su ID
+    if (updateCategory.imagen?.id) {
+      formData.append(`files[0].${updateCategory.imagen.id}`, '');
+    }
+
+    // Si hay una nueva imagen (File), agregarla al FormData
+    if (updateCategory.newImage instanceof File) {
+        formData.append('file', updateCategory.newImage);
+    }
+
+     // Para debugging - ver qué se está enviando
+     for (let pair of formData.entries()) {
+      console.log(pair[0] + ': ' + pair[1]);
+    }
+
+    const updatedCat =await categoriaService.updateCategoria(formData)
+    console.log("categoría a actualizar: ", updatedCat)
+    dispatch({ type: "UPDATE_CATEGORY", payload: updatedCat });
     setSuccessMessage("Categoría actualizada con éxito");
     setEditingItem(null);
   };
@@ -103,6 +125,7 @@ const CategoryTable = () => {
                 e.preventDefault();
                 handleSaveEdit(editingItem);
               }}
+              
             >
               <div className="mb-4">
                 <label className="block text-sm font-semibold mb-2" htmlFor="nombre">Nombre de la categoría</label>
@@ -124,14 +147,53 @@ const CategoryTable = () => {
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-sm font-semibold mb-2" htmlFor="imagen">Imagen (URL)</label>
-                <input
-                  type="text"
-                  id="imagen"
-                  value={editingItem.url}
-                  onChange={(e) => setEditingItem({ ...editingItem, url: e.target.value })}
-                  className="w-full p-2 border border-gray-300 rounded"
-                />
+                <label className="block text-sm font-semibold mb-2" htmlFor="imagen">Imagen</label>
+                <div className="flex flex-col gap-4">
+                    {/* Mostrar imagen actual */}
+                    {editingItem.imagen?.url && (
+                        <div className="flex items-center gap-2">
+                            <img
+                                src={editingItem.imagen.url}
+                                alt="Imagen actual"
+                                className="w-20 h-20 object-cover rounded"
+                            />
+                            <span className="text-sm text-gray-500">Imagen actual</span>
+                        </div>
+                    )}
+                    
+                    {/* Input para nueva imagen */}
+                    <div className="flex gap-4 items-center">
+                        <input
+                            type="file"
+                            name="newImage"
+                            id="newImage"
+                            accept="image/*"
+                            className="w-full p-2 border border-gray-300 rounded"
+                            onChange={(e) => {
+                                const file = e.target.files[0];
+                                if (file) {
+                                    setEditingItem(prev => ({
+                                        ...prev,
+                                        newImage: file,
+                                        previewUrl: URL.createObjectURL(file)
+                                    }));
+                                }
+                            }}
+                        />
+                        {/* Vista previa de la nueva imagen */}
+                        {editingItem.previewUrl && (
+                            <div className="flex items-center gap-2">
+                                <img
+                                    src={editingItem.previewUrl}
+                                    alt="Vista previa"
+                                    className="w-20 h-20 object-cover rounded"
+                                />
+                                <span className="text-sm text-gray-500">Nueva imagen</span>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
               </div>
               <div className="flex justify-between">
                 <button
@@ -170,7 +232,7 @@ const CategoryTable = () => {
                     <tr key={categoria.id}>
                       <td className="whitespace-nowrap px-4 py-2 font-medium text-gray-900 text-left">{categoria.id}</td>
                       <td className="whitespace-nowrap px-4 py-2 text-gray-700 text-left">
-                        <img src={categoria.url} alt={categoria.nombre || "Imagen"} className="w-16 h-16 object-cover" />
+                        <img src={categoria.imagen.url} alt={categoria.nombre || "Imagen"} className="w-16 h-16 object-cover" />
                       </td>
                       <td className="break-words whitespace-wrap px-4 py-2 text-gray-700 text-left">{categoria.nombre || "Nombre no disponible"}</td>
                       <td className="break-words whitespace-wrap px-4 py-2 text-gray-700 text-left max-w-[40rem]">{categoria.descripcion || "Descripción no disponible"}</td>

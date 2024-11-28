@@ -28,6 +28,7 @@ export const obrasService = {
     createObra: async (obra, files) => {  
         try {
             const formData = new FormData();
+
             // Agrega los datos de la obra al FormData
             Object.keys(obra).forEach(key => {
                 formData.append(key, obra[key]);
@@ -52,11 +53,11 @@ export const obrasService = {
         }
     },
 
-    updateObra: async (obra, files) => {
+    updateObra: async (formData) => {
         try {
             const response = await axiosConfig.put("/obra", formData, {
                 headers: {
-                    "Content-Type": "multipart/form-data",
+                    //"Content-Type": "multipart/form-data",
                     Authorization: `Bearer ${localStorage.getItem("token")}`,
                 },
             });
@@ -64,9 +65,10 @@ export const obrasService = {
         } catch (error) {
             console.error("Error actualizando la obra con imágenes:", error);
             if (error.response) {
-                console.error("Response data:", error.response.data);
+                throw new Error(error.response.data || "Error desconocido al actualizar la obra.");
+            } else {
+            throw new Error("No se pudo actualizar la obra. Por favor, verifica tu conexión o intenta nuevamente.");
             }
-            throw error;
         }
     },
 

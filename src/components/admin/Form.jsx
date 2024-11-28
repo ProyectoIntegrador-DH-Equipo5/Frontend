@@ -107,20 +107,24 @@ const Form = ({ edit, obra = {}, onClose }) => {
 	const flattenFormData = (data) => {
     const flattened = {};
 
-    const flatten = (obj, parentKey = "") => {
-        for (const key in obj) {
-            const value = obj[key];
-            const newKey = parentKey ? `${parentKey}.${key}` : key;
+		// Asegurarnos de que el ID del movimiento artístico se mantenga
+    if (data.movimientoArtistico?.id) {
+			flattened['movimientoArtistico.id'] = data.movimientoArtistico.id;
+		}
 
-            if (typeof value === "object" && value !== null && !Array.isArray(value)) {
-                flatten(value, newKey);
-            } else {
-                flattened[newKey] = value;
-            }
-        }
-    };
+    // Resto de los campos
+    Object.keys(data).forEach(key => {
+			if (key !== 'movimientoArtistico') {
+					if (typeof data[key] === 'object' && data[key] !== null) {
+							Object.keys(data[key]).forEach(subKey => {
+									flattened[`${key}.${subKey}`] = data[key][subKey];
+							});
+					} else {
+							flattened[key] = data[key];
+					}
+			}
+		});
 
-    flatten(data);
     return flattened;
 };
 
@@ -151,48 +155,56 @@ const Form = ({ edit, obra = {}, onClose }) => {
 		try {
 			// Aplanar los datos para el envío a Backend
 			const flattenedData = flattenFormData(formData);
+			const files = formData.imagenesAdicionales || []; //Nuevas imágenes a subir
 			console.log("Flattened data:", flattenedData);
 
-			// Preparar las imágenes
-			const files = formData.imagenesAdicionales || []; //Nuevas imágenes a subir
-			
 			// Llamar al servicio para actualizar la obra
 			if (edit) {
-				// Crear un FormData para enviar los datos
 				const formDataToSend = new FormData();
 
-				// Agregar los datos básicos
-				Object.keys(flattenedData).forEach(key => {
-					if (key !== 'imagenes' && flattenedData[key] !== undefined) {
-							formDataToSend.append(key, flattenedData[key]);
+				// Solo enviar los campos necesarios
+				const requiredFields = {
+					'id': formData.id,
+					'nombre': formData.nombre,
+					'descripcion': formData.descripcion,
+					'fechaCreacion': formData.fechaCreacion,
+					'precioRenta': formData.precioRenta,
+					'disponibilidad': formData.disponibilidad,
+					'tamano': formData.tamano,
+					'tecnicaObra.nombre': formData.tecnicaObra?.nombre,
+					'artista.nombre': formData.artista?.nombre,
+					'movimientoArtistico.id': formData.movimientoArtistico?.id
+				};
+				
+				// Agregar solo los campos necesarios
+				Object.entries(requiredFields).forEach(([key, value]) => {
+					if (value !== undefined) {
+							formDataToSend.append(key, value);
 					}
 				});
 
-				// Agregar el ID de la obra
-				formDataToSend.append('id', formData.id);
+				// Agregar estos logs para debug
+				console.log("Estado inicial de formData:", formData);
+				console.log("Imágenes antes de procesar:", formData.imagenes);
 
-				// Manejar imágenes existentes y nuevas
-				const existingImages = formData.imagenes || [];
-				const newImages = formData.imagenesAdicionales || [];
-		
-				// Agregar imágenes existentes
-				existingImages.forEach((imagen, index) => {
-						if (imagen.imagenId) {
-								formDataToSend.append(`imagenes[${index}].imagenId`, imagen.imagenId);
+				if (formData.imagenes?.length > 0) {
+					formData.imagenes.forEach((imagen, index) => {
+						if (imagen?.id) {
+							//formDataToSend.append(`imagenes[${index}]`, imagen.imagenId);
+									formDataToSend.append( `imagenes[files[${index}].${imagen.imagenId}`, '')
 						}
-				});
-		
-				// Agregar nuevas imágenes
-				newImages.forEach((file, index) => {
-						if (file instanceof File) {
-								formDataToSend.append('files', file);
-						}
-				});
-
-				console.log("FormData contents:");
-				for (let pair of formDataToSend.entries()) {
-						console.log(pair[0] + ': ' + pair[1]);
+					});
 				}
+
+			// Manejar nuevas imágenes
+				const newImages = formData.imagenesAdicionales || [];
+				console.log("Nuevas imágenes:", newImages);
+				
+				newImages.forEach((file) => {
+						if (file instanceof File) {
+							formDataToSend.append('files', file);
+						}
+				});
 
 				console.log("Sending update data:", Object.fromEntries(formDataToSend));
 				const response = await obrasService.updateObra(formDataToSend);
@@ -244,9 +256,14 @@ const Form = ({ edit, obra = {}, onClose }) => {
 			setIsAddingCategory(true);
 		} else {
 			setIsAddingCategory(false);
+			// Encontrar la categoría seleccionada del estado global
+			const selectedCategory = state.categories.find(cat => cat.nombre === value);
+			
+			// Guardar el ID del movimiento artístico seleccionado
 			setFormData((prevData) => ({
 				...prevData,
 				movimientoArtistico: {
+					id: selectedCategory?.id, // Guardar el ID del movimiento artístico seleccionado
 					nombre: value || "", // Asegúrate de que el valor esté siempre definido
 				},
 			}));
@@ -275,7 +292,7 @@ const Form = ({ edit, obra = {}, onClose }) => {
 
 	const renderFields = (fields) => {
 		return fields.map((field) => {
-			console.log(field)
+			//console.log(field)
 			const fieldValue = formData[field] || "";
 			const fieldType =
 				field === "descripcion"
@@ -386,7 +403,10 @@ const Form = ({ edit, obra = {}, onClose }) => {
 					>
 						<option value="">Seleccione un movimiento</option>
 						{state.categories.map((category) => (
-							<option key={category.id} value={category.nombre}>
+							<option 
+								key={category.id} 
+								value={category.nombre}
+							>
 								{category.nombre}
 							</option>
 						))}

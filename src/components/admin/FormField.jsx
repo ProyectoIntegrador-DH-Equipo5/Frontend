@@ -10,7 +10,7 @@ const FormField = ({
 }) => {
 	return (
 		<label className="font-bold">
-			{console.log(JSON.stringify(value), element)}
+			{/*console.log(JSON.stringify(value), element)*/}
 			{formatLabel(label)}:
 			{element === "select" ? (
 				<select

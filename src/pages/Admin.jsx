@@ -30,14 +30,9 @@ const Admin = () => {
 		id: "",
 		nombre: "",
 		descripcion: "",
-		url: "",
+		imagen: null,  // Cambiado de url a imagen
+    previewUrl: null // Nuevo campo para la vista previa
 	});
-
-	// const [newCat, setNewCat] = useState({
-	// 	nombre: "",
-	// 	descripcion: "",
-	// 	url: "",
-	// });
 	
 	const handleAddItem = (itemType) => {
 		setIsCreatingItem(itemType); // Establece el tipo de ítem que se va a crear
@@ -164,36 +159,67 @@ const Admin = () => {
 
 	//Categorias
 	const handleInputChangeCat = (e) => {
-		const { name, value } = e.target;
-		setNewCat({
-			...newCat,
-			[name]: value,
-		});
+		const { name, value, type, files } = e.target;
+
+		if (type === 'file') {
+			const file = files[0];
+			if (file) {
+					// Si es un archivo, guardamos el archivo y creamos una URL de vista previa
+					setNewCat(prev => ({
+							...prev,
+							imagen: file,
+							previewUrl: URL.createObjectURL(file)
+					}));
+			}
+		} else {
+
+			// setNewCat({
+			// 	...newCat,
+			// 	[name]: value,
+			// });
+
+			// Para otros campos, mantener el comportamiento actual
+			setNewCat(prev => ({
+				...prev,
+				[name]: value
+			}));
+		}
+
+		
 	};
 
 	const submitCategory = async(e)=>{
 		e.preventDefault(); 
 
 		try {
-			 // Obtener las categorías existentes
-			 const response = await categoriaService.getCategorias();
-			 const existingCategories = response;
+			// Obtener las categorías existentes
+			const response = await categoriaService.getCategorias();
+			const existingCategories = response;
 
-			 // Verificar si la categoría ya existe
-			 const duplicateCategory = existingCategories.find(
-					 (category) => category.nombre.toLowerCase() === newCat.nombre.toLowerCase()
-			 );
+			// Verificar si la categoría ya existe
+			const duplicateCategory = existingCategories.find(
+					(category) => category.nombre.toLowerCase() === newCat.nombre.toLowerCase()
+			);
 
-			 if (duplicateCategory) {
-					 setErrorMessage("La categoría ya existe.");
-					 return; 
-			 }
+			if (duplicateCategory) {
+					setErrorMessage("La categoría ya existe.");
+					return; 
+			}
 
-			await categoriaService.createCategoria(newCat);
-			console.log("categoria: ",newCat)
-			dispatch({ type: "ADD_CATEGORY", payload: newCat });
+			// Crear FormData para enviar la imagen
+			const formData = new FormData();
+			formData.append('nombre', newCat.nombre);
+			formData.append('descripcion', newCat.descripcion);
+			
+			if (newCat.imagen instanceof File) {
+					formData.append('file', newCat.imagen);
+			}
+
+			const createdCategory = await categoriaService.createCategoria(formData);
+			console.log("categoria: ",createdCategory)
+			dispatch({ type: "ADD_CATEGORY", payload: createdCategory });
 			setSuccessMessage("Categoría creada con éxito");
-			setNewCat({ nombre: "", descripcion: "", url: ""});
+			setNewCat({ nombre: "", descripcion: "", imagen: null, previewUrl: null });
 			handleListItems();		
 		}catch (error) {
 			setErrorMessage("Hubo un error al crear la categoría. Intente nuevamente.");
@@ -352,8 +378,8 @@ const Admin = () => {
 													id="descripcion"
 													name="descripcion"
 													className="w-full p-2 border border-gray-300 rounded"
+													value={newCat.descripcion}
 													onChange={handleInputChangeCat}
-													
 												/>
 											</div>
 											<div className="mb-4">
@@ -361,16 +387,26 @@ const Admin = () => {
 													className="block text-sm font-semibold mb-2"
 													htmlFor="imagen"
 												>
-													Imagen (URL)
+													Imagen
 												</label>
-												<input
-													type="text"
-													name="url"
-													id="imagen"
-													className="w-full p-2 border border-gray-300 rounded"
-													onChange={handleInputChangeCat}
-													
-												/>
+													<div className="flex gap-4 items-center">
+														<input
+																type="file"
+																name="imagen"
+																id="imagen"
+																accept="image/*"
+																className="w-full p-2 border border-gray-300 rounded"
+																onChange={handleInputChangeCat}
+														/>
+														{newCat.previewUrl && (
+																<img
+																		src={newCat.previewUrl}
+																		alt="Vista previa"
+																		className="w-20 h-20 object-cover rounded"
+																/>
+														)}
+													</div>
+
 											</div>
 											<div className="flex justify-between">
 												<button

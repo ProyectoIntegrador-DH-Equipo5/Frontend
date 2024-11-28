@@ -31,12 +31,10 @@ export const categoriaService = {
       }
   },
 
-  createCategoria: async (categoria) => {  
+  createCategoria: async (formData) => {  
       try {
-          
-          const response = await axiosConfig.post("/movimientoArtistico", categoria, {
+          const response = await axiosConfig.post("/movimientoArtistico", formData, {
               headers: {
-                  "Content-Type": "application/json", 
                   Authorization: `Bearer ${localStorage.getItem("token")}`,
               },
           });
@@ -54,11 +52,10 @@ export const categoriaService = {
       }
   },
 
-  updateCategoria: async (categoria) => {
+  updateCategoria: async (formData) => {
       try {
-        const response = await axiosConfig.put("/movimientoArtistico", categoria, {
-          headers: {
-              "Content-Type": "application/json", 
+        const response = await axiosConfig.put("/movimientoArtistico", formData, {
+          headers: { 
               Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
       });
@@ -67,7 +64,6 @@ export const categoriaService = {
           console.error("Error actualizando la categoria:", error);
           if (error.response) {
             throw new Error(error.response.data || "Error desconocido al actualziar la categoría.");
-              //console.error("Response data:", error.response.data);
           }else{
             throw new Error("No se pudo actualizar la categoria. Por favor, verifica tu conexión o intenta nuevamente.");
           } 
