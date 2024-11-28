@@ -1,5 +1,6 @@
 import Social from "./Social";
 import Logo from "./Logo";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
 	return (
@@ -10,6 +11,9 @@ const Footer = () => {
 					Todos los derechos reservados | 2024
 				</h3>
 			</div>
+			<Link to="/politicas">
+				<p className="text-primary">Políticas de reserva.</p>
+			</Link>
 			<Social />
 		</footer>
 	);

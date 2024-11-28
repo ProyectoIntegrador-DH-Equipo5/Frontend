@@ -31,7 +31,7 @@ function App() {
 					<Route path="/login" element={<Login />} />
 					<Route path="/register" element={<Register />} />
 					<Route path="/profile" element={<Profile />} />
-					<Route path="/politicas" element={<PolicyView/>} />
+					<Route path="/politicas" element={<PolicyView />} />
 				</Route>
 			</Routes>
 		</Router>
