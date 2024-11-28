@@ -72,7 +72,7 @@ const Card = ({ producto, isFavorite: initialIsFavorite }) => {
             />
             <button
               className={`absolute top-2 right-2 text-white p-2 rounded-full ${
-                displayFavorite ? "bg-red-500" : "bg-gray-500"
+                displayFavorite ? "bg-black" : "bg-gray-500"
               } hover:opacity-80 transition-opacity`}
               onClick={toggleFavorite}
               aria-label={
@@ -80,7 +80,7 @@ const Card = ({ producto, isFavorite: initialIsFavorite }) => {
               }
               disabled={!state.loggedUser}
             >
-              <FaHeart size={20} color={displayFavorite ? "text-white" : "text-black"} />
+              <FaHeart size={20} color={displayFavorite ? "#EFB810" : "black"} />
             </button>
           </div>
           <div className="p-4 bg-white flex flex-col h-48">
