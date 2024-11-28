@@ -138,13 +138,8 @@ const CalendarioModal = ({ obra, setSelectedDates, onDateValidation }) => {
           return (
             <div
               className={`calendar-day ${
-                isDisabled ? "disabled-date" : "available-date"
+                isDisabled ? "calendar-day-disabled" : "calendar-day-available"
               }`}
-              style={{
-                backgroundColor: isDisabled ? "#ff000033" : "#00ff0033",
-                color: isDisabled ? "#888" : "inherit",
-                cursor: isDisabled ? "not-allowed" : "pointer",
-              }}
             >
               {date.getDate()}
             </div>

@@ -203,16 +203,45 @@
   transition: all 0.3s ease;
 }
 
-.available-date {
-  background-color: rgba(0, 255, 0, 0.2);
+.calendar-day-available {
+  background-color: rgba(144, 238, 144, 0.2); /* Verde claro semi-transparente */
   color: #2c3e50;
 }
 
-.disabled-date {
-  background-color: rgba(255, 0, 0, 0.2);
-  color: #7f8c8d;
+.calendar-day-disabled {
+  background-color: #f5f5f5; /* Gris claro */
+  color: #999;
   cursor: not-allowed;
-  text-decoration: line-through;
+}
+
+.rdrSelected, 
+.rdrInRange, 
+.rdrStartEdge, 
+.rdrEndEdge {
+  background: #EFB810 !important; /* Color amarillo principal */
+}
+
+.rdrDayHovered .rdrDayNumber:after {
+  border-color: #EFB810 !important;
+}
+
+.rdrDayToday .rdrDayNumber span:after {
+  background: #EFB810 !important;
+}
+
+.rdrDayStartPreview, 
+.rdrDayInPreview, 
+.rdrDayEndPreview {
+  border-color: #EFB810 !important;
+  background: rgba(239, 184, 16, 0.1) !important;
+}
+
+.rdrDayDisabled {
+  background-color: #f5f5f5 !important;
+}
+
+.rdrDayDisabled .rdrDayNumber span {
+  color: #999 !important;
 }
 
 .rdrDay:hover .calendar-day {
