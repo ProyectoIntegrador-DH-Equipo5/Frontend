@@ -20,6 +20,7 @@ const Buscador = () => {
     }
   ]);
   const [error, setError] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
 
   const inputRef = useRef(null);
 
@@ -76,19 +77,34 @@ const Buscador = () => {
 
   const filterByAvailability = (artworks) => {
     return artworks.filter(art => {
-      return !reservas.some(reserva => {
-        const fechaInicio = new Date(reserva.fechaInicio);
-        const fechaFin = new Date(reserva.fechaFin);
-        return art.id === reserva.obra.id && 
-              ((dateRange[0].startDate >= fechaInicio && dateRange[0].startDate <= fechaFin) ||
-                (dateRange[0].endDate >= fechaInicio && dateRange[0].endDate <= fechaFin) ||
-                (dateRange[0].startDate <= fechaInicio && dateRange[0].endDate >= fechaFin));
+      // Si las fechas son iguales, mostrar todas las obras
+      if (dateRange[0].startDate.getTime() === dateRange[0].endDate.getTime()) {
+        return true;
+      }
+
+      // Verificar si la obra está reservada en el rango de fechas seleccionado
+      const isReserved = reservas.some(reserva => {
+        if (art.id !== reserva.obra.id) return false;
+
+        const reservaInicio = new Date(reserva.fechaInicio);
+        const reservaFin = new Date(reserva.fechaFin);
+        const selectedStart = dateRange[0].startDate;
+        const selectedEnd = dateRange[0].endDate;
+
+        // La obra NO está disponible si hay algún solapamiento entre las fechas
+        return (
+          (selectedStart <= reservaFin && selectedEnd >= reservaInicio)
+        );
       });
+
+      // Retornar true si la obra NO está reservada
+      return !isReserved;
     });
   };
 
   const handleSearch = (event) => {
     event.preventDefault();
+    setHasSearched(true);
     
     try {
       setError(false);
@@ -97,25 +113,28 @@ const Buscador = () => {
         throw new Error('No se pudieron cargar los datos');
       }
 
-      // Primero verificamos si el input coincide exactamente con una categoría
-      const selectedCategory = state.categories.find(
-        category => category.nombre.toLowerCase() === inputValue.toLowerCase()
-      );
-
       let results = [];
       
-      if (selectedCategory) {
-        // Si es una categoría exacta, mostramos todas las obras de esa categoría
-        results = state.data.filter(art => 
-          // art.movimientoArtistico.id === selectedCategory.id
-          art.movimientoArtistico.nombre.toLowerCase() === selectedCategory.nombre.toLowerCase()
+      // Si hay texto en el input, aplicamos los filtros de búsqueda
+      if (inputValue.trim()) {
+        // Primero verificamos si el input coincide exactamente con una categoría
+        const selectedCategory = state.categories.find(
+          category => category.nombre.toLowerCase() === inputValue.toLowerCase()
         );
+        
+        if (selectedCategory) {
+          results = state.data.filter(art => 
+            art.movimientoArtistico.nombre.toLowerCase() === selectedCategory.nombre.toLowerCase()
+          );
+        } else {
+          results = state.data.filter(art => 
+            art.nombre.toLowerCase().includes(inputValue.toLowerCase()) || 
+            art.movimientoArtistico.nombre.toLowerCase().includes(inputValue.toLowerCase())
+          );
+        }
       } else {
-        // Si no es una categoría exacta, buscamos coincidencias parciales en obras y categorías
-        results = state.data.filter(art => 
-          art.nombre.toLowerCase().includes(inputValue.toLowerCase()) || 
-          art.movimientoArtistico.nombre.toLowerCase().includes(inputValue.toLowerCase())
-        );
+        // Si no hay texto, usamos todas las obras
+        results = state.data;
       }
 
       // Aplicamos el filtro de disponibilidad
@@ -204,8 +223,8 @@ const Buscador = () => {
       </form>
       </div>
       
-      {/* Renderizar las obras seleccionadas o mensaje de error */}
-      {inputValue && (
+      {/* Renderizar las obras seleccionadas o mensaje de error solo si se ha buscado */}
+      {hasSearched && (
         <div className="mt-8">
           <h2 className="text-3xl text-primary text-left mb-4">Resultado de búsqueda</h2>
           {error ? (
@@ -222,7 +241,7 @@ const Buscador = () => {
             </div>
           ) : (
             <div className="text-center py-12">
-              <p className="text-xl text-secondary">No hay obras seleccionadas.</p>
+              <p className="text-xl text-secondary">No hay obras disponibles para las fechas seleccionadas.</p>
             </div>
           )}
         </div>
