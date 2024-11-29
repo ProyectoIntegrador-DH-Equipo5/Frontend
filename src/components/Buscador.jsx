@@ -9,7 +9,7 @@ import reservas from '../utils/reserva.json';
 
 const Buscador = () => {
   const { state } = useContextGlobal();
-  // state.data = []; QUITAR COMENTARIO PARA DISPARAR ERROR
+  // state.data = [];
   const [inputValue, setInputValue] = useState('');
   const [filteredOptions, setFilteredOptions] = useState([]);
   const [selectedArtworks, setSelectedArtworks] = useState([]);
