@@ -19,8 +19,15 @@ const PolicyView = () => {
     },
     {
       title: "Duración del Alquiler",
-      description:
-        "El tiempo máximo de alquiler de las obras de arte será de 30 días. Cualquier extensión debe ser solicitada con al menos 3 días de anticipación y estará sujeta a la disponibilidad de la obra. Las renovaciones de alquiler pueden requerir una nueva inspección de la obra y la actualización del contrato. Las devoluciones tardías no autorizadas incurrirán en cargos adicionales por día.",
+      description: (
+        <>
+          <span className="bg-[#FDB813]/10 text-[#FDB813] font-semibold px-2 py-1 rounded">
+            El tiempo mínimo de alquiler es de 7 días y el máximo de 30 días.
+          </span>
+          {" "}
+          Cualquier extensión debe ser solicitada con al menos 3 días de anticipación y estará sujeta a la disponibilidad de la obra. Las renovaciones de alquiler pueden requerir una nueva inspección de la obra y la actualización del contrato. Las devoluciones tardías no autorizadas incurrirán en cargos adicionales por día.
+        </>
+      ),
     },
     {
       title: "Uso Exclusivo",
