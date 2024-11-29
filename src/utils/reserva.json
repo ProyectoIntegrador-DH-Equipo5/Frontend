@@ -2,7 +2,7 @@
     {
         "id": 1,
         "fechaInicio": "2024-11-01",
-        "fechaFin": "",
+        "fechaFin": "2024-11-30",
         "obra": {
             "id": 1,
             "nombre": "El Jardín de las Delicias",
