@@ -24,7 +24,8 @@ const CategoryCard = ({ categoria }) => {
         <div className="h-full">
           <img 
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" 
-            src={categoria.imagen.url} 
+            src={categoria.imagen?.url} 
+            
             alt={categoria.nombre}
             loading="lazy"
           />

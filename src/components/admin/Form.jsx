@@ -191,7 +191,7 @@ const Form = ({ edit, obra = {}, onClose }) => {
 					formData.imagenes.forEach((imagen, index) => {
 						if (imagen?.id) {
 							//formDataToSend.append(`imagenes[${index}]`, imagen.imagenId);
-									formDataToSend.append( `imagenes[files[${index}].${imagen.imagenId}`, '')
+									formDataToSend.append( `files[${index + 1}].${imagen.imagenId}`, '')
 						}
 					});
 				}
