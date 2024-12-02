@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useContextGlobal } from "../utils/global.context.jsx";
 import { useNavigate } from "react-router-dom";
 import { AiFillExclamationCircle } from "react-icons/ai";
+import emailjs from '@emailjs/browser';
 
 const Register = () => {
   const { dispatch } = useContextGlobal();
@@ -16,6 +17,11 @@ const Register = () => {
 
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
+  const [emailStatus, setEmailStatus] = useState({
+    sent: false,
+    error: false,
+    message: ''
+  });
 
   const nameRegex = /^[a-zA-Z\s]*$/;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -77,13 +83,46 @@ const Register = () => {
     validateField(name, value);
   };
 
-  const handleSubmit = (e) => {
+  const sendConfirmationEmail = async (userEmail, userName) => {
+    try {
+      await emailjs.send(
+        'service_g4ywxm6',  // Service ID de EmailJS
+        'template_qq0x3dc', // Template ID
+        {
+          user_email: userEmail,    // Cambiado de to_email a user_email
+          user_name: userName,      // Cambiado de to_name a user_name
+          to_email: userEmail,      // Agregado para especificar el destinatario
+        },
+        '2Pgg6a24lfS4J2fVD'   //  Public Key
+      );
+      setEmailStatus({
+        sent: true,
+        error: false,
+        message: '¡Email de confirmación enviado exitosamente!'
+      });
+    } catch (error) {
+      console.error('Error al enviar email:', error);
+      setEmailStatus({
+        sent: false,
+        error: true,
+        message: 'Error al enviar el email de confirmación'
+      });
+    }
+  };
+
+  const handleResendEmail = async () => {
+    setEmailStatus({ sent: false, error: false, message: 'Enviando email...' });
+    await sendConfirmationEmail(formData.email, `${formData.nombre} ${formData.apellido}`);
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = Object.keys(formData).reduce((acc, field) => {
       validateField(field, formData[field]);
       if (errors[field]) acc[field] = errors[field];
       return acc;
     }, {});
+    
     if (Object.keys(validationErrors).length === 0) {
       const newUser = {
         nombre: `${formData.nombre} ${formData.apellido}`,
@@ -92,20 +131,21 @@ const Register = () => {
         rol: "USER",
       };
 
-      // Guardamos en localStorage
-      console.log("admin: ", newUser);
+      setEmailStatus({ sent: false, error: false, message: 'Enviando email de confirmación...' });
+      await sendConfirmationEmail(formData.email, `${formData.nombre} ${formData.apellido}`);
+      
       dispatch({ type: "ADD_USER", payload: newUser });
-
-      // Limpiamos errores y redireccionamos a la página principal
-      setErrors({});
-      navigate("/");
+      if (!emailStatus.error) {
+        setErrors({});
+        navigate("/");
+      }
     } else {
       setErrors(validationErrors);
     }
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4">
+    <div className="flex items-center justify-center min-h-screen p-4 bg-black">
       <div className="w-full max-w-md">
         <h1 className="text-4xl font-bold text-center text-[#FDB813] mb-8">
           Registrarse
@@ -129,7 +169,7 @@ const Register = () => {
                 required
               />
               {errors.nombre && (
-                <p className="flex items-center text-red-500 mt-1 text-sm">
+                <p className="flex items-center mt-1 text-sm text-red-500">
                   <AiFillExclamationCircle className="mr-1" />
                   {errors.nombre}
                 </p>
@@ -150,7 +190,7 @@ const Register = () => {
                 required
               />
               {errors.apellido && (
-                <p className="flex items-center text-red-500 mt-1 text-sm">
+                <p className="flex items-center mt-1 text-sm text-red-500">
                   <AiFillExclamationCircle className="mr-1" />
                   {errors.apellido}
                 </p>
@@ -169,7 +209,7 @@ const Register = () => {
                 required
               />
               {errors.email && (
-                <p className="flex items-center text-red-500 mt-1 text-sm">
+                <p className="flex items-center mt-1 text-sm text-red-500">
                   <AiFillExclamationCircle className="mr-1" />
                   {errors.email}
                 </p>
@@ -190,7 +230,7 @@ const Register = () => {
                 required
               />
               {errors.contrasenia && (
-                <p className="flex items-center text-red-500 mt-1 text-sm">
+                <p className="flex items-center mt-1 text-sm text-red-500">
                   <AiFillExclamationCircle className="mr-1" />
                   {errors.contrasenia}
                 </p>
@@ -211,7 +251,7 @@ const Register = () => {
                 required
               />
               {errors.confirmPassword && (
-                <p className="flex items-center text-red-500 mt-1 text-sm">
+                <p className="flex items-center mt-1 text-sm text-red-500">
                   <AiFillExclamationCircle className="mr-1" />
                   {errors.confirmPassword}
                 </p>
@@ -226,6 +266,26 @@ const Register = () => {
             </button>
           </div>
         </form>
+        
+        {emailStatus.message && (
+          <div className={`mt-4 p-4 rounded-lg ${
+            emailStatus.error 
+              ? 'bg-red-500/10 text-red-500 border border-red-500/20' 
+              : 'bg-green-500/10 text-green-500 border border-green-500/20'
+          }`}>
+            <p className="text-center">{emailStatus.message}</p>
+            {emailStatus.error && (
+              <div className="mt-2 text-center">
+                <button
+                  onClick={handleResendEmail}
+                  className="text-[#FDB813] hover:text-[#FDB813]/80 underline"
+                >
+                  ¿No has recibido el email? Haz clic aquí para reenviar
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

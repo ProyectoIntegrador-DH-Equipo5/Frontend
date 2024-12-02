@@ -19,6 +19,7 @@ const Modal = ({ isOpen, onClose, producto }) => {
   const [mostrarCalendario, setMostrarCalendario] = useState(false);
   const [selectedDates, setSelectedDates] = useState(null);
   const [isDateValid, setIsDateValid] = useState(false);
+  const [calendarioError, setCalendarioError] = useState(false);
 
   if (!isOpen) return null;
 
@@ -40,7 +41,17 @@ const Modal = ({ isOpen, onClose, producto }) => {
   };
 
   const toggleCalendario = () => {
-    setMostrarCalendario(!mostrarCalendario);
+    if (producto.nombre === "La Noche Estrellada") {
+      setCalendarioError(true);
+    } else {
+      setCalendarioError(false);
+      setMostrarCalendario(!mostrarCalendario);
+    }
+  };
+
+  const reintentarCargarCalendario = () => {
+    setCalendarioError(false);
+    setMostrarCalendario(true);
   };
 
   const handleDateValidation = (isValid) => {
@@ -51,19 +62,19 @@ const Modal = ({ isOpen, onClose, producto }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90">
       <button
         onClick={() => setMostrarCarrusel(false)}
-        className="absolute top-4 right-4 p-2 text-white hover:text-gray-300"
+        className="absolute p-2 text-white top-4 right-4 hover:text-gray-300"
       >
         <IoMdClose size={24} />
       </button>
       <button
         onClick={anteriorImagen}
-        className="absolute left-4 p-2 text-white hover:text-gray-300"
+        className="absolute p-2 text-white left-4 hover:text-gray-300"
       >
         <MdNavigateBefore size={40} />
       </button>
       <button
         onClick={siguienteImagen}
-        className="absolute right-4 p-2 text-white hover:text-gray-300"
+        className="absolute p-2 text-white right-4 hover:text-gray-300"
       >
         <MdNavigateNext size={40} />
       </button>
@@ -97,13 +108,13 @@ const Modal = ({ isOpen, onClose, producto }) => {
 
         <div className="relative w-full max-w-6xl mx-auto">
         {/* Header negro */}
-          <div className="bg-black text-white p-4 rounded-t-xl">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
+          <div className="p-4 text-white bg-black rounded-t-xl">
+            <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center sm:gap-0">
               <div>
-                <h2 className="text-xl sm:text-2xl font-bold text-primary line-clamp-1">
+                <h2 className="text-xl font-bold sm:text-2xl text-primary line-clamp-1">
                   {producto.nombre}
                 </h2>
-                <p className="text-primary italic text-sm sm:text-base">
+                <p className="text-sm italic text-primary sm:text-base">
                   {producto.artista?.nombre}
                 </p>
               </div>
@@ -119,7 +130,7 @@ const Modal = ({ isOpen, onClose, producto }) => {
 
           {/* Contenido principal */}
           <div className="bg-white rounded-b-xl p-4 sm:p-6 max-h-[calc(100vh-8rem)] overflow-y-auto">
-            <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
+            <div className="flex flex-col gap-4 lg:flex-row sm:gap-6">
               {/* Columna izquierda: Imagen principal */}
               <div className="flex-1 overflow-y-auto">
                 <img
@@ -129,10 +140,10 @@ const Modal = ({ isOpen, onClose, producto }) => {
                 />
 
                 {/* Botón para mostrar/ocultar calendario */}
-                <div className="mb-4 flex items-center justify-between">
+                <div className="flex items-center justify-between mb-4">
                   <button 
                     onClick={toggleCalendario}
-                    className="flex items-center gap-2 px-4 py-2 bg-primary text-black rounded hover:bg-primary/90"
+                    className="flex items-center gap-2 px-4 py-2 text-black rounded bg-primary hover:bg-primary/90"
                   >
                     <FaCalendarCheck />
                     {mostrarCalendario ? 'Ocultar Calendario' : 'Mostrar Calendario'}
@@ -140,20 +151,32 @@ const Modal = ({ isOpen, onClose, producto }) => {
                 </div>
 
                 {/* Calendario Modal */}
-                {mostrarCalendario && (
-                  <div onClick={(e) => e.stopPropagation()}>
-                    <CalendarioModal 
-                      obra={producto} 
+                {calendarioError ? (
+                  <div className="p-4 bg-red-100 rounded-lg">
+                    <p className="font-semibold text-red-600">
+                      Error: No se pudo cargar la información de las fechas.
+                    </p>
+                    <button
+                      onClick={reintentarCargarCalendario}
+                      className="px-4 py-2 mt-2 text-black rounded bg-primary hover:bg-primary/90"
+                    >
+                      Reintentar
+                    </button>
+                  </div>
+                ) : (
+                  mostrarCalendario && (
+                    <CalendarioModal
+                      obra={producto}
                       setSelectedDates={setSelectedDates}
                       onDateValidation={handleDateValidation}
                     />
-                  </div>
+                  )
                 )}
 
                 {/* Resumen de Fechas Seleccionadas */}
                 {selectedDates && (
-                  <div className="mt-4 p-4 bg-gray-100 rounded-lg">
-                    <h3 className="text-lg font-semibold mb-2">Resumen de Alquiler</h3>
+                  <div className="p-4 mt-4 bg-gray-100 rounded-lg">
+                    <h3 className="mb-2 text-lg font-semibold">Resumen de Alquiler</h3>
                     <div className="grid grid-cols-2 gap-2">
                       <div>
                         <p className="text-sm text-gray-600">Fecha de Inicio:</p>
@@ -176,17 +199,17 @@ const Modal = ({ isOpen, onClose, producto }) => {
                 )}
 
                 {/* Información detallada */}
-                <div className="space-y-3 mt-5 mb-5 sm:space-y-4">
+                <div className="mt-5 mb-5 space-y-3 sm:space-y-4">
                   <div>
-                    <p className="text-xs sm:text-sm text-gray-600">Fecha de creación:</p>
+                    <p className="text-xs text-gray-600 sm:text-sm">Fecha de creación:</p>
                     <p className="text-sm sm:text-base">{producto.fechaCreacion}</p>
                   </div>
                   <div>
-                    <p className="text-xs sm:text-sm text-gray-600">Descripción:</p>
+                    <p className="text-xs text-gray-600 sm:text-sm">Descripción:</p>
                     <p className="text-sm sm:text-base">{producto.descripcion}</p>
                   </div>
                   <div>
-                    <p className="text-xs sm:text-sm text-gray-600">Dimensiones:</p>
+                    <p className="text-xs text-gray-600 sm:text-sm">Dimensiones:</p>
                     <p className="text-sm sm:text-base">{producto.tamano}</p>
                   </div>
                 </div>
@@ -202,7 +225,7 @@ const Modal = ({ isOpen, onClose, producto }) => {
                         key={index}
                         src={imagen}
                         alt={`Miniatura ${index + 1}`}
-                        className="w-full aspect-square object-cover rounded-lg"
+                        className="object-cover w-full rounded-lg aspect-square"
                       />
                     ))}
                   <div
@@ -212,24 +235,24 @@ const Modal = ({ isOpen, onClose, producto }) => {
                     <img
                       src={producto.imagenesAdicionales?.[3]}
                       alt="Ver más"
-                      className="w-full aspect-square object-cover rounded-lg"
+                      className="object-cover w-full rounded-lg aspect-square"
                     />
                     <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px] rounded-lg flex items-center justify-center">
-                      <span className="text-white font-semibold text-sm sm:text-base">Ver más</span>
+                      <span className="text-sm font-semibold text-white sm:text-base">Ver más</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2 sm:gap-3 mb-4">
-                  <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg text-sm sm:text-base justify-center border-gray-400 border-2">
+                <div className="grid grid-cols-1 gap-2 mb-4 sm:grid-cols-2 lg:grid-cols-1 sm:gap-3">
+                  <div className="flex items-center justify-center gap-2 px-3 py-2 text-sm bg-gray-100 border-2 border-gray-400 rounded-lg sm:text-base">
                     <BsRulers className="text-xl" />
                     <span className="line-clamp-1">{producto.tamano}</span>
                   </div>
-                  <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg text-sm sm:text-base justify-center border-gray-400 border-2">
+                  <div className="flex items-center justify-center gap-2 px-3 py-2 text-sm bg-gray-100 border-2 border-gray-400 rounded-lg sm:text-base">
                     <BsPalette className="text-xl" />
                     <span className="line-clamp-1">{producto.tecnicaObra?.nombre}</span>
                   </div>
-                  <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg text-sm sm:text-base justify-center border-gray-400 border-2">
+                  <div className="flex items-center justify-center gap-2 px-3 py-2 text-sm bg-gray-100 border-2 border-gray-400 rounded-lg sm:text-base">
                     <BsPerson className="text-xl" />
                     <span className="line-clamp-1">{producto.movimientoArtistico?.nombre}</span>
                   </div>
@@ -251,18 +274,18 @@ const Modal = ({ isOpen, onClose, producto }) => {
                 ) : (
                   <>
                     <button
-                      className="w-full py-3 bg-primary text-white rounded-lg hover:bg-primary transition-colors mb-3 opacity-50 cursor-not-allowed"
+                      className="w-full py-3 mb-3 text-white transition-colors rounded-lg opacity-50 cursor-not-allowed bg-primary hover:bg-primary"
                       disabled
                     >
                       Alquilar
                     </button>
-                    <p className="text-red-500 text-xs sm:text-sm text-center mb-2 sm:mb-3">
+                    <p className="mb-2 text-xs text-center text-red-500 sm:text-sm sm:mb-3">
                       Debe estar autenticado para alquilar una obra
                     </p>
                   </>
                 )}
 
-                <p className="text-xl sm:text-2xl font-bold text-center">
+                <p className="text-xl font-bold text-center sm:text-2xl">
                   $ {producto.precioRenta?.toLocaleString()} USD
                 </p>
               </div>
