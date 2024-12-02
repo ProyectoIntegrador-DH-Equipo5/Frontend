@@ -85,13 +85,20 @@ const Register = () => {
 
   const sendConfirmationEmail = async (userEmail, userName) => {
     try {
+      const baseUrl = import.meta.env.PROD 
+        ? 'URL_DE_PRODUCCION'
+        : 'http://localhost:5173';
+      
+      const loginUrl = `${baseUrl}/login`;
+      
       await emailjs.send(
         'service_g4ywxm6',  // Service ID de EmailJS
         'template_qq0x3dc', // Template ID
         {
-          user_email: userEmail,    // Cambiado de to_email a user_email
-          user_name: userName,      // Cambiado de to_name a user_name
-          to_email: userEmail,      // Agregado para especificar el destinatario
+          user_email: userEmail,
+          user_name: userName,
+          login_url: loginUrl,
+          to_email: userEmail,
         },
         '2Pgg6a24lfS4J2fVD'   //  Public Key
       );
