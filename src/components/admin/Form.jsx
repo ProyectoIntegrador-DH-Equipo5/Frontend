@@ -187,24 +187,30 @@ const Form = ({ edit, obra = {}, onClose }) => {
 				console.log("Estado inicial de formData:", formData);
 				console.log("Imágenes antes de procesar:", formData.imagenes);
 
+				// Manejar imagenes existentes
 				if (formData.imagenes?.length > 0) {
 					formData.imagenes.forEach((imagen, index) => {
 						if (imagen?.id) {
 							//formDataToSend.append(`imagenes[${index}]`, imagen.imagenId);
-									formDataToSend.append( `files[${index + 1}].${imagen.imagenId}`, '')
+									formDataToSend.append( `files[${index + 1}].${imagen.imagenId}`, '');
+									console.log(`Agregando imagen existente: files[${index + 1}].${imagen.imagenId}`);
 						}
 					});
 				}
 
-			// Manejar nuevas imágenes
+				// Manejar nuevas imágenes
 				const newImages = formData.imagenesAdicionales || [];
+				const startIndex = formData.imagenes?.length || 0 + 1; // Comenzar después de las existentes
 				console.log("Nuevas imágenes:", newImages);
-				
-				newImages.forEach((file) => {
+				newImages.forEach((file, index) => {
 						if (file instanceof File) {
-							formDataToSend.append('files', file);
+							formDataToSend.append(`files[${startIndex + index}]`, file);
 						}
 				});
+
+				console.log("Estado de formData:", formData);
+				console.log("Imágenes existentes:", formData.imagenes);
+				console.log("Imágenes nuevas:", formData.imagenesAdicionales);
 
 				console.log("Sending update data:", Object.fromEntries(formDataToSend));
 				const response = await obrasService.updateObra(formDataToSend);
