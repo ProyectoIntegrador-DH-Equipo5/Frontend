@@ -21,6 +21,11 @@ const Register = () => {
     error: false,
     message: ''
   });
+  const [emailStatus, setEmailStatus] = useState({
+    sent: false,
+    error: false,
+    message: ''
+  });
 
   const nameRegex = /^[a-zA-Z\s]*$/;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -133,6 +138,7 @@ const Register = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen p-4 bg-black">
+    <div className="flex items-center justify-center min-h-screen p-4 bg-black">
       <div className="w-full max-w-md">
         <h1 className="text-4xl font-bold text-center text-[#FDB813] mb-8">
           Registrarse
@@ -197,6 +203,7 @@ const Register = () => {
               />
               {errors.email && (
                 <p className="flex items-center mt-1 text-sm text-red-500">
+                <p className="flex items-center mt-1 text-sm text-red-500">
                   <AiFillExclamationCircle className="mr-1" />
                   {errors.email}
                 </p>
@@ -238,6 +245,7 @@ const Register = () => {
                 required
               />
               {errors.confirmPassword && (
+                <p className="flex items-center mt-1 text-sm text-red-500">
                 <p className="flex items-center mt-1 text-sm text-red-500">
                   <AiFillExclamationCircle className="mr-1" />
                   {errors.confirmPassword}
