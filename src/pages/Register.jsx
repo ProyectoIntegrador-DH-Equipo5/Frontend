@@ -3,6 +3,7 @@ import { useContextGlobal } from '../utils/global.context.jsx';
 import { useNavigate } from 'react-router-dom';
 import { authService } from "../api/authService.js";
 import { emailService } from "../api/emailService.js";
+import { AiFillExclamationCircle } from "react-icons/ai";
 
 const Register = () => {
   const { dispatch } = useContextGlobal();
@@ -16,11 +17,6 @@ const Register = () => {
 
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
-  const [emailStatus, setEmailStatus] = useState({
-    sent: false,
-    error: false,
-    message: ''
-  });
   const [emailStatus, setEmailStatus] = useState({
     sent: false,
     error: false,
@@ -138,7 +134,6 @@ const Register = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen p-4 bg-black">
-    <div className="flex items-center justify-center min-h-screen p-4 bg-black">
       <div className="w-full max-w-md">
         <h1 className="text-4xl font-bold text-center text-[#FDB813] mb-8">
           Registrarse
@@ -203,7 +198,6 @@ const Register = () => {
               />
               {errors.email && (
                 <p className="flex items-center mt-1 text-sm text-red-500">
-                <p className="flex items-center mt-1 text-sm text-red-500">
                   <AiFillExclamationCircle className="mr-1" />
                   {errors.email}
                 </p>
@@ -246,13 +240,11 @@ const Register = () => {
               />
               {errors.confirmPassword && (
                 <p className="flex items-center mt-1 text-sm text-red-500">
-                <p className="flex items-center mt-1 text-sm text-red-500">
                   <AiFillExclamationCircle className="mr-1" />
                   {errors.confirmPassword}
                 </p>
               )}
             </div>
-
             <button
               type="submit"
               className="w-full py-3 bg-[#FDB813] text-black font-bold rounded-lg hover:bg-[#FDB813]/90 transition-colors"
