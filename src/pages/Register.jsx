@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useContextGlobal } from '../utils/global.context.jsx';
 import { useNavigate } from 'react-router-dom';
+import { authService } from "../api/authService.js";
+import { emailService } from "../api/emailService.js";
 
 const Register = () => {
   const { dispatch } = useContextGlobal();
@@ -14,6 +16,11 @@ const Register = () => {
 
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
+  const [emailStatus, setEmailStatus] = useState({
+    sent: false,
+    error: false,
+    message: ''
+  });
 
   const nameRegex = /^[a-zA-Z\s]*$/;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -83,29 +90,38 @@ const Register = () => {
 
     if (Object.keys(validationErrors).length === 0) {
       try {
-        const response = await fetch('http://localhost:8080/api/auth/register', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            name: formData.name,
-            lastname: formData.lastName,
-            email: formData.email,
-            password: formData.password,
-      
-          }),
-        });
+        const userDataToSend = {
+          name: formData.name,
+          lastname: formData.lastName,
+          email: formData.email,
+          password: formData.password
+        };
+        const response = await authService.register(userDataToSend);
 
-        const data = await response.json();
-        console.log(data);
+        if (response) {
+          dispatch({ type: 'ADD_USER', payload: response.user });
+          localStorage.setItem('user', JSON.stringify(response.user));
 
-        if (response.ok) {
-          dispatch({ type: 'SET_USER', payload: data.user });
-          localStorage.setItem('user', JSON.stringify(data.user));
-          navigate('/');
+          // Service email
+          setEmailStatus({ sent: false, error: false, message: 'Enviando email de confirmación...' })
+          const emailResponse = await emailService.registerConfirmation(
+            formData.email,
+            `${formData.name} ${formData.lastName}`,
+            setEmailStatus
+          );
+
+          setEmailStatus(emailResponse);  // Actualizamos el estado con la respuesta del servicio
+          console.log(emailResponse);
+          
+
+          if (emailResponse.success) {
+            setErrors({});
+            setTimeout(() => {
+              navigate('/'); // Redirect to home page
+            }, 1000); // Delay for 1 second (or adjust if necessary)
+          }
         } else {
-          setErrors({ form: data.message || 'Error al registrarse.' });
+          setErrors({ form: response.message || 'Error al registrarse.' });
         }
       } catch (error) {
         setErrors({ form: 'Error del servidor.' });
@@ -113,91 +129,151 @@ const Register = () => {
     } else {
       setErrors(validationErrors);
     }
-      
-      
   };
 
   return (
-    <div className="flex flex-col w-full pt-32 min-h-screen bg-black">
-      <h1 className="text-3xl font-bold text-center text-white mt-8 mb-8">Registrarse</h1>
-      <form onSubmit={handleSubmit} className="flex flex-col w-full max-w-md mx-auto bg-white p-8 rounded-lg shadow-md">
-        <label className="mb-4">
-          <span className="block text-sm font-medium text-gray-700">Nombre:</span>
-          <input
-            type="text"
-            name="name"
-            className="w-full mt-1 p-2 border border-gray-300 rounded-lg"
-            value={formData.name}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            required
-          />
-          {errors.name && <p className="text-red-500">{errors.name}</p>}
-        </label>
-        
-        <label className="mb-4">
-          <span className="block text-sm font-medium text-gray-700">Apellido:</span>
-          <input
-            type="text"
-            name="lastName"
-            className="w-full mt-1 p-2 border border-gray-300 rounded-lg"
-            value={formData.lastName}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            required
-          />
-          {errors.lastName && <p className="text-red-500">{errors.lastName}</p>}
-        </label>
-        
-        <label className="mb-4">
-          <span className="block text-sm font-medium text-gray-700">Email:</span>
-          <input
-            type="email"
-            name="email"
-            className="w-full mt-1 p-2 border border-gray-300 rounded-lg"
-            value={formData.email}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            required
-          />
-          {errors.email && <p className="text-red-500">{errors.email}</p>}
-        </label>
-        
-        <label className="mb-4">
-          <span className="block text-sm font-medium text-gray-700">Contraseña:</span>
-          <input
-            type="password"
-            name="password"
-            className="w-full mt-1 p-2 border border-gray-300 rounded-lg"
-            value={formData.password}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            required
-          />
-          {errors.password && <p className="text-red-500">{errors.password}</p>}
-        </label>
-        
-        <label className="mb-4">
-          <span className="block text-sm font-medium text-gray-700">Confirmar Contraseña:</span>
-          <input
-            type="password"
-            name="confirmPassword"
-            className="w-full mt-1 p-2 border border-gray-300 rounded-lg"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            required
-          />
-          {errors.confirmPassword && <p className="text-red-500">{errors.confirmPassword}</p>}
-        </label>
-        
-        <button
-          type="submit"
-          className="w-full py-2 mt-4 bg-primary text-black font-semibold rounded-lg"
-        >
+    <div className="flex items-center justify-center min-h-screen p-4 bg-black">
+      <div className="w-full max-w-md">
+        <h1 className="text-4xl font-bold text-center text-[#FDB813] mb-8">
           Registrarse
-        </button>
-      </form>
+        </h1>
+        <form
+          onSubmit={handleSubmit}
+          className="bg-[#1E1E1E] rounded-lg p-8 shadow-lg border border-[#FDB813]/20"
+        >
+          <div className="space-y-6">
+            <div>
+              <label className="block text-[#FDB813] text-lg mb-2">
+                Nombre
+              </label>
+              <input
+                type="text"
+                name="name"
+                className="w-full p-3 bg-white rounded-lg border-2 border-[#FDB813]/20 focus:border-[#FDB813] outline-none transition-colors"
+                value={formData.name}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                required
+              />
+              {errors.name && (
+                <p className="flex items-center mt-1 text-sm text-red-500">
+                  <AiFillExclamationCircle className="mr-1" />
+                  {errors.name}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-[#FDB813] text-lg mb-2">
+                Apellido
+              </label>
+              <input
+                type="text"
+                name="lastName"
+                className="w-full p-3 bg-white rounded-lg border-2 border-[#FDB813]/20 focus:border-[#FDB813] outline-none transition-colors"
+                value={formData.lastName}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                required
+              />
+              {errors.lastName && (
+                <p className="flex items-center mt-1 text-sm text-red-500">
+                  <AiFillExclamationCircle className="mr-1" />
+                  {errors.lastName}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-[#FDB813] text-lg mb-2">Email</label>
+              <input
+                type="email"
+                name="email"
+                className="w-full p-3 bg-white rounded-lg border-2 border-[#FDB813]/20 focus:border-[#FDB813] outline-none transition-colors"
+                value={formData.email}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                required
+              />
+              {errors.email && (
+                <p className="flex items-center mt-1 text-sm text-red-500">
+                  <AiFillExclamationCircle className="mr-1" />
+                  {errors.email}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-[#FDB813] text-lg mb-2">
+                Contraseña
+              </label>
+              <input
+                type="password"
+                name="password"
+                className="w-full p-3 bg-white rounded-lg border-2 border-[#FDB813]/20 focus:border-[#FDB813] outline-none transition-colors"
+                value={formData.password}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                required
+              />
+              {errors.password && (
+                <p className="flex items-center mt-1 text-sm text-red-500">
+                  <AiFillExclamationCircle className="mr-1" />
+                  {errors.password}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-[#FDB813] text-lg mb-2">
+                Confirmar Contraseña
+              </label>
+              <input
+                type="password"
+                name="confirmPassword"
+                className="w-full p-3 bg-white rounded-lg border-2 border-[#FDB813]/20 focus:border-[#FDB813] outline-none transition-colors"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                required
+              />
+              {errors.confirmPassword && (
+                <p className="flex items-center mt-1 text-sm text-red-500">
+                  <AiFillExclamationCircle className="mr-1" />
+                  {errors.confirmPassword}
+                </p>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-3 bg-[#FDB813] text-black font-bold rounded-lg hover:bg-[#FDB813]/90 transition-colors"
+            >
+              Registrarse
+            </button>
+          </div>
+        </form>
+        
+        {emailStatus?.message && (
+          <div className={`mt-4 p-4 rounded-lg ${
+            emailStatus.error 
+              ? 'bg-red-500/10 text-red-500 border border-red-500/20' 
+              : 'bg-green-500/10 text-green-500 border border-green-500/20'
+          }`}>
+            <p className="text-center">{emailStatus.message}</p>
+            {emailStatus.error && (
+              <div className="mt-2 text-center">
+                <button
+                  onClick={handleResendEmail}
+                  className="text-[#FDB813] hover:text-[#FDB813]/80 underline"
+                >
+                  ¿No has recibido el email? Haz clic aquí para reenviar
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -36,14 +36,14 @@ export const authService = {
     },
     
     // Obtener detalles de usuario (requiere token)
-    getUserDetails: async (token) => {
-        try {
-            const response = await axiosConfig.get("/usuario/detalles", {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            return response.data;
-        } catch (error) {
-            console.error("Error al obtener detalles del usuario:", error);
-        }
-    },
+    // getUserDetails: async (token) => {
+    //     try {
+    //         const response = await axiosConfig.get("/usuario/detalles", {
+    //             headers: { Authorization: `Bearer ${token}` },
+    //         });
+    //         return response.data;
+    //     } catch (error) {
+    //         console.error("Error al obtener detalles del usuario:", error);
+    //     }
+    // },
 };
