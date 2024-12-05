@@ -1,15 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useContextGlobal } from "../../utils/global.context";
 
-const ImageUpload = ({ onFilesAdded, existingImages, imagenesAdicionales }) => {
-    //const { dispatch, state } = useContextGlobal();
+const ImageUpload = ({ onFilesAdded, onFilesDeleted, existingImages, imagenesAdicionales }) => {
     const [localImages, setLocalImages] = useState([]); // Nuevo estado local
-    //const images = state.images || []; // Fetch images from global state
-    //const existingImages = imagenesAdicionales || []; // Existing images passed as prop
 
     // Reinicializar el estado cuando cambian las imágenes adicionales
     useEffect(() => {
-        //setLocalImages([]);
         // Limpiar URLs de objeto al desmontar
         return () => {
             localImages.forEach(img => {
@@ -22,19 +18,42 @@ const ImageUpload = ({ onFilesAdded, existingImages, imagenesAdicionales }) => {
 
      // Inicializar imágenes cuando se reciben imagenesAdicionales
      useEffect(() => {
-         // Limpiar estado anterior
-        if (imagenesAdicionales && imagenesAdicionales.length > 0) {
-            const formattedImages = imagenesAdicionales.map(img => ({
-                url: typeof img === 'string' ? img : URL.createObjectURL(img),
-                file: typeof img === 'string' || img.imagenId ? null : img,
-                isExisting: typeof img === 'string' || img.imagenId ? true : false,
-                imagenId: img.imagenId // Preservar el imagenId si existe
+
+        const initialImages = [];
+        
+        // Procesar imágenes existentes si las hay
+        if (existingImages && existingImages.length > 0) {
+            const existingFormattedImages = existingImages.map(img => ({
+                url: img.url || img,
+                file: null,
+                isExisting: true,
+                imagenId: img.id || img.imagenId
             }));
-            setLocalImages(formattedImages);
-        } else {
-            setLocalImages([]);
+            initialImages.push(...existingFormattedImages);
         }
-    }, [imagenesAdicionales]);
+
+        // Procesar imágenes adicionales si las hay
+        if (imagenesAdicionales && imagenesAdicionales.length > 0) {
+            const additionalFormattedImages = imagenesAdicionales.map(img => ({
+                url: img.url || (typeof img === 'string' ? img : URL.createObjectURL(img)),
+                file: img.file || (typeof img === 'string' || img.imagenId ? null : img),
+                isExisting: img.isExisting || typeof img === 'string' || img.imagenId ? true : false,
+                imagenId: img.imagenId || null
+            }));
+            initialImages.push(...additionalFormattedImages);
+        }
+
+        setLocalImages(initialImages);
+
+        // Cleanup function
+        return () => {
+            initialImages.forEach(img => {
+                if (!img.isExisting && img.url) {
+                    URL.revokeObjectURL(img.url);
+                }
+            });
+        };
+    }, [existingImages, imagenesAdicionales]);
 
 
     const handleFileChange = (e) => {
@@ -58,10 +77,15 @@ const ImageUpload = ({ onFilesAdded, existingImages, imagenesAdicionales }) => {
         });
 
         setLocalImages(updatedImages);
-        
-        // Notificar al componente padre con la lista actualizada de archivos
-        const allFiles = updatedImages.map(img => img.isExisting ? img.url : img.file);
+
+        const allFiles = updatedImages.map(img => {
+            if (img.isExisting) {
+                return img.imagenId ? { imagenId: img.imagenId } : img.url;
+            }
+            return img.file;
+        });
         onFilesAdded(allFiles);
+
         
         e.target.value = '';
     };
@@ -79,15 +103,21 @@ const ImageUpload = ({ onFilesAdded, existingImages, imagenesAdicionales }) => {
         
         if (!imageToDelete.isExisting) {
             URL.revokeObjectURL(imageToDelete.url);
+        } else if (imageToDelete.imagenId) {
+            onFilesDeleted?.(imageToDelete.imagenId); // Llamar a la nueva función si existe
         }
         
-        // Notificar al componente padre
-        const updatedFiles = newLocalImages.map(img => img.isExisting ? img.url : img.file);
+        // Notificar al componente padre preservando los IDs
+        const updatedFiles = newLocalImages.map(img => {
+            if (img.isExisting) {
+                return img.imagenId ? { imagenId: img.imagenId } : img.url;
+            }
+            return img.file;
+        });
         onFilesAdded(updatedFiles);
     };
 
     const addFile = (file) => {
-        // Verificar si el archivo ya existe
         const isDuplicate = localImages.some(img => 
             img.file && img.file.name === file.name && img.file.size === file.size
         );
@@ -100,17 +130,20 @@ const ImageUpload = ({ onFilesAdded, existingImages, imagenesAdicionales }) => {
                 isExisting: false
             };
             
-            setLocalImages(prevImages => [...prevImages, newImage]);
+            const updatedImages = [...localImages, newImage];
+            setLocalImages(updatedImages);
             
             // Notificar al componente padre
-            const updatedImages = [...localImages, newImage]
-                .map(img => img.isExisting ? img.url : img.file);
-            onFilesAdded(updatedImages);
+            const allFiles = updatedImages.map(img => {
+                if (img.isExisting) {
+                    return img.imagenId ? { imagenId: img.imagenId } : img.url;
+                }
+                return img.file;
+            });
+            onFilesAdded(allFiles);
         }
     };
 
-    //const allImages = [...existingImages, ...images];
-    //console.log("All images:", allImages); // Verifica las URLs de las imágenes en la consola
 
     return (
         <div

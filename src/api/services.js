@@ -72,24 +72,6 @@ export const obrasService = {
         }
     },
 
-    // updateObra: async (formData) => {
-    //     try {
-    //         const response = await axiosConfig.put("/obra", formData, {
-    //             headers: {
-    //                 "Content-Type": "multipart/form-data",
-    //                 Authorization: `Bearer ${localStorage.getItem("token")}`,
-    //             },
-    //         });
-    //         return response.data;
-    //     } catch (error) {
-    //         console.error("Error actualizando la obra con imágenes:", error);
-    //         if (error.response) {
-    //             console.error("Response data:", error.response.data);
-    //         }
-    //         throw error;
-    //     }
-    // },
-
     deleteObra: async (id) => {
         try {
             const response = await axiosConfig.delete(`/obra/${id}`, {

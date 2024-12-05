@@ -43,20 +43,18 @@ const Form = ({ edit, obra = {}, onClose }) => {
 }, [edit, obra]);
 
 	const onFilesAdded = (files) => {
-		console.log("Archivo añadidos:", files);
 		setFormData((prevData) => ({
 			...prevData,
 			imagenesAdicionales: files
 		}));
 	};
 
-	// const onFilesDeleted = (file) => {  
-	// 	console.log("Archivo añadido:", file);
-	// 	setFormData((prevData) => ({
-	// 		...prevData,
-	// 		imagenesAdicionales: [...(prevData.imagenesAdicionales || []), imagenes[imagenId] = file], // Agregar el archivo al array de imágenes
-	// 	}));
-	// };
+	const onFilesDeleted = (deletedImageId) => {  
+		setFormData(prevData => ({
+			...prevData,
+			imagenes: prevData.imagenes.filter(img => img.id !== deletedImageId)
+		}));
+	};
 
 	const handleChange = (e) => {
 		const { name, value } = e.target;
@@ -191,9 +189,12 @@ const Form = ({ edit, obra = {}, onClose }) => {
 				if (formData.imagenes?.length > 0) {
 					formData.imagenes.forEach((imagen, index) => {
 						if (imagen?.id) {
-							//formDataToSend.append(`imagenes[${index}]`, imagen.imagenId);
-									formDataToSend.append( `files[${index + 1}].${imagen.imagenId}`, '');
-									console.log(`Agregando imagen existente: files[${index + 1}].${imagen.imagenId}`);
+							// Crear un nuevo Blob/File para la imagen existente
+							const imageBlob = new Blob([''], { type: 'application/octet-stream' });
+							const imageFile = new File([imageBlob], imagen.imagenId, { type: 'application/octet-stream' });
+							
+							formDataToSend.append( `files[${index + 1}].${imagen.imagenId}`, imageFile);
+							console.log(`Agregando imagen existente: files[${index + 1}].${imagen.imagenId}`);
 						}
 					});
 				}
@@ -475,6 +476,7 @@ const Form = ({ edit, obra = {}, onClose }) => {
 					artId={formData.id} // Reemplazar art.id con formData.id
 					existingImages={formData.imagenes} 
 					onFilesAdded={onFilesAdded}
+					onFilesDeleted={onFilesDeleted}
 				/>
 
 				<div className="flex justify-between items-center">
