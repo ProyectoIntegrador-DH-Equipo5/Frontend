@@ -7,6 +7,7 @@ import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
 import Profile from "./pages/Profile.jsx";
 import PolicyView from "./pages/PolicyView.jsx";
+import ReservaDetalle from "./pages/ReservaDetalle.jsx";
 import { useContextGlobal } from "./utils/global.context.jsx";
 
 function App() {
@@ -28,14 +29,15 @@ function App() {
 						}
 					/>
 
-					<Route path="/login" element={<Login />} />
-					<Route path="/register" element={<Register />} />
-					<Route path="/profile" element={<Profile />} />
-					<Route path="/politicas" element={<PolicyView />} />
-				</Route>
-			</Routes>
-		</Router>
-	);
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/politicas" element={<PolicyView />} />
+            <Route path="/reservar/:id" element={<ReservaDetalle />} />
+          </Route>
+        </Routes>
+    </Router>
+  );
 }
 
 export default App;

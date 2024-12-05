@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useContextGlobal } from "../utils/global.context.jsx";
 import CalendarioModal from './CalendarioModal.jsx';
+import { useNavigate } from "react-router-dom";
 
 import { RiArrowGoBackFill } from "react-icons/ri";
 import { IoMdClose } from "react-icons/io";
@@ -11,6 +12,7 @@ import { BsPerson } from "react-icons/bs";
 import { FaCalendarCheck } from "react-icons/fa";
 
 const Modal = ({ isOpen, onClose, producto }) => {
+  const navigate = useNavigate();
   const [mostrarCarrusel, setMostrarCarrusel] = useState(false);
   const [imagenActual, setImagenActual] = useState(0);
   const { state } = useContextGlobal();
@@ -56,6 +58,21 @@ const Modal = ({ isOpen, onClose, producto }) => {
 
   const handleDateValidation = (isValid) => {
     setIsDateValid(isValid);
+  };
+
+  const handleReservation = () => {
+    if (!state.loggedUser) {
+      navigate("/login");
+    } else if (isDateValid) {
+      navigate(`/reservar/${producto.id}`, {
+        state: { 
+          selectedDates,
+          productoSeleccionado: producto // Añadir el producto completo al state
+        }
+      });
+    } else {
+      alert("Por favor, seleccione fechas válidas.");
+    }
   };
 
   const CarruselModal = () => (
@@ -262,6 +279,7 @@ const Modal = ({ isOpen, onClose, producto }) => {
                 {/* Botón de Alquiler con validación de fechas */}
                 {state.loggedUser ? (
                   <button 
+                    onClick={handleReservation}
                     className={`w-full py-3 font-bold rounded-lg transition-colors mb-3 ${
                       isDateValid 
                         ? 'bg-primary text-black hover:bg-primary/90' 
