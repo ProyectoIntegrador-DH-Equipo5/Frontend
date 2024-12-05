@@ -26,15 +26,67 @@ const ReservaDetalle = () => {
   }
 
   const handleSubmit = async () => {
+    // Verificar si el usuario está logueado
+    if (!state.loggedUser) {
+      window.location.href = "/login";
+      return;
+    }
+
+    // Verificar si las fechas seleccionadas son válidas
+    if (!areDatesAvailable(selectedDates)) {
+      alert("Las fechas seleccionadas no están disponibles.");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       // Lógica para confirmar la reserva
       console.log("Reserva confirmada");
+      window.location.href = `/reserva/${producto.id}`;
     } catch (error) {
       console.error("Error al procesar la reserva:", error);
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const areDatesAvailable = (dates) => {
+    const disabledDates = getDisabledDates(); // Llama a la función que obtendrá las fechas deshabilitadas
+
+    // Validación 1: Fechas no pueden estar en el pasado
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (dates.startDate < today) {
+      return false; // La fecha de inicio no puede ser en el pasado
+    }
+
+    // Validación 2: Verificar que no haya fechas reservadas en el rango seleccionado
+    const hasReservedDates = disabledDates.some(
+      (disabledDate) => 
+        disabledDate >= dates.startDate && 
+        disabledDate <= dates.endDate
+    );
+
+    return !hasReservedDates; // Retorna true si no hay fechas reservadas
+  };
+
+  // Nueva función para obtener las fechas deshabilitadas
+  const getDisabledDates = () => {
+    // Aquí deberías implementar la lógica para obtener las fechas deshabilitadas
+    // Por ejemplo, podrías usar el mismo método que en CalendarioModal
+    const reservasObra = state.data.flatMap(prod => prod.reservas || []);
+    const fechasDeshabilitadas = reservasObra.flatMap((reserva) => {
+      const fechaInicio = new Date(reserva.fechaInicio);
+      const fechaFin = new Date(reserva.fechaFin);
+      const diasReservados = [];
+      let currentDate = new Date(fechaInicio);
+      while (currentDate <= fechaFin) {
+        diasReservados.push(new Date(currentDate));
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+      return diasReservados;
+    });
+    return fechasDeshabilitadas;
   };
 
   const startDate = new Date(selectedDates.startDate);

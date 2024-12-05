@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useContextGlobal } from "../utils/global.context.jsx";
 import CalendarioModal from './CalendarioModal.jsx';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 import { RiArrowGoBackFill } from "react-icons/ri";
 import { IoMdClose } from "react-icons/io";
@@ -275,6 +275,9 @@ const Modal = ({ isOpen, onClose, producto }) => {
                   </div>
                 </div>
                 
+                <p className="text-xl font-bold text-center mb-2 sm:text-2xl">
+                  $ {producto.precioRenta?.toLocaleString()} USD
+                </p>
 
                 {/* Botón de Alquiler con validación de fechas */}
                 {state.loggedUser ? (
@@ -297,15 +300,16 @@ const Modal = ({ isOpen, onClose, producto }) => {
                     >
                       Alquilar
                     </button>
-                    <p className="mb-2 text-xs text-center text-red-500 sm:text-sm sm:mb-3">
-                      Debe estar autenticado para alquilar una obra
-                    </p>
+                    <div className="flex flex-col items-center justify-start p-2 bg-gray-300 rounded-lg mb-4 text-black">
+          <p>Debe estar autenticado para alquilar una obra.</p>
+          <Link to="/login">
+            <button className="mt-2 px-4 py-2 bg-[#FDB813] text-black rounded-lg hover:bg-[#FDB813]/90 transition">
+              Iniciar Sesión
+            </button>
+          </Link>
+        </div>
                   </>
                 )}
-
-                <p className="text-xl font-bold text-center sm:text-2xl">
-                  $ {producto.precioRenta?.toLocaleString()} USD
-                </p>
               </div>
             </div>
           </div>
