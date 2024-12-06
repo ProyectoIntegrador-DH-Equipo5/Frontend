@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { DateRangePicker } from "react-date-range";
 import { useContextGlobal } from "../utils/global.context";
-import reservas from "../utils/reserva.json";
+import reservasService from "../api/reservasService";
 import "../styles/App.css";
 import "../styles/default.css";
 import "../styles/styles.css";
@@ -18,50 +18,72 @@ const CalendarioModal = ({ obra, setSelectedDates, onDateValidation }) => {
 
   const [disabledDates, setDisabledDates] = useState([]);
   const [validationError, setValidationError] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Obtener las fechas reservadas para la obra específica
-    const reservasObra = reservas.filter(
-      (reserva) => reserva.obra.id === obra.id
-    );
+    const fetchReservas = async () => {
+      try {
+        setIsLoading(true);
+        // Obtener un rango amplio para verificar disponibilidad (por ejemplo, próximos 6 meses)
+        const today = new Date();
+        const sixMonthsLater = new Date();
+        sixMonthsLater.setMonth(sixMonthsLater.getMonth() + 6);
 
-    const fechasDeshabilitadas = reservasObra.flatMap((reserva) => {
-      const fechaInicio = new Date(reserva.fechaInicio);
-      const fechaFin = new Date(reserva.fechaFin);
+        const fechaInicio = today.toISOString().split('T')[0];
+        const fechaFin = sixMonthsLater.toISOString().split('T')[0];
 
-      const diasReservados = [];
-      let currentDate = new Date(fechaInicio);
+        // Obtener las reservas para la obra específica
+        const reservasObra = await reservasService.verificarDisponibilidad(
+          obra.id,
+          fechaInicio,
+          fechaFin
+        );
 
-      while (currentDate <= fechaFin) {
-        diasReservados.push(new Date(currentDate));
-        currentDate.setDate(currentDate.getDate() + 1);
+        // Convertir las fechas reservadas a objetos Date
+        const fechasDeshabilitadas = reservasObra.flatMap((reserva) => {
+          const fechaInicio = new Date(reserva.fechaInicio);
+          const fechaFin = new Date(reserva.fechaFin);
+          const diasReservados = [];
+          let currentDate = new Date(fechaInicio);
+
+          while (currentDate <= fechaFin) {
+            diasReservados.push(new Date(currentDate));
+            currentDate.setDate(currentDate.getDate() + 1);
+          }
+
+          return diasReservados;
+        });
+
+        setDisabledDates(fechasDeshabilitadas);
+      } catch (error) {
+        console.error("Error al obtener las reservas:", error);
+        setValidationError("Error al cargar las fechas disponibles");
+      } finally {
+        setIsLoading(false);
       }
+    };
 
-      return diasReservados;
-    });
-
-    setDisabledDates(fechasDeshabilitadas);
+    fetchReservas();
   }, [obra.id]);
 
   const handleSelect = (ranges) => {
     const { startDate, endDate } = ranges.selection;
     
-    // Validación de fechas
+    // Siempre actualizamos el rango visual
+    setDateRange([ranges.selection]);
+    
+    // Validamos después de actualizar el rango visual
     const validationResult = validateDateRange(startDate, endDate);
     
     if (validationResult.isValid) {
-      setDateRange([ranges.selection]);
       setSelectedDates(ranges.selection);
       setValidationError("");
-      
-      // Llamar a la función de validación externa si existe
       if (onDateValidation) {
         onDateValidation(true);
       }
     } else {
+      setSelectedDates(null); // Importante: no guardamos fechas inválidas
       setValidationError(validationResult.error);
-      
-      // Llamar a la función de validación externa si existe
       if (onDateValidation) {
         onDateValidation(false);
       }
@@ -69,34 +91,38 @@ const CalendarioModal = ({ obra, setSelectedDates, onDateValidation }) => {
   };
 
   const validateDateRange = (startDate, endDate) => {
-    // Validación 1: Fechas no pueden estar en el pasado
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    if (startDate < today) {
+    // Normalizar las fechas para comparación
+    const start = new Date(startDate);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(endDate);
+    end.setHours(0, 0, 0, 0);
+
+    if (start < today) {
       return {
         isValid: false,
         error: "La fecha de inicio no puede ser en el pasado"
       };
     }
 
-    // Validación 2: Rango mínimo de alquiler (por ejemplo, 7 días)
     const millisecondsPerDay = 24 * 60 * 60 * 1000;
-    const daysDifference = Math.ceil((endDate - startDate) / millisecondsPerDay);
+    const daysDifference = Math.ceil((end - start) / millisecondsPerDay);
 
-    if (daysDifference < 7) {
+    if (daysDifference < 6) {
       return {
         isValid: false,
         error: "El alquiler mínimo es de 7 días"
       };
     }
 
-    // Validación 3: Verificar que no haya fechas reservadas en el rango seleccionado
-    const hasReservedDates = disabledDates.some(
-      (disabledDate) => 
-        disabledDate >= startDate && 
-        disabledDate <= endDate
-    );
+    // Verificar si hay fechas reservadas en el rango seleccionado
+    const hasReservedDates = disabledDates.some(disabledDate => {
+      const currentDate = new Date(disabledDate);
+      currentDate.setHours(0, 0, 0, 0);
+      return currentDate >= start && currentDate <= end;
+    });
 
     if (hasReservedDates) {
       return {
@@ -113,6 +139,14 @@ const CalendarioModal = ({ obra, setSelectedDates, onDateValidation }) => {
       (disabledDate) => disabledDate.toDateString() === date.toDateString()
     );
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-4">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative w-full">
@@ -132,7 +166,7 @@ const CalendarioModal = ({ obra, setSelectedDates, onDateValidation }) => {
         inputRanges={[]}
         showDateDisplay={true}
         minDate={new Date()}
-        disabledDates={disabledDates}
+        disabledDay={() => false} // Importante: permitir selección de cualquier día
         dayContentRenderer={(date) => {
           const isDisabled = isDateDisabled(date);
           return (

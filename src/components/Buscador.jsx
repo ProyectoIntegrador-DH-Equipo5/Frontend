@@ -5,7 +5,7 @@ import '../styles/App.css';
 import { useContextGlobal } from '../utils/global.context';
 import { useState, useRef, useEffect } from 'react';
 import Card from './Card';
-import reservas from '../utils/reserva.json';
+import reservasService from '../api/reservasService';
 
 const Buscador = () => {
   const { state } = useContextGlobal();
@@ -76,34 +76,33 @@ const Buscador = () => {
     setFilteredOptions([]);
   };
 
-  const filterByAvailability = (artworks) => {
-    return artworks.filter(art => {
-      // Si las fechas son iguales, mostrar todas las obras
+  const filterByAvailability = async (artworks) => {
+    try {
       if (dateRange[0].startDate.getTime() === dateRange[0].endDate.getTime()) {
-        return true;
+        return artworks;
       }
 
-      // Verificar si la obra está reservada en el rango de fechas seleccionado
-      const isReserved = reservas.some(reserva => {
-        if (art.id !== reserva.obra.id) return false;
+      const fechaInicio = dateRange[0].startDate.toISOString().split('T')[0];
+      const fechaFin = dateRange[0].endDate.toISOString().split('T')[0];
 
-        const reservaInicio = new Date(reserva.fechaInicio);
-        const reservaFin = new Date(reserva.fechaFin);
-        const selectedStart = dateRange[0].startDate;
-        const selectedEnd = dateRange[0].endDate;
+      // Obtener las obras disponibles del backend
+      const disponibles = await reservasService.obtenerObrasDisponibles(
+        fechaInicio,
+        fechaFin
+      );
 
-        // La obra NO está disponible si hay algún solapamiento entre las fechas
-        return (
-          (selectedStart <= reservaFin && selectedEnd >= reservaInicio)
-        );
-      });
-
-      // Retornar true si la obra NO está reservada
-      return !isReserved;
-    });
+      // Filtrar las obras que están en la lista de disponibles
+      return artworks.filter(art => 
+        disponibles.some(obraDisponible => obraDisponible.id === art.id)
+      );
+    } catch (error) {
+      console.error('Error al verificar disponibilidad:', error);
+      setError(true);
+      return [];
+    }
   };
 
-  const handleSearch = (event) => {
+  const handleSearch = async (event) => {
     event.preventDefault();
     setHasSearched(true);
     
@@ -116,9 +115,7 @@ const Buscador = () => {
 
       let results = [];
       
-      // Si hay texto en el input, aplicamos los filtros de búsqueda
       if (inputValue.trim()) {
-        // Primero verificamos si el input coincide exactamente con una categoría
         const selectedCategory = state.categories.find(
           category => category.nombre.toLowerCase() === inputValue.toLowerCase()
         );
@@ -134,12 +131,11 @@ const Buscador = () => {
           );
         }
       } else {
-        // Si no hay texto, usamos todas las obras
         results = state.data;
       }
 
-      // Aplicamos el filtro de disponibilidad
-      const availableResults = filterByAvailability(results);
+      // Aplicar el filtro de disponibilidad de manera asíncrona
+      const availableResults = await filterByAvailability(results);
       setSelectedArtworks(availableResults);
     } catch (err) {
       setError(true);
@@ -147,8 +143,8 @@ const Buscador = () => {
     }
   };
 
-  // Nueva función para búsqueda programática
-  const searchByCategory = (categoryName) => {
+  // La función searchByCategory también necesita ser actualizada para ser asíncrona
+  const searchByCategory = async (categoryName) => {
     try {
       setError(false);
       setInputValue(categoryName);
@@ -162,7 +158,7 @@ const Buscador = () => {
         art.movimientoArtistico.nombre.toLowerCase() === categoryName.toLowerCase()
       );
 
-      const availableResults = filterByAvailability(results);
+      const availableResults = await filterByAvailability(results);
       setSelectedArtworks(availableResults);
     } catch (err) {
       setError(true);
