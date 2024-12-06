@@ -5,10 +5,13 @@ const reservasService = {
     crearReserva: async (obraId, fechaInicio, fechaFin) => {
         try {
             const response = await axiosConfig.post('/reservas', {
-                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
                 obra: obraId,
-                fechaInicio: fechaInicio,
-                fechaFin: fechaFin
+                fechaInicio: fechaInicio.toISOString().split('T')[0],
+                fechaFin: fechaFin.toISOString().split('T')[0]
+            }, {
+                headers: { 
+                    Authorization: `Bearer ${localStorage.getItem("token")}` 
+                }
             });
             return response.data;
         } catch (error) {

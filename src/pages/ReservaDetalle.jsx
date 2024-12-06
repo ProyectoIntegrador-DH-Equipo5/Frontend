@@ -1,6 +1,7 @@
 import { React, useState } from "react";
 import { useLocation, useParams, Link } from "react-router-dom";
 import { useContextGlobal } from "../utils/global.context.jsx";
+import reservasService from "../api/reservasService.js";
 
 const ReservaDetalle = () => {
   const { id } = useParams();
@@ -40,11 +41,19 @@ const ReservaDetalle = () => {
 
     setIsSubmitting(true);
     try {
-      // Lógica para confirmar la reserva
-      console.log("Reserva confirmada");
-      window.location.href = `/reserva/${producto.id}`;
+      const reservaCreada = await reservasService.crearReserva(
+        producto.id, 
+        selectedDates.startDate, 
+        selectedDates.endDate
+      );
+      
+      if (reservaCreada) {
+        alert("¡Reserva confirmada con éxito!");
+        window.location.href = "/mis-reservas"; // O donde quieras redirigir
+      }
     } catch (error) {
       console.error("Error al procesar la reserva:", error);
+      alert("Hubo un error al procesar la reserva. Por favor, intente nuevamente.");
     } finally {
       setIsSubmitting(false);
     }
@@ -98,7 +107,7 @@ const ReservaDetalle = () => {
     <div className="flex flex-col items-center justify-start min-h-screen p-4 pt-32 bg-background text-white">
       <div className="w-full max-w-6xl bg-background bg-opacity-50 rounded-lg shadow-lg p-8 flex border-primary border">
         <img
-          src={producto.img}
+          src={producto.imagenes?.find((imagen) => imagen.nombre.toLowerCase().startsWith("principal"))?.url || producto.imagenes?.[0]?.url}
           alt={producto.nombre}
           className="w-1/3 h-auto rounded-lg shadow-md mr-4"
         />
@@ -108,7 +117,7 @@ const ReservaDetalle = () => {
           </h1>
           <h2 className="text-4xl font-bold text-[#FDB813] mb-2">{producto.nombre}</h2>
           <p className="text-lg text-gray-300 mb-4">{producto.descripcion}</p>
-
+          {/* Faltan agregar detalles de la obra como la tecnica y las caracteristicas ETC*/}
           <h3 className="mt-6 text-2xl font-semibold text-[#FDB813]">Detalles de la Reserva</h3>
           <p className="text-gray-300">
             <strong>Fecha de Inicio:</strong>{" "}

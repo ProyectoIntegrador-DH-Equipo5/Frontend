@@ -41,8 +41,8 @@ const CalendarioModal = ({ obra, setSelectedDates, onDateValidation }) => {
 
         // Convertir las fechas reservadas a objetos Date
         const fechasDeshabilitadas = reservasObra.flatMap((reserva) => {
-          const fechaInicio = new Date(reserva.fechaInicio);
-          const fechaFin = new Date(reserva.fechaFin);
+          const fechaInicio = new Date(reserva.fechaInicio + 'T00:00:00');
+          const fechaFin = new Date(reserva.fechaFin + 'T00:00:00');
           const diasReservados = [];
           let currentDate = new Date(fechaInicio);
 
@@ -110,7 +110,7 @@ const CalendarioModal = ({ obra, setSelectedDates, onDateValidation }) => {
     const millisecondsPerDay = 24 * 60 * 60 * 1000;
     const daysDifference = Math.ceil((end - start) / millisecondsPerDay);
 
-    if (daysDifference < 6) {
+    if (daysDifference < 7) {
       return {
         isValid: false,
         error: "El alquiler mínimo es de 7 días"
@@ -135,9 +135,16 @@ const CalendarioModal = ({ obra, setSelectedDates, onDateValidation }) => {
   };
 
   const isDateDisabled = (date) => {
-    return disabledDates.some(
-      (disabledDate) => disabledDate.toDateString() === date.toDateString()
-    );
+    return disabledDates.some(disabledDate => {
+      const currentDate = new Date(date);
+      const disabledDateTime = new Date(disabledDate);
+      
+      // Normalizar las fechas para comparación
+      currentDate.setHours(0, 0, 0, 0);
+      disabledDateTime.setHours(0, 0, 0, 0);
+      
+      return currentDate.getTime() === disabledDateTime.getTime();
+    });
   };
 
   if (isLoading) {
