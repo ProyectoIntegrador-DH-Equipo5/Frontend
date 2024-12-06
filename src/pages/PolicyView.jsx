@@ -34,6 +34,11 @@ const PolicyView = () => {
       description:
         "Las obras alquiladas deben ser usadas solo en los fines indicados en el contrato. Está prohibido usarlas para fines comerciales sin la autorización explícita de la galería. No se permite la reproducción fotográfica profesional sin permiso previo. El cliente no puede prestar, subalquilar o transferir la obra a terceros bajo ninguna circunstancia. Cualquier uso no autorizado resultará en la terminación inmediata del contrato.",
     },
+    {
+      title: "Privacidad y Seguridad",
+      description: 
+        "Al utilizar WhatsApp como canal de comunicación, garantizamos que la información personal de los usuarios será tratada con la máxima confidencialidad. No se almacenará ni compartirá información personal sin el consentimiento explícito del usuario. Se recomienda a los usuarios que no compartan información sensible a través de WhatsApp. La galería se compromete a cumplir con las normativas de protección de datos aplicables."
+    },
   ];
 
   return (

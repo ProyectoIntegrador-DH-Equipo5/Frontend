@@ -8,6 +8,7 @@ import Register from "./pages/Register.jsx";
 import Profile from "./pages/Profile.jsx";
 import PolicyView from "./pages/PolicyView.jsx";
 import { useContextGlobal } from "./utils/global.context.jsx";
+import WhatsAppIcon from "./components/WhatsAppIcon.jsx";
 
 function App() {
 	const { state } = useContextGlobal();
@@ -34,6 +35,7 @@ function App() {
 					<Route path="/politicas" element={<PolicyView />} />
 				</Route>
 			</Routes>
+			<WhatsAppIcon />
 		</Router>
 	);
 }
