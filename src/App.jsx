@@ -9,6 +9,7 @@ import Profile from "./pages/Profile.jsx";
 import PolicyView from "./pages/PolicyView.jsx";
 import ReservaDetalle from "./pages/ReservaDetalle.jsx";
 import { useContextGlobal } from "./utils/global.context.jsx";
+import WhatsAppIcon from "./components/WhatsAppIcon.jsx";
 
 function App() {
 	const { state } = useContextGlobal();
@@ -36,6 +37,7 @@ function App() {
             <Route path="/reservar/:id" element={<ReservaDetalle />} />
           </Route>
         </Routes>
+		<WhatsAppIcon />
     </Router>
   );
 }
