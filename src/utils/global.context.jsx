@@ -15,6 +15,7 @@ import {
     loadFromLocalStorage, 
     removeFromLocalStorage 
 } from "./localStorage"; // Importar funciones de localStorage
+import axiosConfig from "../api/axiosConfig";
 
 export const ContextGlobal = createContext(undefined);
 
@@ -61,8 +62,8 @@ export const ContextProvider = ({ children }) => {
 
                 // Intentar obtener datos desde el backend
                 const [artResponse, categoriesResponse] = await Promise.all([
-                    axios.get(`${backendURL}/obra/listartodos`, config),
-                    axios.get(`${backendURL}/movimientoArtistico/listartodos`, config),
+                    axiosConfig.get(`/obra/listartodos`, config),
+                    axiosConfig.get(`/movimientoArtistico/listartodos`, config),
                 ]);
 
                 // Actualizar estado con los datos obtenidos
