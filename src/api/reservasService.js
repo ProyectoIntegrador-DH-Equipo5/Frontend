@@ -47,6 +47,20 @@ const reservasService = {
         } catch (error) {
             throw error;
         }
+    },
+
+    // Obtener reservas por usuario
+    obtenerReservasPorUsuario: async (userId) => {
+        try {
+            const response = await axiosConfig.get(`/reservas/${userId}`, {
+                headers: { 
+                    Authorization: `Bearer ${localStorage.getItem("token")}` 
+                }
+            });
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
     }
 };
 

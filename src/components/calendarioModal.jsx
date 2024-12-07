@@ -150,7 +150,7 @@ const CalendarioModal = ({ obra, setSelectedDates, onDateValidation }) => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-4">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <div className="w-8 h-8 border-b-2 rounded-full animate-spin border-primary"></div>
       </div>
     );
   }
@@ -158,7 +158,7 @@ const CalendarioModal = ({ obra, setSelectedDates, onDateValidation }) => {
   return (
     <div className="relative w-full">
       {validationError && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+        <div className="relative px-4 py-3 mb-4 text-red-700 bg-red-100 border border-red-400 rounded" role="alert">
           <span className="block sm:inline">{validationError}</span>
         </div>
       )}

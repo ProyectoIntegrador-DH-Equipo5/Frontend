@@ -1,68 +1,84 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useContextGlobal } from "../utils/global.context.jsx";
 import { useNavigate } from "react-router-dom";
 import Card from "../components/Card";
 import { RiArrowGoBackFill } from "react-icons/ri";
+import reservasService from "../api/reservasService.js";
 
 const Profile = () => {
   const { state } = useContextGlobal();
   const navigate = useNavigate();
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
+  const [reservas, setReservas] = useState([]);
 
   const toggleFavorites = () => {
     setIsFavoritesOpen(!isFavoritesOpen);
   };
+
+  useEffect(() => {
+    const fetchReservas = async () => {
+      if (state.loggedUser) {
+        try {
+          const userReservas = await reservasService.obtenerReservasPorUsuario(state.loggedUser.id);
+          setReservas(userReservas);
+        } catch (error) {
+          console.error("Error al obtener las reservas:", error);
+        }
+      }
+    };
+
+    fetchReservas();
+  }, [state.loggedUser]);
+
   console.log(state.loggedUser?.rol);
   console.log(state.loggedUser);
- // Verifica que loggedUser esté definido
-
 
   return (
-    <div className="min-h-screen bg-black p-8 profile">
-      <div className="flex justify-around mx-auto items-center align center mt-20">
-      <h1 className="text-4xl font-bold text-[#FDB813] text-center mb-12 pl-4 pt-12">
-        Perfil
-      </h1>
-      
-      <button className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-primary rounded-lg text-black hover:bg-primary/90 transition-colors text-sm sm:text-base" onClick={() => navigate("/")}>
-        <RiArrowGoBackFill size={20} />
-        <span>Regresar</span>
-      </button>
+    <div className="min-h-screen p-8 bg-black profile">
+      <div className="flex items-center justify-around mx-auto mt-20 align center">
+        <h1 className="text-4xl font-bold text-[#FDB813] text-center mb-12 pl-4 pt-12">
+          Perfil
+        </h1>
+        
+        <button className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-primary rounded-lg text-black hover:bg-primary/90 transition-colors text-sm sm:text-base" onClick={() => navigate("/")}>
+          <RiArrowGoBackFill size={20} />
+          <span>Regresar</span>
+        </button>
       </div>
       {state.users ? (
-        <div className="max-w-3xl mx-auto bg-black text-white">
-          <div className="bg-white rounded-lg p-8 shadow-lg">
-            <div className="flex justify-between items-start">
+        <div className="max-w-3xl mx-auto text-white bg-black">
+          <div className="p-8 bg-white rounded-lg shadow-lg">
+            <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="mb-6">
-                  <h2 className="text-lg font-semibold text-gray-600 mb-1">
+                  <h2 className="mb-1 text-lg font-semibold text-gray-600">
                     Nombre
                   </h2>
                   <p className="text-gray-800">{state.loggedUser.nombre}</p>
                 </div>
 
                 <div className="mb-6">
-                  <h2 className="text-lg font-semibold text-gray-600 mb-1">
+                  <h2 className="mb-1 text-lg font-semibold text-gray-600">
                     Email
                   </h2>
                   <p className="text-gray-800">{state.loggedUser.email}</p>
                 </div>
 
                 <div className="mb-6">
-                  <h2 className="text-lg font-semibold text-gray-600 mb-1">
+                  <h2 className="mb-1 text-lg font-semibold text-gray-600">
                     Preferencias
                   </h2>
-                  <p className="text-gray-800 text-sm leading-relaxed">
+                  <p className="text-sm leading-relaxed text-gray-800">
                     Me guuuUsta el arrrte.
                   </p>
                 </div>
               </div>
 
-              <div className="w-96 mx-auto flex flex-col items-center justify-center">
-                <h2 className="text-xl font-bold text-gray-800 mb-4">
+              <div className="flex flex-col items-center justify-center mx-auto w-96">
+                <h2 className="mb-4 text-xl font-bold text-gray-800">
                   {state.loggedUser?.rol[0]?.authority}
                 </h2>
-                <div className="w-32 h-32 bg-gray-200 rounded-full flex items-center justify-center">
+                <div className="flex items-center justify-center w-32 h-32 bg-gray-200 rounded-full">
                   <svg
                     className="w-20 h-20 text-gray-400"
                     viewBox="0 0 24 24"
@@ -85,10 +101,8 @@ const Profile = () => {
               </div>
             </div>
 
-            {/* Menú desplegable de favoritos: */}
-
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-600 mb-1">
+              <h2 className="mb-1 text-lg font-semibold text-gray-600">
                 Favoritos
               </h2>
               <button onClick={toggleFavorites} className="text-gray-400">
@@ -113,7 +127,7 @@ const Profile = () => {
             </div>
 
             {isFavoritesOpen && (
-              <div className="bg-white p-4 rounded-lg text-black">
+              <div className="p-4 text-black bg-white rounded-lg">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 [&>*]:text-black">
                   {state.favorites.map((producto) => (
                     <Card
@@ -125,6 +139,25 @@ const Profile = () => {
                 </div>
               </div>
             )}
+
+            <div className="mt-8">
+              <h2 className="mb-1 text-lg font-semibold text-gray-600">
+                Historial de Reservas
+              </h2>
+              {reservas.length > 0 ? (
+                <div className="p-4 text-black bg-white rounded-lg">
+                  {reservas.map((reserva) => (
+                    <div key={reserva.id} className="p-2 mb-4 border-b">
+                      <p><strong>Obra:</strong> {reserva.obra.nombre}</p>
+                      <p><strong>Fecha de Inicio:</strong> {new Date(reserva.fechaInicio).toLocaleDateString()}</p>
+                      <p><strong>Fecha de Fin:</strong> {new Date(reserva.fechaFin).toLocaleDateString()}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500">No tienes reservas realizadas.</p>
+              )}
+            </div>
           </div>
         </div>
       ) : (
