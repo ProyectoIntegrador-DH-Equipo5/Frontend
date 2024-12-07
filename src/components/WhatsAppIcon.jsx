@@ -3,7 +3,7 @@ import '../styles/App.css';
 
 const WhatsAppIcon = () => {
     const [error, setError] = useState('');
-    const phoneNumber = "+59896458505"; //Numero del Cyber (? xd 
+    const phoneNumber = "+59898797493"; //Numero del Josh, cambiar.
 
     const handleClick = () => {
         // Validar el número de teléfono (simple validación)
