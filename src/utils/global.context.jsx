@@ -1,3 +1,4 @@
+import axios from "axios";
 import {
     createContext,
     useContext,
@@ -29,6 +30,8 @@ export const initialState = {
     loggedUser: loadFromLocalStorage("loggedUser") || null,
     favorites: loadFromLocalStorage("favorites") || [],
 };
+
+const backendURL = "http://localhost:8080"; // *URL base del backend
 
 export const ContextProvider = ({ children }) => {
     const [state, dispatch] = useReducer(reducer, initialState);
@@ -84,7 +87,7 @@ export const ContextProvider = ({ children }) => {
         fetchBackendData();
     }, []);
 
-    const fetchUsersByRole = async (token, userRole = state.loggedUser?.rol) => {
+    const fetchUsersByRole = async (token, userRole= state.loggedUser?.rol) => {
         console.log(userRole[0]?.authority);
    
         if (!token || !userRole) return;
@@ -95,17 +98,19 @@ export const ContextProvider = ({ children }) => {
                 console.log("Pasó segundo if");
                 console.log("Token actual:", token);
 
-                const response = await axiosConfig.get(`/usuarios/listartodos`, {
+                const response = await axios.get(`${backendURL}/usuarios/listartodos`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 console.log("Usuarios obtenidos:", response.data);
     
+                // Actualiza el estado y localStorage
                 dispatch({ type: "GET_USERS", payload: response.data });
                 saveToLocalStorage("users", response.data);
             }
         } catch (error) {
             console.error("Error al obtener usuarios:", error.message);
             console.error("Detalles del error:", error.response?.data || error);
+            console.error("Error al obtener usuarios por rol:", error.response?.data || error.message);
         }
     };
     
