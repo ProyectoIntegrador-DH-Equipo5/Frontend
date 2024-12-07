@@ -5,7 +5,7 @@ import axios from "axios";
 // });
 
 export const axiosConfig = axios.create({
-    baseURL: process.env.REACT_APP_API_URL || "http://localhost:5000",
+    baseURL: process.env.REACT_APP_API_URL || "http://localhost:8080",
 });
 
 // Interceptor para incluir el token en cada solicitud
