@@ -88,9 +88,9 @@ export const ContextProvider = ({ children }) => {
                 console.log("Pasó segundo if");
                 console.log("Token actual:", token);
 
-                const response = await axiosConfig.get('/usuarios/listartodos'), {
+                const response = await axiosConfig.get('/usuarios/listartodos', {
                     headers: { Authorization: `Bearer ${token}` },
-                };
+                });
                 console.log("Usuarios obtenidos:", response.data);
     
                 // Actualiza el estado y localStorage
