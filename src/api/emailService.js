@@ -55,7 +55,7 @@ export const emailService = {
           user_name: userName,
           start_date: selectedDates.startDate.toLocaleDateString(),
           end_date: selectedDates.endDate.toLocaleDateString(),
-          duration: selectedDates.endDate.toLocaleDateString() - selectedDates.startDate.toLocaleDateString(),
+          duration: Math.ceil((selectedDates.endDate - selectedDates.startDate) / (1000 * 60 * 60 * 24)),
           product_name: producto.nombre,
           artist_name: producto.artista?.nombre,
           total_price: (producto.precioRenta * Math.ceil((selectedDates.endDate - selectedDates.startDate) / (1000 * 60 * 60 * 24))).toLocaleString(),

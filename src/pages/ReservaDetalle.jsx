@@ -60,14 +60,23 @@ const ReservaDetalle = () => {
 
         if (emailResponse.success) {
           setMessage({ visible: true, type: 'success', text: "¡Reserva confirmada con éxito! Se ha enviado un correo de confirmación." });
-          setReservaConfirmada(true); // Actualizar el estado para mostrar que la reserva fue confirmada
+          setReservaConfirmada(true);
         } else {
           setMessage({ visible: true, type: 'danger', text: "¡Reserva confirmada, pero hubo un problema al enviar el correo de confirmación!" });
         }
       }
     } catch (error) {
-      console.error("Error al procesar la reserva:", error);
-      setMessage({ visible: true, type: 'danger', text: "Hubo un error al procesar la reserva. Por favor, intente nuevamente." });
+      if (error.response) {
+        if (error.response.status === 409) { // Supongamos que 409 es el código para conflicto de reserva
+          setMessage({ visible: true, type: 'danger', text: "Las fechas seleccionadas ya han sido reservadas por otro usuario. Por favor, elija otro rango de fechas." });
+        } else {
+          setMessage({ visible: true, type: 'danger', text: `Error del servidor: ${error.response.data.message || "Por favor, intente nuevamente más tarde."}` });
+        }
+      } else if (error.request) {
+        setMessage({ visible: true, type: 'danger', text: "Error de red: No se pudo conectar al servidor. Verifique su conexión a Internet." });
+      } else {
+        setMessage({ visible: true, type: 'danger', text: `Error: ${error.message}` });
+      }
     } finally {
       setIsSubmitting(false);
     }
