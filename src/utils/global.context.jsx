@@ -7,14 +7,12 @@ import {
     useState,
 } from "react";
 import { reducer } from "../reducers/reducer";
-// import data from "./data.json";
-// import categories from './category.json';
-// import users from "./user.json";
 import { 
     saveToLocalStorage, 
     loadFromLocalStorage, 
     removeFromLocalStorage 
 } from "./localStorage"; // Importar funciones de localStorage
+import axiosConfig from "../api/axiosConfig";
 
 export const ContextGlobal = createContext(undefined);
 
@@ -29,8 +27,6 @@ export const initialState = {
     loggedUser: loadFromLocalStorage("loggedUser") || null,
     favorites: loadFromLocalStorage("favorites") || [],
 };
-
-const backendURL = "http://localhost:8080"; // *URL base del backend
 
 export const ContextProvider = ({ children }) => {
     const [state, dispatch] = useReducer(reducer, initialState);
@@ -61,8 +57,8 @@ export const ContextProvider = ({ children }) => {
 
                 // Intentar obtener datos desde el backend
                 const [artResponse, categoriesResponse] = await Promise.all([
-                    axios.get(`${backendURL}/obra/listartodos`, config),
-                    axios.get(`${backendURL}/movimientoArtistico/listartodos`, config),
+                    axiosConfig.get(`/obra/listartodos`, config),
+                    axiosConfig.get(`/movimientoArtistico/listartodos`, config),
                 ]);
 
                 // Actualizar estado con los datos obtenidos
@@ -75,11 +71,6 @@ export const ContextProvider = ({ children }) => {
 
             } catch (error) {
                 console.error("Error al conectar con el backend, cargando datos locales.", error);
-
-                // Cargar datos locales si el backend falla
-                // dispatch({ type: "GET_ART", payload: data });
-                // dispatch({ type: "GET_CATEGORIES", payload: categories });
-                // dispatch({ type: "GET_USERS", payload: users });
             }
         };
 
@@ -97,7 +88,7 @@ export const ContextProvider = ({ children }) => {
                 console.log("Pasó segundo if");
                 console.log("Token actual:", token);
 
-                const response = await axios.get(`${backendURL}/usuarios/listartodos`, {
+                const response = await axiosConfig.get('/usuarios/listartodos', {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 console.log("Usuarios obtenidos:", response.data);
@@ -130,21 +121,6 @@ export const ContextProvider = ({ children }) => {
         if (state.categories.length > 0) saveToLocalStorage("categories", state.categories);
         if (state.users.length > 0) saveToLocalStorage("users", state.users);
     }, [state.data, state.categories, state.users]);
-
-    // Guardar las imágenes en localStorage cuando cambien
-    // useEffect(() => {
-    //     if (state.images.length > 0) {
-    //         saveToLocalStorage("images", state.images);
-    //     }
-    // }, [state.images]);
-
-    //Guardar las URL de las imágenes 
-    // useEffect(() => {
-    //     if (state.images.length > 0) {
-    //         const imageRefs = state.images.map((image) => image.url); // Solo guardar URLs
-    //         saveToLocalStorage("images", imageRefs);
-    //     }
-    // }, [state.images]);
     
     return (
         <ContextGlobal.Provider value={{ state, dispatch, isMobile }}>
