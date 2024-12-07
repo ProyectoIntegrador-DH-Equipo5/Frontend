@@ -10,6 +10,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
   const [reservas, setReservas] = useState([]);
+  const [obras, setObras] = useState([]);
 
   const toggleFavorites = () => {
     setIsFavoritesOpen(!isFavoritesOpen);
@@ -19,7 +20,9 @@ const Profile = () => {
     const fetchReservas = async () => {
       if (state.loggedUser) {
         try {
-          const userReservas = await reservasService.obtenerReservasPorUsuario(state.loggedUser.id);
+          const userReservas = await reservasService.obtenerReservasPorUsuario(
+            state.loggedUser.id
+          );
           setReservas(userReservas);
         } catch (error) {
           console.error("Error al obtener las reservas:", error);
@@ -33,14 +36,30 @@ const Profile = () => {
   console.log(state.loggedUser?.rol);
   console.log(state.loggedUser);
 
+  useEffect(() => {
+    const fetchObras = async () => {
+      try {
+        const obrasData = await reservasService.obtenerObrasDisponibles(); // Método para obtener las obras
+        setObras(obrasData);
+      } catch (error) {
+        console.error("Error al obtener las obras:", error);
+      }
+    };
+
+    fetchObras();
+  }, []);
+
   return (
     <div className="min-h-screen p-8 bg-black profile">
       <div className="flex items-center justify-around mx-auto mt-20 align center">
         <h1 className="text-4xl font-bold text-[#FDB813] text-center mb-12 pl-4 pt-12">
           Perfil
         </h1>
-        
-        <button className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-primary rounded-lg text-black hover:bg-primary/90 transition-colors text-sm sm:text-base" onClick={() => navigate("/")}>
+
+        <button
+          className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-primary rounded-lg text-black hover:bg-primary/90 transition-colors text-sm sm:text-base"
+          onClick={() => navigate("/")}
+        >
           <RiArrowGoBackFill size={20} />
           <span>Regresar</span>
         </button>
@@ -90,11 +109,15 @@ const Profile = () => {
                 <button
                   onClick={() => navigate("/administracion")}
                   className={`w-full mt-4 py-2 font-semibold rounded-lg transition-colors ${
-                    state.loggedUser?.rol[0]?.authority === 'ADMIN' || state.loggedUser?.rol[0]?.authority === 'COLAB'
-                      ? 'bg-[#FDB813] text-black hover:bg-[#FDB813]/90' 
-                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    state.loggedUser?.rol[0]?.authority === "ADMIN" ||
+                    state.loggedUser?.rol[0]?.authority === "COLAB"
+                      ? "bg-[#FDB813] text-black hover:bg-[#FDB813]/90"
+                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
                   }`}
-                  disabled={state.loggedUser?.rol[0]?.authority !== 'ADMIN' && state.loggedUser?.rol[0]?.authority !== 'COLAB'}
+                  disabled={
+                    state.loggedUser?.rol[0]?.authority !== "ADMIN" &&
+                    state.loggedUser?.rol[0]?.authority !== "COLAB"
+                  }
                 >
                   Administrar obras
                 </button>
@@ -146,13 +169,29 @@ const Profile = () => {
               </h2>
               {reservas.length > 0 ? (
                 <div className="p-4 text-black bg-white rounded-lg">
-                  {reservas.map((reserva) => (
-                    <div key={reserva.id} className="p-2 mb-4 border-b">
-                      <p><strong>Obra:</strong> {reserva.obra.nombre}</p>
-                      <p><strong>Fecha de Inicio:</strong> {new Date(reserva.fechaInicio).toLocaleDateString()}</p>
-                      <p><strong>Fecha de Fin:</strong> {new Date(reserva.fechaFin).toLocaleDateString()}</p>
-                    </div>
-                  ))}
+                  {reservas.map((reserva) => {
+                    const obra = obras.find(
+                      (o) => o.id === reserva.producto?.id
+                    ); // Buscar la obra por ID
+                    console.log(reserva);
+                    return (
+                      <div key={reserva.id} className="p-2 mb-4 border-b">
+                        <p>
+                          <strong>Obra:</strong>{" "}
+                          {obra ? obra.nombre : "Obra no encontrada"}
+                        </p>{" "}
+                        {/* Mostrar el nombre de la obra */}
+                        <p>
+                          <strong>Fecha de Inicio:</strong>{" "}
+                          {new Date(reserva.fechaInicio).toLocaleDateString()}
+                        </p>
+                        <p>
+                          <strong>Fecha de Fin:</strong>{" "}
+                          {new Date(reserva.fechaFin).toLocaleDateString()}
+                        </p>
+                      </div>
+                    );
+                  })}
                 </div>
               ) : (
                 <p className="text-gray-500">No tienes reservas realizadas.</p>

@@ -52,7 +52,7 @@ const reservasService = {
     // Obtener reservas por usuario
     obtenerReservasPorUsuario: async (userId) => {
         try {
-            const response = await axiosConfig.get(`/reservas/${userId}`, {
+            const response = await axiosConfig.get(`/usuarios/reservaciones`, {
                 headers: { 
                     Authorization: `Bearer ${localStorage.getItem("token")}` 
                 }
