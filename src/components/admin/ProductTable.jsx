@@ -129,9 +129,11 @@ const ProductTable = () => {
 												{obra.nombre ||
 													"Nombre no disponible"}
 											</td>
-											<td className="break-words whitespace-wrap px-4 py-2 text-gray-700 text-left max-w-[40rem]">
-												{obra.descripcion ||
-													"Descripción no disponible"}
+											<td className="break-words whitespace-wrap px-4 py-2 text-gray-700 text-left max-w-[15rem]">
+												{obra.descripcion 
+													? obra.descripcion.split(' ').slice(0, 15).join(' ') + (obra.descripcion.split(' ').length > 15 ? '...' : '')
+													: "Descripción no disponible"
+												}
 											</td>
 											<td className="break-words whitespace-wrap px-4 py-2 text-gray-700 text-left max-w-[40rem]">
 												{obra.movimientoArtistico
