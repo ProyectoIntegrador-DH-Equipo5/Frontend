@@ -6,6 +6,7 @@ import ImageUpload from "./ImageUpload";
 import Message from "./Message";
 import { removeFromLocalStorage } from "../../utils/localStorage";
 import { obrasService } from "../../api/services"
+import { useCategories } from '../../hooks/useCategories';
 
 const Form = ({ edit, obra = {}, onClose }) => {
 	const { state, dispatch } = useContextGlobal(); // Obtiene las categorías del estado global
@@ -23,11 +24,6 @@ const Form = ({ edit, obra = {}, onClose }) => {
 	);
 	const [priceRangeSymbol, setPriceRangeSymbol] = useState("");
 	const [isAddingCategory, setIsAddingCategory] = useState(false); // Nuevo estado para manejar la creación de categoría
-	const [newCategory, setNewCategory] = useState({
-		nombre: "",
-		descripcion: "",
-		imagen: "",
-	});
 	const [successMessage, setSuccessMessage] = useState("");
 	const [errorMessage, setErrorMessage] = useState("");
 
@@ -81,13 +77,21 @@ const Form = ({ edit, obra = {}, onClose }) => {
 		}
 	};
 
-	const handleCategoryChange = (e) => {
-		const { name, value } = e.target;
-		setNewCategory((prevCategory) => ({
-			...prevCategory,
-			[name]: value,
+	const { 
+		newCategory,
+		handleInputChange: handleCategoryInputChange,
+		submitCategory 
+	} = useCategories((createdCategory) => {
+		setFormData(prevData => ({
+			...prevData,
+			movimientoArtistico: {
+				id: createdCategory.id,
+				nombre: createdCategory.nombre
+			}
 		}));
-	};
+		setIsAddingCategory(false);
+		setSuccessMessage("Categoría creada exitosamente");
+	});
 
 	const updatePriceRangeSymbol = (value) => {
 		if (!value) {
@@ -138,7 +142,7 @@ const Form = ({ edit, obra = {}, onClose }) => {
 			(product) => product.nombre === formData.nombre
 		);
 
-		if (!edit && existingProduct) { //Ojo q lo cambié
+		if (!edit && existingProduct) { 
 			setErrorMessage("El nombre del producto ya existe.");
 			console.log("El nombre del producto ya existe.");
 			return;
@@ -241,22 +245,6 @@ const Form = ({ edit, obra = {}, onClose }) => {
 		}
 	}
 
-	const handleCreateCategory = () => {
-		// Simulación de creación de la categoría
-		console.log("Nueva categoría creada:", newCategory);
-		setIsAddingCategory(false); // Oculta los campos de nueva categoría después de la creación
-	};
-	// Efecto para ocultar los mensajes después de unos segundos
-	useEffect(() => {
-		if (successMessage || errorMessage) {
-			const timer = setTimeout(() => {
-				setSuccessMessage(""); // Ocultar el mensaje de éxito
-				setErrorMessage(""); // Ocultar el mensaje de error
-			}, 3000); // Duración del mensaje en milisegundos
-
-			return () => clearTimeout(timer); // Limpiar el temporizador al desmontar
-		}
-	}, [successMessage, errorMessage]);
 	const handleCategorySelect = (e) => {
 		const { value } = e.target;
 		if (value === "agregar") {
@@ -299,7 +287,6 @@ const Form = ({ edit, obra = {}, onClose }) => {
 
 	const renderFields = (fields) => {
 		return fields.map((field) => {
-			//console.log(field)
 			const fieldValue = formData[field] || "";
 			const fieldType =
 				field === "descripcion"
@@ -426,27 +413,41 @@ const Form = ({ edit, obra = {}, onClose }) => {
 								element="input"
 								name="nombre"
 								value={newCategory.nombre}
-								onChange={handleCategoryChange}
+								onChange={handleCategoryInputChange}
 								label="Nombre de la nueva categoría"
 							/>
 							<FormField
 								element="textarea"
 								name="descripcion"
 								value={newCategory.descripcion}
-								onChange={handleCategoryChange}
+								onChange={handleCategoryInputChange}
 								label="Descripción de la nueva categoría"
 							/>
-							<FormField
-								element="input"
-								name="imagen"
-								value={newCategory.imagen}
-								onChange={handleCategoryChange}
-								label="Imagen (URL)"
-							/>
+							<div className="mb-4">
+								<label className="block text-sm font-semibold mb-2">
+									Imagen
+								</label>
+								<div className="flex gap-4 items-center">
+									<input
+										type="file"
+										name="imagen"
+										accept="image/*"
+										onChange={handleCategoryInputChange}
+										className="w-full p-2 border border-gray-300 rounded"
+									/>
+									{newCategory.previewUrl && (
+										<img
+											src={newCategory.previewUrl}
+											alt="Vista previa"
+											className="w-20 h-20 object-cover rounded"
+										/>
+									)}
+								</div>
+							</div>
 							<button
 								type="button"
 								className="bg-blue-600 text-white py-2 px-4 mt-2 rounded"
-								onClick={handleCreateCategory}
+								onClick={submitCategory}
 							>
 								Crear Categoría
 							</button>
