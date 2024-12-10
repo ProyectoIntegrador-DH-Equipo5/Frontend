@@ -123,39 +123,58 @@ const Admin = () => {
 			return;
 		}
 
-		// Sólo enviamos los datos que pide Backend, no el objeto completo
-		const newUserRegister = {
-			name: newUser.name,
-			lastname: newUser.lastname,
-			email: newUser.email,
-			password: "password",
+		// Validación básica del formato de email
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		if (!emailRegex.test(newUser.email)) {
+			setErrorMessage("Por favor, ingrese un correo electrónico válido.");
+			return;
 		}
-		// Agregar el nuevo usuario
+
+		setIsUserLoading(true);
 		try {
+			// Obtener la lista actualizada de usuarios antes de verificar
+			let existingUsers;
+			try {
+				existingUsers = await userService.getUsers();
+			} catch (error) {
+				console.error("Error al verificar usuarios:", error);
+				existingUsers = state.users; // Usar el estado global como respaldo
+			}
+			
+			const userExists = existingUsers.some(user => 
+				user.email.toLowerCase() === newUser.email.toLowerCase()
+			);
+
+			if (userExists) {
+				setErrorMessage("Ya existe un usuario con este correo electrónico.");
+				setIsUserLoading(false);
+				return;
+			}
+
+			// Registro del nuevo usuario
+			const newUserRegister = {
+				name: newUser.name,
+				lastname: newUser.lastname,
+				email: newUser.email,
+				password: "password",
+			}
+			
 			const createdUser = await authService.register(newUserRegister);
 			dispatch({ type: "ADD_USER", payload: createdUser });
 			setSuccessMessage("Usuario creado con éxito");
 			setNewUser({ name: "", lastname: "", email: ""});
 			handleListItems();
+
+			// Actualizar la lista de usuarios inmediatamente después de crear uno nuevo
+			const updatedUsers = await userService.getUsers();
+			dispatch({ type: "GET_USERS", payload: updatedUsers });
+
 		} catch (error) {
-			setErrorMessage("Hubo un error al crear el usuario. Intente nuevamente.");
+			setErrorMessage(error.message || "Hubo un error al crear el usuario. Intente nuevamente.");
+		} finally {
+			setIsUserLoading(false);
 		}
 	};
-
-	useEffect(() => {
-    const fetchUsers = async () => {
-        try {
-            const users = await userService.getUsers();
-            dispatch({ type: "GET_USERS", payload: users });
-        } catch (error) {
-            console.error("Error al obtener usuarios:", error);
-        }
-    };
-
-    if (successMessage === "Usuario creado con éxito") {
-        fetchUsers();
-    }
-}, [successMessage, dispatch]);
 
 	return (
 		<>

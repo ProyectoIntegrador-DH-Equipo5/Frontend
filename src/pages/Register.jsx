@@ -105,7 +105,7 @@ const Register = () => {
 
           // Service email
           setEmailStatus({ sent: false, error: false, message: 'Enviando email de confirmación...' })
-          const emailResponse = await emailService.registerConfirmation(
+          const emailResponse = await emailService.register(
             formData.email,
             `${formData.name} ${formData.lastName}`,
             setEmailStatus
