@@ -90,11 +90,41 @@ const ImageUpload = ({ onFilesAdded, onFilesDeleted, existingImages, imagenesAdi
         e.target.value = '';
     };
 
-    const handleDrop = (e) => {
+    const handleDrop = async (e) => {
         e.preventDefault();
         e.stopPropagation();
+        
+        // Crear una copia del estado actual
+        let currentImages = [...localImages];
+        
+        // Procesar todos los archivos
         const files = Array.from(e.dataTransfer.files);
-        files.forEach(addFile);
+        for (const file of files) {
+            const isDuplicate = currentImages.some(img => 
+                img.file && img.file.name === file.name && img.file.size === file.size
+            );
+
+            if (!isDuplicate) {
+                const fileUrl = URL.createObjectURL(file);
+                currentImages.push({
+                    url: fileUrl,
+                    file: file,
+                    isExisting: false
+                });
+            }
+        }
+
+        // Actualizar el estado con todos los archivos
+        setLocalImages(currentImages);
+        
+        // Notificar al componente padre
+        const allFiles = currentImages.map(img => {
+            if (img.isExisting) {
+                return img.imagenId ? { imagenId: img.imagenId } : img.url;
+            }
+            return img.file;
+        });
+        onFilesAdded(allFiles);
     };
 
     const handleDelete = (imageToDelete) => {

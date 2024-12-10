@@ -10,6 +10,7 @@ export const useCategories = (onSuccess) => {
         imagen: null,
         previewUrl: null
     });
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleInputChange = (e) => {
         const { name, value, type, files } = e.target;
@@ -33,7 +34,9 @@ export const useCategories = (onSuccess) => {
 
     const submitCategory = async (e) => {
         e.preventDefault();
+        if (isLoading) return;
 
+        setIsLoading(true);
         try {
             const response = await categoriaService.getCategorias();
             const existingCategories = response;
@@ -61,10 +64,19 @@ export const useCategories = (onSuccess) => {
             if (onSuccess) {  //función callback que se ejecutará cuando la categoría se cree exitosamente
                 onSuccess(createdCategory);
             }
-
+            
             return { success: true, category: createdCategory };
         } catch (error) {
-            throw new Error(error.message || "Hubo un error al crear la categoría");
+            console.error("Error en la creación de categoría:", error);
+            if (error.response) {
+                throw new Error(error.response.data || "Error desconocido al crear la categoría.");
+            } else if (error.message === "La categoría ya existe.") {
+                throw new Error(error.message);
+            } else {
+                throw new Error("No se pudo crear la categoría. Por favor, verifica tu conexión o intenta nuevamente.");
+            }
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -72,6 +84,7 @@ export const useCategories = (onSuccess) => {
         newCategory,
         handleInputChange,
         submitCategory,
-        setNewCategory
+        setNewCategory,
+        isLoading
     };
 };

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FaTimes } from "react-icons/fa";
+import { FaTimes, FaSpinner } from "react-icons/fa";
 import { useContextGlobal } from "../../utils/global.context"; // Importa el contexto
 import FormField from "./FormField";
 import ImageUpload from "./ImageUpload";
@@ -26,7 +26,10 @@ const Form = ({ edit, obra = {}, onClose }) => {
 	const [isAddingCategory, setIsAddingCategory] = useState(false); // Nuevo estado para manejar la creación de categoría
 	const [successMessage, setSuccessMessage] = useState("");
 	const [errorMessage, setErrorMessage] = useState("");
+	const [isLoading, setIsLoading] = useState(false);
+	const [isCategoryLoading, setIsCategoryLoading] = useState(false);
 
+	// useEffects
 	useEffect(() => {
     if (edit && obra) {
         const formattedObra = {
@@ -37,6 +40,26 @@ const Form = ({ edit, obra = {}, onClose }) => {
         updatePriceRangeSymbol(obra.precioRenta || "");
     }
 }, [edit, obra]);
+
+	useEffect(() => {
+		if (successMessage) {
+			const timer = setTimeout(() => {
+				setSuccessMessage("");
+			}, 2000); // El mensaje desaparecerá después de 2 segundos
+
+			return () => clearTimeout(timer);
+		}
+	}, [successMessage]);
+
+	useEffect(() => {
+		if (errorMessage) {
+			const timer = setTimeout(() => {
+				setErrorMessage("");
+			}, 2000); // El mensaje de error desaparecerá después de 2 segundos
+
+			return () => clearTimeout(timer);
+		}
+	}, [errorMessage]);
 
 	const onFilesAdded = (files) => {
 		setFormData((prevData) => ({
@@ -80,7 +103,8 @@ const Form = ({ edit, obra = {}, onClose }) => {
 	const { 
 		newCategory,
 		handleInputChange: handleCategoryInputChange,
-		submitCategory 
+		submitCategory,
+		isLoading: categoryLoading
 	} = useCategories((createdCategory) => {
 		setFormData(prevData => ({
 			...prevData,
@@ -132,6 +156,7 @@ const Form = ({ edit, obra = {}, onClose }) => {
 
 	const handleSubmit = async(e) => {
 		e.preventDefault();
+		if (isLoading) return;
 
 		// Verificar si se ha seleccionado o creado una categoría
 		const isCategoryValid =
@@ -154,6 +179,7 @@ const Form = ({ edit, obra = {}, onClose }) => {
 		}
 		console.log("Form data:", formData);
 
+		setIsLoading(true);
 		try {
 			// Aplanar los datos para el envío a Backend
 			const flattenedData = flattenFormData(formData);
@@ -221,7 +247,9 @@ const Form = ({ edit, obra = {}, onClose }) => {
 				const response = await obrasService.updateObra(formDataToSend);
 				dispatch({ type: "UPDATE_ART", payload: response });
 				setSuccessMessage("La obra se ha actualizado correctamente.");
-				onClose();
+				setTimeout(() => {
+					onClose();
+				}, 1500); // Esperar 1.5 segundos antes de cerrar
 			} else {
 					// Crear nueva obra y guardar en el estado global
 					const response = await obrasService.createObra(flattenedData, files); 
@@ -234,7 +262,9 @@ const Form = ({ edit, obra = {}, onClose }) => {
 							? "La obra se ha editado correctamente."
 							: "La obra se ha creado correctamente."
 					);
-					onClose();
+					setTimeout(() => {
+						onClose();
+					}, 1500); 
 			};
 		}
 		catch (error) {
@@ -242,6 +272,8 @@ const Form = ({ edit, obra = {}, onClose }) => {
 			setErrorMessage(
 					"Hubo un error al enviar los datos. Por favor, inténtalo de nuevo."
 			);
+		} finally {
+			setIsLoading(false);
 		}
 	}
 
@@ -446,10 +478,24 @@ const Form = ({ edit, obra = {}, onClose }) => {
 							</div>
 							<button
 								type="button"
-								className="bg-blue-600 text-white py-2 px-4 mt-2 rounded"
-								onClick={submitCategory}
+								className="bg-blue-600 text-white py-2 px-4 mt-2 rounded disabled:opacity-50 flex items-center gap-2"
+								onClick={async (e) => {
+									try {
+										await submitCategory(e);
+									} catch (error) {
+										setErrorMessage(error.message);
+									}
+								}}
+								disabled={categoryLoading}
 							>
-								Crear Categoría
+								{categoryLoading ? (
+									<>
+										<FaSpinner className="animate-spin" />
+										Creando categoría...
+									</>
+								) : (
+									"Crear Categoría"
+								)}
 							</button>
 						</div>
 					)}
@@ -483,16 +529,25 @@ const Form = ({ edit, obra = {}, onClose }) => {
 				<div className="flex justify-between items-center">
 					<button
 						type="button"
-						className="bg-gray-500 text-white py-2 px-4 rounded mt-4"
+						className="bg-gray-500 text-white py-2 px-4 rounded mt-4 disabled:opacity-50"
 						onClick={onClose}
+						disabled={isLoading}
 					>
 						Cancelar
 					</button>
 					<button
 						type="submit"
-						className="bg-blue-600 text-white py-2 px-4 rounded mt-4"
+						className="bg-blue-600 text-white py-2 px-4 rounded mt-4 disabled:opacity-50 flex items-center gap-2"
+						disabled={isLoading}
 					>
-						{edit ? "Actualizar obra" : "Crear obra"}
+						{isLoading ? (
+							<>
+								<FaSpinner className="animate-spin" />
+								{edit ? "Actualizando obra..." : "Creando obra..."}
+							</>
+						) : (
+							edit ? "Actualizar obra" : "Crear obra"
+						)}
 					</button>
 				</div>
 				{/* Mostrar mensajes */}

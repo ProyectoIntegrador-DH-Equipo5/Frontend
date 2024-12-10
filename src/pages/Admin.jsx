@@ -7,7 +7,7 @@ import IsMobile from "../components/admin/IsMobile";
 import { useState, useEffect  } from "react";
 import Sidebar from "../components/admin/Sidebar";
 import Form from "../components/admin/Form";
-import { FaTimes } from "react-icons/fa";
+import { FaTimes, FaSpinner } from "react-icons/fa";
 import Message from "../components/admin/Message";
 import { authService } from "../api/authService";
 import { userService } from "../api/userService";
@@ -24,12 +24,15 @@ const Admin = () => {
 		email: "",
 		password: "password",
 	});
+	const [isCategoryLoading, setIsCategoryLoading] = useState(false);
+	const [isUserLoading, setIsUserLoading] = useState(false);
 
 	// Crear una nueva categoría
 	const { 
 		newCategory: newCat,                     // renombramos 
 		handleInputChange: handleInputChangeCat, // renombramos
-		submitCategory                           // usamos tal cuál
+		submitCategory,                           // usamos tal cuál
+		setNewCategory    // Solo agregamos esta línea
 	} = useCategories(() => {                  // pasamos una función callback que se ejecutará al tener éxito                 
 		handleListItems();
 		setSuccessMessage("Categoría creada con éxito");
@@ -105,14 +108,15 @@ const Admin = () => {
 			const timer = setTimeout(() => {
 				setSuccessMessage(""); // Ocultar el mensaje de éxito
 				setErrorMessage(""); // Ocultar el mensaje de error
-			}, 3000); // Duración del mensaje en milisegundos
+			}, 2000); // Duración del mensaje en milisegundos
 
 			return () => clearTimeout(timer); // Limpiar el temporizador al desmontar
 		}
 	}, [successMessage, errorMessage]);
 	
 	const handleSubmitUser = async(e) => {
-		e.preventDefault(); // Previene el comportamiento predeterminado de envío del formulario
+		e.preventDefault();
+		if (isUserLoading) return;
 
 		if (!newUser.name || !newUser.lastname || !newUser.email) {
 			setErrorMessage("Por favor, complete todos los campos.");
@@ -129,12 +133,9 @@ const Admin = () => {
 		// Agregar el nuevo usuario
 		try {
 			const createdUser = await authService.register(newUserRegister);
-			// Actualizar el estado global con el usuario creado
 			dispatch({ type: "ADD_USER", payload: createdUser });
 			setSuccessMessage("Usuario creado con éxito");
-			// Limpiar los campos después de la creación
 			setNewUser({ name: "", lastname: "", email: ""});
-			// Actualizar la lista de usuarios en la interfaz (si es necesario)
 			handleListItems();
 		} catch (error) {
 			setErrorMessage("Hubo un error al crear el usuario. Intente nuevamente.");
@@ -182,7 +183,10 @@ const Admin = () => {
 								{isCreatingItem === "usuario" && (
 									<div className="w-[75vw] h-[70vh] overflow-y-scroll bg-white p-6 rounded-lg shadow-md relative">
 										<button
-											onClick={handleListItems}
+											onClick={() => {
+												setNewUser({ name: "", lastname: "", email: "", password: "password" });
+												handleListItems();
+											}}
 											className="absolute top-2 right-2 bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center"
 											aria-label="Cerrar"
 										>
@@ -253,15 +257,26 @@ const Admin = () => {
 												<button
 													type="button"
 													className="bg-gray-500 text-white py-2 px-4 rounded"
-													onClick={handleListItems}
+													onClick={() => {
+														setNewUser({ name: "", lastname: "", email: "", password: "password" });
+														handleListItems();
+													}}
 												>
 													Cancelar
 												</button>
 												<button
 													type="submit"
-													className="bg-blue-600 text-white py-2 px-4 rounded"
+													className="bg-blue-600 text-white py-2 px-4 rounded disabled:opacity-50 flex items-center gap-2"
+													disabled={isUserLoading}
 												>
-													Crear Usuario
+													{isUserLoading ? (
+														<>
+															<FaSpinner className="animate-spin" />
+															Creando usuario...
+														</>
+													) : (
+														"Crear Usuario"
+													)}
 												</button>
 											</div>
 										</form>
@@ -270,7 +285,10 @@ const Admin = () => {
 								{isCreatingItem === "categoria" && (
 									<div className="w-[75vw] h-[70vh] overflow-y-scroll bg-white p-6 rounded-lg shadow-md relative">
 										<button
-											onClick={handleListItems}
+											onClick={() => {
+												setNewCategory({ nombre: "", descripcion: "", imagen: null, previewUrl: null });
+												handleListItems();
+											}}
 											className="absolute top-2 right-2 bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center"
 											aria-label="Cerrar"
 										>
@@ -279,7 +297,19 @@ const Admin = () => {
 										<h2 className="text-xl font-semibold mb-4">
 											Crear nueva categoría
 										</h2>
-										<form onSubmit={submitCategory}>
+										<form onSubmit={async (e) => {
+											e.preventDefault();
+											if (isCategoryLoading) return;
+
+											setIsCategoryLoading(true);
+											try {
+												await submitCategory(e);
+											} catch (error) {
+												setErrorMessage(error.message);
+											} finally {
+												setIsCategoryLoading(false);
+											}
+										}}>
 											<div className="mb-4">
 												<label
 													className="block text-sm font-semibold mb-2"
@@ -341,15 +371,27 @@ const Admin = () => {
 												<button
 													type="button"
 													className="bg-gray-500 text-white py-2 px-4 rounded"
-													onClick={handleListItems}
+													onClick={() => {
+														setNewCategory({ nombre: "", descripcion: "", imagen: null, previewUrl: null });
+														handleListItems();
+													}}
+													disabled={isCategoryLoading}
 												>
 													Cancelar
 												</button>
 												<button
 													type="submit"
-													className="bg-blue-600 text-white py-2 px-4 rounded"
-												>
-													Crear Categoría
+													className="bg-blue-600 text-white py-2 px-4 rounded disabled:opacity-50 flex items-center gap-2"
+													disabled={isCategoryLoading}
+													>
+													{isCategoryLoading ? (
+														<>
+															<FaSpinner className="animate-spin" />
+															Creando categoría...
+														</>
+													) : (
+														"Crear Categoría"
+													)}
 												</button>
 											</div>
 										</form>
