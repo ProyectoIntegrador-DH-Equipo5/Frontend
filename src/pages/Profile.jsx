@@ -178,7 +178,7 @@ const Profile = () => {
                       <div key={reserva.id} className="p-2 mb-4 border-b">
                         <p>
                           <strong>Obra:</strong>{" "}
-                          {obra ? obra.nombre : "Obra no encontrada"}
+                          {reserva ? reserva.nombreObra : "Obra no encontrada"}
                         </p>{" "}
                         {/* Mostrar el nombre de la obra */}
                         <p>
