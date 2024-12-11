@@ -10,6 +10,7 @@ import { BsRulers } from "react-icons/bs";
 import { BsPalette } from "react-icons/bs";
 import { BsPerson } from "react-icons/bs";
 import { FaCalendarCheck } from "react-icons/fa";
+import ModalPolicies from "./ModalPolicies.jsx";
 
 const Modal = ({ isOpen, onClose, producto }) => {
   const navigate = useNavigate();
@@ -232,6 +233,8 @@ const Modal = ({ isOpen, onClose, producto }) => {
                 </div>
               </div>
 
+              
+
               {/* Columna derecha: Miniaturas y botones */}
               <div className="lg:w-1/3">
                 <div className="grid grid-cols-2 gap-2 mb-4">
@@ -251,11 +254,11 @@ const Modal = ({ isOpen, onClose, producto }) => {
                         <img
                           src={producto.imagenes?.[3].url}
                           alt="Ver más"
-                          className="w-full aspect-square object-cover rounded-lg"
+                          className="object-cover w-full rounded-lg aspect-square"
                         />
                       ) : (
-                        <div className="w-full aspect-square flex items-center justify-center bg-gray-200 rounded-lg">
-                          <span className="text-gray-500 text-sm">No hay más imágenes</span>
+                        <div className="flex items-center justify-center w-full bg-gray-200 rounded-lg aspect-square">
+                          <span className="text-sm text-gray-500">No hay más imágenes</span>
                         </div> 
                       )}
                     <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px] rounded-lg flex items-center justify-center">
@@ -279,7 +282,7 @@ const Modal = ({ isOpen, onClose, producto }) => {
                   </div>
                 </div>
                 
-                <p className="text-xl font-bold text-center mb-2 sm:text-2xl">
+                <p className="mb-2 text-xl font-bold text-center sm:text-2xl">
                   $ {producto.precioRenta?.toLocaleString()} USD
                 </p>
 
@@ -304,7 +307,7 @@ const Modal = ({ isOpen, onClose, producto }) => {
                     >
                       Alquilar
                     </button>
-                    <div className="flex flex-col items-center justify-start p-2 bg-gray-300 rounded-lg mb-4 text-black">
+                    <div className="flex flex-col items-center justify-start p-2 mb-4 text-black bg-gray-300 rounded-lg">
           <p>Debe estar autenticado para alquilar una obra.</p>
           <Link to="/login">
             <button className="mt-2 px-4 py-2 bg-[#FDB813] text-black rounded-lg hover:bg-[#FDB813]/90 transition">
@@ -316,6 +319,7 @@ const Modal = ({ isOpen, onClose, producto }) => {
                 )}
               </div>
             </div>
+              <ModalPolicies />
           </div>
         </div>
       </div>
