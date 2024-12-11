@@ -177,7 +177,7 @@ const Buscador = () => {
     <section className="flex-col items-center justify-center w-full pt-32 mx-auto text-center bg-secondary p-7 search-section">
       <h1 className="mt-16 font-serif text-4xl leading-relaxed text-primary">ARTE EXCLUSIVO<br /> EXPERIENCIAS INOLVIDABLES</h1>
       <div className="flex justify-between w-full mx-auto">
-      <form onSubmit={handleSearch} className="flex flex-col justify-center w-full gap-6 p-5 px-4 md:flex-row md:px-24 sm:items-start md:items-start lg:items-center">
+      <form onSubmit={handleSearch} className="flex flex-col flex-wrap justify-center w-full gap-6 p-5 px-4 md:flex-row md:px-24 sm:items-start md:items-start lg:items-center">
         <div className="relative w-full max-w-md" ref={inputRef}>
         <h2 className="px-4 pt-16 mb-2 text-2xl text-left text-white md:pt-16 sm:pt-8">Busca y alquila tus obras favoritas</h2>
           <input
