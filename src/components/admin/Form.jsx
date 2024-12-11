@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { FaTimes } from "react-icons/fa";
+import { FaTimes, FaSpinner } from "react-icons/fa";
 import { useContextGlobal } from "../../utils/global.context"; // Importa el contexto
 import FormField from "./FormField";
 import ImageUpload from "./ImageUpload";
 import Message from "./Message";
 import { removeFromLocalStorage } from "../../utils/localStorage";
 import { obrasService } from "../../api/services"
+import { useCategories } from '../../hooks/useCategories';
 
 const Form = ({ edit, obra = {}, onClose }) => {
 	const { state, dispatch } = useContextGlobal(); // Obtiene las categorías del estado global
@@ -23,14 +24,12 @@ const Form = ({ edit, obra = {}, onClose }) => {
 	);
 	const [priceRangeSymbol, setPriceRangeSymbol] = useState("");
 	const [isAddingCategory, setIsAddingCategory] = useState(false); // Nuevo estado para manejar la creación de categoría
-	const [newCategory, setNewCategory] = useState({
-		nombre: "",
-		descripcion: "",
-		imagen: "",
-	});
 	const [successMessage, setSuccessMessage] = useState("");
 	const [errorMessage, setErrorMessage] = useState("");
+	const [isLoading, setIsLoading] = useState(false);
+	const [isCategoryLoading, setIsCategoryLoading] = useState(false);
 
+	// useEffects
 	useEffect(() => {
     if (edit && obra) {
         const formattedObra = {
@@ -41,6 +40,26 @@ const Form = ({ edit, obra = {}, onClose }) => {
         updatePriceRangeSymbol(obra.precioRenta || "");
     }
 }, [edit, obra]);
+
+	useEffect(() => {
+		if (successMessage) {
+			const timer = setTimeout(() => {
+				setSuccessMessage("");
+			}, 2000); // El mensaje desaparecerá después de 2 segundos
+
+			return () => clearTimeout(timer);
+		}
+	}, [successMessage]);
+
+	useEffect(() => {
+		if (errorMessage) {
+			const timer = setTimeout(() => {
+				setErrorMessage("");
+			}, 2000); // El mensaje de error desaparecerá después de 2 segundos
+
+			return () => clearTimeout(timer);
+		}
+	}, [errorMessage]);
 
 	const onFilesAdded = (files) => {
 		setFormData((prevData) => ({
@@ -81,13 +100,22 @@ const Form = ({ edit, obra = {}, onClose }) => {
 		}
 	};
 
-	const handleCategoryChange = (e) => {
-		const { name, value } = e.target;
-		setNewCategory((prevCategory) => ({
-			...prevCategory,
-			[name]: value,
+	const { 
+		newCategory,
+		handleInputChange: handleCategoryInputChange,
+		submitCategory,
+		isLoading: categoryLoading
+	} = useCategories((createdCategory) => {
+		setFormData(prevData => ({
+			...prevData,
+			movimientoArtistico: {
+				id: createdCategory.id,
+				nombre: createdCategory.nombre
+			}
 		}));
-	};
+		setIsAddingCategory(false);
+		setSuccessMessage("Categoría creada exitosamente");
+	});
 
 	const updatePriceRangeSymbol = (value) => {
 		if (!value) {
@@ -128,6 +156,7 @@ const Form = ({ edit, obra = {}, onClose }) => {
 
 	const handleSubmit = async(e) => {
 		e.preventDefault();
+		if (isLoading) return;
 
 		// Verificar si se ha seleccionado o creado una categoría
 		const isCategoryValid =
@@ -138,7 +167,7 @@ const Form = ({ edit, obra = {}, onClose }) => {
 			(product) => product.nombre === formData.nombre
 		);
 
-		if (!edit && existingProduct) { //Ojo q lo cambié
+		if (!edit && existingProduct) { 
 			setErrorMessage("El nombre del producto ya existe.");
 			console.log("El nombre del producto ya existe.");
 			return;
@@ -150,6 +179,7 @@ const Form = ({ edit, obra = {}, onClose }) => {
 		}
 		console.log("Form data:", formData);
 
+		setIsLoading(true);
 		try {
 			// Aplanar los datos para el envío a Backend
 			const flattenedData = flattenFormData(formData);
@@ -217,7 +247,9 @@ const Form = ({ edit, obra = {}, onClose }) => {
 				const response = await obrasService.updateObra(formDataToSend);
 				dispatch({ type: "UPDATE_ART", payload: response });
 				setSuccessMessage("La obra se ha actualizado correctamente.");
-				onClose();
+				setTimeout(() => {
+					onClose();
+				}, 1500); // Esperar 1.5 segundos antes de cerrar
 			} else {
 					// Crear nueva obra y guardar en el estado global
 					const response = await obrasService.createObra(flattenedData, files); 
@@ -230,7 +262,9 @@ const Form = ({ edit, obra = {}, onClose }) => {
 							? "La obra se ha editado correctamente."
 							: "La obra se ha creado correctamente."
 					);
-					onClose();
+					setTimeout(() => {
+						onClose();
+					}, 1500); 
 			};
 		}
 		catch (error) {
@@ -238,25 +272,11 @@ const Form = ({ edit, obra = {}, onClose }) => {
 			setErrorMessage(
 					"Hubo un error al enviar los datos. Por favor, inténtalo de nuevo."
 			);
+		} finally {
+			setIsLoading(false);
 		}
 	}
 
-	const handleCreateCategory = () => {
-		// Simulación de creación de la categoría
-		console.log("Nueva categoría creada:", newCategory);
-		setIsAddingCategory(false); // Oculta los campos de nueva categoría después de la creación
-	};
-	// Efecto para ocultar los mensajes después de unos segundos
-	useEffect(() => {
-		if (successMessage || errorMessage) {
-			const timer = setTimeout(() => {
-				setSuccessMessage(""); // Ocultar el mensaje de éxito
-				setErrorMessage(""); // Ocultar el mensaje de error
-			}, 3000); // Duración del mensaje en milisegundos
-
-			return () => clearTimeout(timer); // Limpiar el temporizador al desmontar
-		}
-	}, [successMessage, errorMessage]);
 	const handleCategorySelect = (e) => {
 		const { value } = e.target;
 		if (value === "agregar") {
@@ -299,7 +319,6 @@ const Form = ({ edit, obra = {}, onClose }) => {
 
 	const renderFields = (fields) => {
 		return fields.map((field) => {
-			//console.log(field)
 			const fieldValue = formData[field] || "";
 			const fieldType =
 				field === "descripcion"
@@ -426,29 +445,57 @@ const Form = ({ edit, obra = {}, onClose }) => {
 								element="input"
 								name="nombre"
 								value={newCategory.nombre}
-								onChange={handleCategoryChange}
+								onChange={handleCategoryInputChange}
 								label="Nombre de la nueva categoría"
 							/>
 							<FormField
 								element="textarea"
 								name="descripcion"
 								value={newCategory.descripcion}
-								onChange={handleCategoryChange}
+								onChange={handleCategoryInputChange}
 								label="Descripción de la nueva categoría"
 							/>
-							<FormField
-								element="input"
-								name="imagen"
-								value={newCategory.imagen}
-								onChange={handleCategoryChange}
-								label="Imagen (URL)"
-							/>
+							<div className="mb-4">
+								<label className="block text-sm font-semibold mb-2">
+									Imagen
+								</label>
+								<div className="flex gap-4 items-center">
+									<input
+										type="file"
+										name="imagen"
+										accept="image/*"
+										onChange={handleCategoryInputChange}
+										className="w-full p-2 border border-gray-300 rounded"
+									/>
+									{newCategory.previewUrl && (
+										<img
+											src={newCategory.previewUrl}
+											alt="Vista previa"
+											className="w-20 h-20 object-cover rounded"
+										/>
+									)}
+								</div>
+							</div>
 							<button
 								type="button"
-								className="bg-blue-600 text-white py-2 px-4 mt-2 rounded"
-								onClick={handleCreateCategory}
+								className="bg-blue-600 text-white py-2 px-4 mt-2 rounded disabled:opacity-50 flex items-center gap-2"
+								onClick={async (e) => {
+									try {
+										await submitCategory(e);
+									} catch (error) {
+										setErrorMessage(error.message);
+									}
+								}}
+								disabled={categoryLoading}
 							>
-								Crear Categoría
+								{categoryLoading ? (
+									<>
+										<FaSpinner className="animate-spin" />
+										Creando categoría...
+									</>
+								) : (
+									"Crear Categoría"
+								)}
 							</button>
 						</div>
 					)}
@@ -482,16 +529,25 @@ const Form = ({ edit, obra = {}, onClose }) => {
 				<div className="flex justify-between items-center">
 					<button
 						type="button"
-						className="bg-gray-500 text-white py-2 px-4 rounded mt-4"
+						className="bg-gray-500 text-white py-2 px-4 rounded mt-4 disabled:opacity-50"
 						onClick={onClose}
+						disabled={isLoading}
 					>
 						Cancelar
 					</button>
 					<button
 						type="submit"
-						className="bg-blue-600 text-white py-2 px-4 rounded mt-4"
+						className="bg-blue-600 text-white py-2 px-4 rounded mt-4 disabled:opacity-50 flex items-center gap-2"
+						disabled={isLoading}
 					>
-						{edit ? "Actualizar obra" : "Crear obra"}
+						{isLoading ? (
+							<>
+								<FaSpinner className="animate-spin" />
+								{edit ? "Actualizando obra..." : "Creando obra..."}
+							</>
+						) : (
+							edit ? "Actualizar obra" : "Crear obra"
+						)}
 					</button>
 				</div>
 				{/* Mostrar mensajes */}

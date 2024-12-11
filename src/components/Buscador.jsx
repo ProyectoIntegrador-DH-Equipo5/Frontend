@@ -66,7 +66,7 @@ const Buscador = () => {
     setInputValue(value);
 
     const filtered = options.filter(option => 
-      option.label.toLowerCase().startsWith(value.toLowerCase())
+      option.label.toLowerCase().includes(value.toLowerCase())
     );
     setFilteredOptions(filtered);
   };
@@ -174,26 +174,26 @@ const Buscador = () => {
   }, []);
 
   return (
-    <section className="mx-auto bg-secondary p-7 pt-32 flex-col justify-center items-center text-center w-full search-section">
-      <h1 className="text-primary font-serif text-4xl mt-16 leading-relaxed">ARTE EXCLUSIVO<br /> EXPERIENCIAS INOLVIDABLES</h1>
-      <div className="mx-auto flex justify-between w-full">
-      <form onSubmit={handleSearch} className="flex flex-col w-full md:flex-row justify-center gap-6 p-5 px-4 md:px-24 sm:items-start md:items-start lg:items-center">
+    <section className="flex-col items-center justify-center w-full pt-32 mx-auto text-center bg-secondary p-7 search-section">
+      <h1 className="mt-16 font-serif text-4xl leading-relaxed text-primary">ARTE EXCLUSIVO<br /> EXPERIENCIAS INOLVIDABLES</h1>
+      <div className="flex justify-between w-full mx-auto">
+      <form onSubmit={handleSearch} className="flex flex-col flex-wrap justify-center w-full gap-6 p-5 px-4 md:flex-row md:px-24 sm:items-start md:items-start lg:items-center">
         <div className="relative w-full max-w-md" ref={inputRef}>
-        <h2 className="text-2xl mb-2 text-white text-left pt-16 px-4 md:pt-16 sm:pt-8">Busca y alquila tus obras favoritas</h2>
+        <h2 className="px-4 pt-16 mb-2 text-2xl text-left text-white md:pt-16 sm:pt-8">Busca y alquila tus obras favoritas</h2>
           <input
             type="text"
             placeholder="Encuentra tu obra favorita"
             value={inputValue}
             onChange={handleInputChange}
-            className="w-full rounded-lg border border-gray-300 bg-white py-3 h-12 pl-10 pr-4 text-gray-700 placeholder-gray-500 focus:outline-none"
+            className="w-full h-12 py-3 pl-10 pr-4 text-gray-700 placeholder-gray-500 bg-white border border-gray-300 rounded-lg focus:outline-none"
           />
           {filteredOptions.length > 0 && (
-            <ul className="absolute z-10 bg-white border border-gray-300 rounded-lg opacity-70 w-full max-h-60 overflow-y-auto shadow-lg">
+            <ul className="absolute z-10 w-full overflow-y-auto bg-white border border-gray-300 rounded-lg shadow-lg opacity-70 max-h-60">
               {filteredOptions.map((option, index) => (
                 <li 
                   key={index} 
                   onMouseDown={() => handleOptionClick(option)} 
-                  className="cursor-pointer hover:bg-gray-200 p-2 text-left"
+                  className="p-2 text-left cursor-pointer hover:bg-gray-200"
                 >
                   {option.label} ({option.type.charAt(0).toUpperCase() + option.type.slice(1)})
                 </li>
@@ -202,11 +202,11 @@ const Buscador = () => {
           )}
         </div>
         <div className="flex flex-col">
-          <h2 className="text-2xl mb-2 text-white text-left pt-16 px-4 md:pt-16 sm:pt-8">Rango de Fecha</h2>
+          <h2 className="px-4 pt-16 mb-2 text-2xl text-left text-white md:pt-16 sm:pt-8">Rango de Fecha</h2>
           <Calendar setDateRange={setDateRange}/>
         </div>
         <div className="flex flex-col justify-self-end">
-        <h2 className="mb-10 pt-16 md:pt-16 sm:pt-8"></h2>
+        <h2 className="pt-16 mb-10 md:pt-16 sm:pt-8"></h2>
           <Button 
           type="button"
           text={<BiSearchAlt /> } 
@@ -224,21 +224,21 @@ const Buscador = () => {
       {/* Renderizar las obras seleccionadas o mensaje de error solo si se ha buscado */}
       {hasSearched && (
         <div className="mt-8">
-          <h2 className="text-3xl text-primary text-left mb-4">Resultado de búsqueda</h2>
+          <h2 className="mb-4 text-3xl text-left text-primary">Resultado de búsqueda</h2>
           {error ? (
-            <div className="text-center py-12 bg-red-100 rounded-lg">
+            <div className="py-12 text-center bg-red-100 rounded-lg">
               <p className="text-xl text-red-600">
                 Ha ocurrido un error. Reintente más tarde.
               </p>
             </div>
           ) : selectedArtworks.length > 0 ? (
-            <div className="flex grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="flex grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
               {selectedArtworks.map((producto) => (
                 <Card key={producto.id} producto={producto} />
               ))}
             </div>
           ) : (
-            <div className="text-center py-12">
+            <div className="py-12 text-center">
               <p className="text-xl text-secondary">No hay obras disponibles para las fechas seleccionadas.</p>
             </div>
           )}

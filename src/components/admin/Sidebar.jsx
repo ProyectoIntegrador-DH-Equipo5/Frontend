@@ -14,43 +14,35 @@ const Sidebar = () => {
   };
 
   return (
-    <aside id="sidebar-nav" className="bg-black transition-width duration-300 w-16 hover:w-48 flex flex-col justify-between border-primary/50 pt-28">
+    <aside id="sidebar-nav" className="flex flex-col justify-between w-16 duration-300 bg-black transition-width hover:w-48 border-primary/50 pt-28">
       <div className="mt-10 mb-10">
-        <ul className="sidebar-list flex flex-col gap-8 w-full pl-4">
-          <li className="py-2 w-full">
+        <ul className="flex flex-col w-full gap-8 pl-4 sidebar-list">
+          <li className="w-full py-2">
             <a onClick={() => handleSectionChange("obras")}>
-              <span className="text-white text-sm flex items-center gap-4 hover:cursor-pointer">
+              <span className="flex items-center gap-4 text-sm text-white hover:cursor-pointer">
                 <AiFillPicture className="text-lg" />
                 <h3 className="hidden sidebar-text">Obras</h3>
               </span>
             </a>
           </li>
           
-          <li className="py-2 w-full">
+          <li className="w-full py-2">
             <a onClick={() => handleSectionChange("categorias")}>
-              <span className="text-white text-sm flex items-center gap-4 hover:cursor-pointer">
+              <span className="flex items-center gap-4 text-sm text-white hover:cursor-pointer">
                 <MdCategory />
                 <h3 className="hidden sidebar-text">Categorías</h3>
               </span>
             </a>
           </li>
-          <li className="py-2 w-full">
+          <li className="w-full py-2">
             <a onClick={() => handleSectionChange("usuarios")}>
-              <span className="text-white text-sm flex items-center gap-4 hover:cursor-pointer">
+              <span className="flex items-center gap-4 text-sm text-white hover:cursor-pointer">
                 <ImUsers />
                 <h3 className="hidden sidebar-text">Usuarios</h3>
               </span>
             </a>
           </li>
         </ul>
-      </div>
-      <div className="sidebar-logout flex flex-col items-start pl-4 pb-8">
-        <a href="#">
-          <span className="text-white text-lg flex items-center gap-4">
-            <FaPowerOff />
-            <h3 className="hidden sidebar-text">Salir</h3>
-          </span>
-        </a>
       </div>
     </aside>
   );

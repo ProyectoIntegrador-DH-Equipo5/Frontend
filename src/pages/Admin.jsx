@@ -7,12 +7,11 @@ import IsMobile from "../components/admin/IsMobile";
 import { useState, useEffect  } from "react";
 import Sidebar from "../components/admin/Sidebar";
 import Form from "../components/admin/Form";
-import { FaTimes } from "react-icons/fa";
-import { idCreator } from "../utils/formatFunctions";
+import { FaTimes, FaSpinner } from "react-icons/fa";
 import Message from "../components/admin/Message";
 import { authService } from "../api/authService";
 import { userService } from "../api/userService";
-import { categoriaService } from "../api/categoriaService";
+import { useCategories } from '../hooks/useCategories';
 
 const Admin = () => {
 	const { isMobile, state, dispatch } = useContextGlobal();
@@ -25,13 +24,18 @@ const Admin = () => {
 		email: "",
 		password: "password",
 	});
+	const [isCategoryLoading, setIsCategoryLoading] = useState(false);
+	const [isUserLoading, setIsUserLoading] = useState(false);
 
-	const [newCat, setNewCat] = useState({
-		id: "",
-		nombre: "",
-		descripcion: "",
-		imagen: null,  // Cambiado de url a imagen
-    previewUrl: null // Nuevo campo para la vista previa
+	// Crear una nueva categoría
+	const { 
+		newCategory: newCat,                     // renombramos 
+		handleInputChange: handleInputChangeCat, // renombramos
+		submitCategory,                           // usamos tal cuál
+		setNewCategory    // Solo agregamos esta línea
+	} = useCategories(() => {                  // pasamos una función callback que se ejecutará al tener éxito                 
+		handleListItems();
+		setSuccessMessage("Categoría creada con éxito");
 	});
 	
 	const handleAddItem = (itemType) => {
@@ -104,127 +108,73 @@ const Admin = () => {
 			const timer = setTimeout(() => {
 				setSuccessMessage(""); // Ocultar el mensaje de éxito
 				setErrorMessage(""); // Ocultar el mensaje de error
-			}, 3000); // Duración del mensaje en milisegundos
+			}, 2000); // Duración del mensaje en milisegundos
 
 			return () => clearTimeout(timer); // Limpiar el temporizador al desmontar
 		}
 	}, [successMessage, errorMessage]);
 	
 	const handleSubmitUser = async(e) => {
-		e.preventDefault(); // Previene el comportamiento predeterminado de envío del formulario
+		e.preventDefault();
+		if (isUserLoading) return;
 
 		if (!newUser.name || !newUser.lastname || !newUser.email) {
 			setErrorMessage("Por favor, complete todos los campos.");
 			return;
 		}
 
-		// Sólo enviamos los datos que pide Backend, no el objeto completo
-		const newUserRegister = {
-			name: newUser.name,
-			lastname: newUser.lastname,
-			email: newUser.email,
-			password: "password",
+		// Validación básica del formato de email
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		if (!emailRegex.test(newUser.email)) {
+			setErrorMessage("Por favor, ingrese un correo electrónico válido.");
+			return;
 		}
-		// Agregar el nuevo usuario
+
+		setIsUserLoading(true);
 		try {
-			const createdUser = await authService.register(newUserRegister);
-			// Actualizar el estado global con el usuario creado
-			dispatch({ type: "ADD_USER", payload: createdUser });
-			setSuccessMessage("Usuario creado con éxito");
-			// Limpiar los campos después de la creación
-			setNewUser({ name: "", lastname: "", email: ""});
-			// Actualizar la lista de usuarios en la interfaz (si es necesario)
-			handleListItems();
-		} catch (error) {
-			setErrorMessage("Hubo un error al crear el usuario. Intente nuevamente.");
-		}
-	};
-
-	useEffect(() => {
-    const fetchUsers = async () => {
-        try {
-            const users = await userService.getUsers();
-            dispatch({ type: "GET_USERS", payload: users });
-        } catch (error) {
-            console.error("Error al obtener usuarios:", error);
-        }
-    };
-
-    if (successMessage === "Usuario creado con éxito") {
-        fetchUsers();
-    }
-}, [successMessage, dispatch]);
-
-
-
-	//Categorias
-	const handleInputChangeCat = (e) => {
-		const { name, value, type, files } = e.target;
-
-		if (type === 'file') {
-			const file = files[0];
-			if (file) {
-					// Si es un archivo, guardamos el archivo y creamos una URL de vista previa
-					setNewCat(prev => ({
-							...prev,
-							imagen: file,
-							previewUrl: URL.createObjectURL(file)
-					}));
+			// Obtener la lista actualizada de usuarios antes de verificar
+			let existingUsers;
+			try {
+				existingUsers = await userService.getUsers();
+			} catch (error) {
+				console.error("Error al verificar usuarios:", error);
+				existingUsers = state.users; // Usar el estado global como respaldo
 			}
-		} else {
-
-			// setNewCat({
-			// 	...newCat,
-			// 	[name]: value,
-			// });
-
-			// Para otros campos, mantener el comportamiento actual
-			setNewCat(prev => ({
-				...prev,
-				[name]: value
-			}));
-		}
-
-		
-	};
-
-	const submitCategory = async(e)=>{
-		e.preventDefault(); 
-
-		try {
-			// Obtener las categorías existentes
-			const response = await categoriaService.getCategorias();
-			const existingCategories = response;
-
-			// Verificar si la categoría ya existe
-			const duplicateCategory = existingCategories.find(
-					(category) => category.nombre.toLowerCase() === newCat.nombre.toLowerCase()
+			
+			const userExists = existingUsers.some(user => 
+				user.email.toLowerCase() === newUser.email.toLowerCase()
 			);
 
-			if (duplicateCategory) {
-					setErrorMessage("La categoría ya existe.");
-					return; 
+			if (userExists) {
+				setErrorMessage("Ya existe un usuario con este correo electrónico.");
+				setIsUserLoading(false);
+				return;
 			}
 
-			// Crear FormData para enviar la imagen
-			const formData = new FormData();
-			formData.append('nombre', newCat.nombre);
-			formData.append('descripcion', newCat.descripcion);
+			// Registro del nuevo usuario
+			const newUserRegister = {
+				name: newUser.name,
+				lastname: newUser.lastname,
+				email: newUser.email,
+				password: "password",
+			}
 			
-			if (newCat.imagen instanceof File) {
-					formData.append('file', newCat.imagen);
-			}
+			const createdUser = await authService.register(newUserRegister);
+			dispatch({ type: "ADD_USER", payload: createdUser });
+			setSuccessMessage("Usuario creado con éxito");
+			setNewUser({ name: "", lastname: "", email: ""});
+			handleListItems();
 
-			const createdCategory = await categoriaService.createCategoria(formData);
-			console.log("categoria: ",createdCategory)
-			dispatch({ type: "ADD_CATEGORY", payload: createdCategory });
-			setSuccessMessage("Categoría creada con éxito");
-			setNewCat({ nombre: "", descripcion: "", imagen: null, previewUrl: null });
-			handleListItems();		
-		}catch (error) {
-			setErrorMessage("Hubo un error al crear la categoría. Intente nuevamente.");
-		} 
-	}
+			// Actualizar la lista de usuarios inmediatamente después de crear uno nuevo
+			const updatedUsers = await userService.getUsers();
+			dispatch({ type: "GET_USERS", payload: updatedUsers });
+
+		} catch (error) {
+			setErrorMessage(error.message || "Hubo un error al crear el usuario. Intente nuevamente.");
+		} finally {
+			setIsUserLoading(false);
+		}
+	};
 
 	return (
 		<>
@@ -252,7 +202,10 @@ const Admin = () => {
 								{isCreatingItem === "usuario" && (
 									<div className="w-[75vw] h-[70vh] overflow-y-scroll bg-white p-6 rounded-lg shadow-md relative">
 										<button
-											onClick={handleListItems}
+											onClick={() => {
+												setNewUser({ name: "", lastname: "", email: "", password: "password" });
+												handleListItems();
+											}}
 											className="absolute top-2 right-2 bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center"
 											aria-label="Cerrar"
 										>
@@ -323,15 +276,26 @@ const Admin = () => {
 												<button
 													type="button"
 													className="bg-gray-500 text-white py-2 px-4 rounded"
-													onClick={handleListItems}
+													onClick={() => {
+														setNewUser({ name: "", lastname: "", email: "", password: "password" });
+														handleListItems();
+													}}
 												>
 													Cancelar
 												</button>
 												<button
 													type="submit"
-													className="bg-blue-600 text-white py-2 px-4 rounded"
+													className="bg-blue-600 text-white py-2 px-4 rounded disabled:opacity-50 flex items-center gap-2"
+													disabled={isUserLoading}
 												>
-													Crear Usuario
+													{isUserLoading ? (
+														<>
+															<FaSpinner className="animate-spin" />
+															Creando usuario...
+														</>
+													) : (
+														"Crear Usuario"
+													)}
 												</button>
 											</div>
 										</form>
@@ -340,7 +304,10 @@ const Admin = () => {
 								{isCreatingItem === "categoria" && (
 									<div className="w-[75vw] h-[70vh] overflow-y-scroll bg-white p-6 rounded-lg shadow-md relative">
 										<button
-											onClick={handleListItems}
+											onClick={() => {
+												setNewCategory({ nombre: "", descripcion: "", imagen: null, previewUrl: null });
+												handleListItems();
+											}}
 											className="absolute top-2 right-2 bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center"
 											aria-label="Cerrar"
 										>
@@ -349,7 +316,19 @@ const Admin = () => {
 										<h2 className="text-xl font-semibold mb-4">
 											Crear nueva categoría
 										</h2>
-										<form onSubmit={submitCategory}>
+										<form onSubmit={async (e) => {
+											e.preventDefault();
+											if (isCategoryLoading) return;
+
+											setIsCategoryLoading(true);
+											try {
+												await submitCategory(e);
+											} catch (error) {
+												setErrorMessage(error.message);
+											} finally {
+												setIsCategoryLoading(false);
+											}
+										}}>
 											<div className="mb-4">
 												<label
 													className="block text-sm font-semibold mb-2"
@@ -364,7 +343,6 @@ const Admin = () => {
 													value={newCat.nombre}
 													name="nombre"
 													onChange={handleInputChangeCat}
-													
 												/>
 											</div>
 											<div className="mb-4">
@@ -412,15 +390,27 @@ const Admin = () => {
 												<button
 													type="button"
 													className="bg-gray-500 text-white py-2 px-4 rounded"
-													onClick={handleListItems}
+													onClick={() => {
+														setNewCategory({ nombre: "", descripcion: "", imagen: null, previewUrl: null });
+														handleListItems();
+													}}
+													disabled={isCategoryLoading}
 												>
 													Cancelar
 												</button>
 												<button
 													type="submit"
-													className="bg-blue-600 text-white py-2 px-4 rounded"
-												>
-													Crear Categoría
+													className="bg-blue-600 text-white py-2 px-4 rounded disabled:opacity-50 flex items-center gap-2"
+													disabled={isCategoryLoading}
+													>
+													{isCategoryLoading ? (
+														<>
+															<FaSpinner className="animate-spin" />
+															Creando categoría...
+														</>
+													) : (
+														"Crear Categoría"
+													)}
 												</button>
 											</div>
 										</form>

@@ -9,12 +9,17 @@ const Profile = () => {
   const { state } = useContextGlobal();
   const navigate = useNavigate();
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [reservas, setReservas] = useState([]);
   const [obras, setObras] = useState([]);
 
   const toggleFavorites = () => {
     setIsFavoritesOpen(!isFavoritesOpen);
   };
+
+  const toggleHistory = () => {
+    setIsHistoryOpen(!isHistoryOpen);
+    };
 
   useEffect(() => {
     const fetchReservas = async () => {
@@ -67,7 +72,7 @@ const Profile = () => {
       {state.users ? (
         <div className="max-w-3xl mx-auto text-white bg-black">
           <div className="p-8 bg-white rounded-lg shadow-lg">
-            <div className="flex items-start justify-between">
+            <div className="flex flex-col items-start justify-between md:flex-row lg:flex-row">
               <div className="flex-1">
                 <div className="mb-6">
                   <h2 className="mb-1 text-lg font-semibold text-gray-600">
@@ -93,7 +98,7 @@ const Profile = () => {
                 </div>
               </div>
 
-              <div className="flex flex-col items-center justify-center mx-auto w-96">
+              <div className="flex flex-col items-center justify-center w-auto mx-auto md:w-96 lg:w-96">
                 <h2 className="mb-4 text-xl font-bold text-gray-800">
                   {state.loggedUser?.rol[0]?.authority}
                 </h2>
@@ -124,11 +129,11 @@ const Profile = () => {
               </div>
             </div>
 
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between p-3 mb-4 bg-gray-200 rounded-lg cursor-pointer" onClick={toggleFavorites}>
               <h2 className="mb-1 text-lg font-semibold text-gray-600">
                 Favoritos
               </h2>
-              <button onClick={toggleFavorites} className="text-gray-400">
+              <button  className="text-gray-400">
                 {isFavoritesOpen ? (
                   <svg
                     className="w-7 h-7"
@@ -163,24 +168,43 @@ const Profile = () => {
               </div>
             )}
 
-            <div className="mt-8">
+            <div className="flex items-center justify-between p-3 mt-4 mb-4 bg-gray-200 rounded-lg cursor-pointer" onClick={toggleHistory}>
               <h2 className="mb-1 text-lg font-semibold text-gray-600">
                 Historial de Reservas
               </h2>
-              {reservas.length > 0 ? (
-                <div className="p-4 text-black bg-white rounded-lg">
-                  {reservas.map((reserva) => {
+              <button className="text-gray-400">
+                {isHistoryOpen ? (
+                  <svg
+                    className="w-7 h-7"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M10 12l-4-4h8l-4 4z" />
+                  </svg>
+                ) : (
+                  <svg
+                    className="w-7 h-7"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M10 8l4 4H6l4-4z" />
+                  </svg>
+                )}
+              </button>
+            </div>
+            {isHistoryOpen && (
+              <div className="p-4 text-black bg-white rounded-lg">
+                {reservas.length > 0 ? (
+                  reservas.map((reserva) => {
                     const obra = obras.find(
                       (o) => o.id === reserva.producto?.id
                     ); // Buscar la obra por ID
-                    console.log(reserva);
                     return (
                       <div key={reserva.id} className="p-2 mb-4 border-b">
                         <p>
                           <strong>Obra:</strong>{" "}
-                          {obra ? obra.nombre : "Obra no encontrada"}
-                        </p>{" "}
-                        {/* Mostrar el nombre de la obra */}
+                          {reserva ? reserva.nombreObra : "Obra no encontrada"}
+                        </p>
                         <p>
                           <strong>Fecha de Inicio:</strong>{" "}
                           {new Date(reserva.fechaInicio).toLocaleDateString()}
@@ -191,12 +215,12 @@ const Profile = () => {
                         </p>
                       </div>
                     );
-                  })}
-                </div>
-              ) : (
-                <p className="text-gray-500">No tienes reservas realizadas.</p>
-              )}
-            </div>
+                  })
+                ) : (
+                  <p className="text-gray-500">No tienes reservas realizadas.</p>
+                )}
+              </div>
+            )}
           </div>
         </div>
       ) : (

@@ -128,3 +128,7 @@
   z-index: 1001;
   transition: opacity 0.5s ease;
 }
+
+.subheader{
+  z-index: 5;
+}

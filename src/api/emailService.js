@@ -5,10 +5,7 @@ export const emailService = {
   // Función para enviar el correo de confirmación de registro
   register: async (userEmail, userName, setEmailStatus) => {
     try {
-      const baseUrl = import.meta.env.PROD
-        ? axiosConfig.defaults.baseURL
-        : 'http://localhost:8080';
-
+      const baseUrl = axiosConfig.defaults.baseURL;
       const loginUrl = `${baseUrl}/api/auth/login`;
 
       await emailjs.send(
@@ -18,6 +15,7 @@ export const emailService = {
           user_email: userEmail,
           user_name: userName,
           login_url: loginUrl,
+          to_email: userEmail,
         },
         '2Pgg6a24lfS4J2fVD'   // Public Key de EmailJS
       );
@@ -59,6 +57,7 @@ export const emailService = {
           product_name: producto.nombre,
           artist_name: producto.artista?.nombre,
           total_price: (producto.precioRenta * Math.ceil((selectedDates.endDate - selectedDates.startDate) / (1000 * 60 * 60 * 24))).toLocaleString(),
+          to_email: userEmail,
         },
         '2Pgg6a24lfS4J2fVD'   // Public Key de EmailJS
       );
