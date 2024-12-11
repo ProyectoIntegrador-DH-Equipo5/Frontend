@@ -67,7 +67,7 @@ const Profile = () => {
       {state.users ? (
         <div className="max-w-3xl mx-auto text-white bg-black">
           <div className="p-8 bg-white rounded-lg shadow-lg">
-            <div className="flex items-start justify-between">
+            <div className="flex flex-col items-start justify-between md:flex-row lg:flex-row">
               <div className="flex-1">
                 <div className="mb-6">
                   <h2 className="mb-1 text-lg font-semibold text-gray-600">
@@ -93,7 +93,7 @@ const Profile = () => {
                 </div>
               </div>
 
-              <div className="flex flex-col items-center justify-center mx-auto w-96">
+              <div className="flex flex-col items-center justify-center w-auto mx-auto md:w-96 lg:w-96">
                 <h2 className="mb-4 text-xl font-bold text-gray-800">
                   {state.loggedUser?.rol[0]?.authority}
                 </h2>
