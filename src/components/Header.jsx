@@ -15,6 +15,8 @@ const Header = () => {
 
   const handleLogout = () => {
     dispatch({ type: "LOGOUT_USER" });
+    localStorage.removeItem('loggedUser');
+    localStorage.removeItem('favorites');
     navigate('/');
   };
 
@@ -59,7 +61,7 @@ const Header = () => {
           avatar: true,
         },
         {
-          text: <FiLogOut size={30} className="text-primary font-bold" />,
+          text: <FiLogOut size={30} className="font-bold text-primary" />,
           bgColor: "transparent",
           textColor: "black",
           textSize: "md",
@@ -72,13 +74,13 @@ const Header = () => {
       ];
 
   return (
-    <header className="flex justify-between items-center fixed top-0 w-full h-24 bg-background p-4 border-b border-primary/50 z-10">
+    <header className="fixed top-0 z-10 flex items-center justify-between w-full h-24 p-4 border-b bg-background border-primary/50">
       <Logo size={16} />
-      <div className="flex items-center relative">
+      <div className="relative flex items-center">
         {state.loggedUser && (
           <div
             onClick={toggleMenu}
-            className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-xl font-bold cursor-pointer"
+            className="flex items-center justify-center w-10 h-10 text-xl font-bold rounded-full cursor-pointer bg-primary"
           >
             {userName}
           </div>
@@ -86,10 +88,10 @@ const Header = () => {
         {isMenuOpen && (
           <div ref={menuRef} className="absolute top-16 right-20 w-40 bg-black text-primary rounded-lg shadow-lg z-50">
             <ul className="flex flex-col p-2">
-              <li onClick={handleProfile} className="p-2 hover:bg-gray-200 hover:text-black cursor-pointer">
+              <li onClick={handleProfile} className="p-2 cursor-pointer hover:bg-gray-200 hover:text-black">
                 Ver Perfil
               </li>
-              <li onClick={handleLogout} className="p-2 hover:bg-gray-200 hover:text-black cursor-pointer flex items-center">
+              <li onClick={handleLogout} className="flex items-center p-2 cursor-pointer hover:bg-gray-200 hover:text-black">
                 <AiFillCloseSquare className="mr-2" /> Cerrar Sesión
               </li>
             </ul>
