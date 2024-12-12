@@ -279,7 +279,7 @@ const UserTable = () => {
 									</tr>
 								</thead>
 								<tbody className="divide-y divide-gray-200">
-									{currentItems.map((user) => (
+									{currentItems?.map((user) => (
 										<tr key={user.id}>
 											<td className="whitespace-nowrap px-4 py-2 font-medium text-gray-900 text-left">
 												{user.id}

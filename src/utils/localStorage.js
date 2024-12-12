@@ -1,11 +1,6 @@
 export const saveToLocalStorage = (key, value) => {
     localStorage.setItem(key, JSON.stringify(value));
 };
-
-export const saveUsersToLocalStorage = (key, value) => {
-  localStorage.setItem(key, value); //borrar si no funciona
-};
-
   
 // export const loadFromLocalStorage = (key) => {
 //     const stored = localStorage.getItem(key);
