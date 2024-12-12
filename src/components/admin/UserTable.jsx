@@ -87,6 +87,9 @@ const UserTable = () => {
 		setEditingItem(null);
 	};
 
+	console.log(state.users);
+	console.log(typeof state.users);
+
 	const handleRoleChange = async(id, newRole) => {
 		const updatedUser = state.users.find((user) => user.id === id);
 		const updatedUserData = {

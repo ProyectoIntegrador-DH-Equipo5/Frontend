@@ -176,6 +176,8 @@ const Admin = () => {
 		}
 	};
 
+	console.log(state.users);
+	console.log(typeof state.users);
 	return (
 		<>
 			{isMobile ? (
