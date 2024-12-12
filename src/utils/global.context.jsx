@@ -8,6 +8,7 @@ import {
 import { reducer } from "../reducers/reducer";
 import { 
     saveToLocalStorage, 
+    saveUsersToLocalStorage, //borrar si no funciona
     loadFromLocalStorage, 
     removeFromLocalStorage 
 } from "./localStorage"; // Importar funciones de localStorage
@@ -94,7 +95,7 @@ export const ContextProvider = ({ children }) => {
     
                 // Actualiza el estado y localStorage
                 dispatch({ type: "GET_USERS", payload: response.data });
-                saveToLocalStorage("users", response.data);
+                saveUsersToLocalStorage("users", response.data); //borrar...
             }
         } catch (error) {
             console.error("Error al obtener usuarios:", error.message);
