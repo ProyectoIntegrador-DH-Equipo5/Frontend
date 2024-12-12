@@ -76,14 +76,14 @@ export const ContextProvider = ({ children }) => {
         fetchBackendData();
     }, []);
 
-    const fetchUsersByRole = async (token, userRole= state.loggedUser.rol) => { // signo loggedUser?.
-        //console.log(userRole[0]?.authority);
+    const fetchUsersByRole = async (token, userRole= state.loggedUser?.rol) => {
+        console.log(userRole[0]?.authority);
    
         if (!token || !userRole) return;
         console.log("Pasó primer if");
         
         try {
-            if (userRole[0].authority === "ADMIN" || userRole[0].authority === "COLAB") { //[0].?
+            if (userRole[0]?.authority === "ADMIN" || userRole[0]?.authority === "COLAB") {
                 console.log("Pasó segundo if");
                 console.log("Token actual:", token);
 
