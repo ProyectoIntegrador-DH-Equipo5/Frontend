@@ -105,4 +105,4 @@ Genera un nuevo ID único basado en los elementos existentes.
 Función para gestionar el inicio de sesión del usuario.
 
 ### logoutUser
-Función para gestionar el cierre de sesión del usuario.
+Función para gestionar el cierre de sesión del usuario..
